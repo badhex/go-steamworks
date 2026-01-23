@@ -1,0 +1,88 @@
+// SPDX-License-Identifier: Apache-2.0
+// SPDX-FileCopyrightText: 2025 The go-steamworks Authors
+
+package steamworks
+
+import (
+	"bytes"
+	"testing"
+)
+
+func TestCStringToGo(t *testing.T) {
+	tests := []struct {
+		name string
+		in   []byte
+		want string
+	}{
+		{name: "empty", in: []byte{0}, want: ""},
+		{name: "no-null", in: []byte("steam"), want: "steam"},
+		{name: "with-null", in: []byte{'s', 't', 'e', 'a', 'm', 0, 'x'}, want: "steam"},
+	}
+	for _, tt := range tests {
+		if got := cStringToGo(tt.in); got != tt.want {
+			t.Fatalf("%s: cStringToGo(%v)=%q, want %q", tt.name, tt.in, got, tt.want)
+		}
+	}
+}
+
+func TestPutUint32(t *testing.T) {
+	var buf [4]byte
+	putUint32(buf[:], 0x11223344)
+	want := []byte{0x44, 0x33, 0x22, 0x11}
+	if !bytes.Equal(buf[:], want) {
+		t.Fatalf("putUint32 wrote %v, want %v", buf, want)
+	}
+}
+
+func TestPutUint64(t *testing.T) {
+	var buf [8]byte
+	putUint64(buf[:], 0x1122334455667788)
+	want := []byte{0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11}
+	if !bytes.Equal(buf[:], want) {
+		t.Fatalf("putUint64 wrote %v, want %v", buf, want)
+	}
+}
+
+func TestSteamNetworkingIdentitySetSteamID64(t *testing.T) {
+	var id SteamNetworkingIdentity
+	id.SetSteamID64(0x0102030405060708)
+	wantType := []byte{0x10, 0x00, 0x00, 0x00}
+	wantSize := []byte{0x08, 0x00, 0x00, 0x00}
+	if !bytes.Equal(id.data[0:4], wantType) {
+		t.Fatalf("identity type = %v, want %v", id.data[0:4], wantType)
+	}
+	if !bytes.Equal(id.data[4:8], wantSize) {
+		t.Fatalf("identity size = %v, want %v", id.data[4:8], wantSize)
+	}
+	wantID := []byte{0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01}
+	if !bytes.Equal(id.data[8:16], wantID) {
+		t.Fatalf("identity steamID bytes = %v, want %v", id.data[8:16], wantID)
+	}
+}
+
+func TestSteamNetworkingIdentitySetIPv4Addr(t *testing.T) {
+	var id SteamNetworkingIdentity
+	id.SetIPv4Addr(0x7f000001, 27015)
+	wantType := []byte{0x01, 0x00, 0x00, 0x00}
+	wantSize := []byte{0x12, 0x00, 0x00, 0x00}
+	if !bytes.Equal(id.data[0:4], wantType) {
+		t.Fatalf("identity type = %v, want %v", id.data[0:4], wantType)
+	}
+	if !bytes.Equal(id.data[4:8], wantSize) {
+		t.Fatalf("identity size = %v, want %v", id.data[4:8], wantSize)
+	}
+	wantAddr := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x01, 0x87, 0x69}
+	if !bytes.Equal(id.data[8:26], wantAddr) {
+		t.Fatalf("identity addr = %v, want %v", id.data[8:26], wantAddr)
+	}
+}
+
+func TestOptionsPtr(t *testing.T) {
+	if ptr := optionsPtr(nil); ptr != 0 {
+		t.Fatalf("optionsPtr(nil)=%d, want 0", ptr)
+	}
+	values := []SteamNetworkingConfigValue{{Value: 1}}
+	if ptr := optionsPtr(values); ptr == 0 {
+		t.Fatalf("optionsPtr(values)=0, want non-zero")
+	}
+}
