@@ -98,6 +98,26 @@ var (
 	ptrAPI_ISteamMatchmaking_SetLobbyMemberLimit   func(uintptr, CSteamID, int32) bool
 	ptrAPI_ISteamMatchmaking_SetLobbyType          func(uintptr, CSteamID, ELobbyType) bool
 
+	// ISteamHTTP
+	ptrAPI_SteamHTTP                            func() uintptr
+	ptrAPI_ISteamHTTP_CreateHTTPRequest         func(uintptr, int32, string) HTTPRequestHandle
+	ptrAPI_ISteamHTTP_SetHTTPRequestHeaderValue func(uintptr, HTTPRequestHandle, string, string) bool
+	ptrAPI_ISteamHTTP_SendHTTPRequest           func(uintptr, HTTPRequestHandle, uintptr) bool
+	ptrAPI_ISteamHTTP_GetHTTPResponseBodySize   func(uintptr, HTTPRequestHandle, uintptr) bool
+	ptrAPI_ISteamHTTP_GetHTTPResponseBodyData   func(uintptr, HTTPRequestHandle, uintptr, uint32) bool
+	ptrAPI_ISteamHTTP_ReleaseHTTPRequest        func(uintptr, HTTPRequestHandle) bool
+
+	// ISteamUGC
+	ptrAPI_SteamUGC                        func() uintptr
+	ptrAPI_ISteamUGC_GetNumSubscribedItems func(uintptr, bool) uint32
+	ptrAPI_ISteamUGC_GetSubscribedItems    func(uintptr, uintptr, uint32, bool) uint32
+
+	// ISteamInventory
+	ptrAPI_SteamInventory                  func() uintptr
+	ptrAPI_ISteamInventory_GetResultStatus func(uintptr, SteamInventoryResult_t) int32
+	ptrAPI_ISteamInventory_GetResultItems  func(uintptr, SteamInventoryResult_t, uintptr, uintptr) bool
+	ptrAPI_ISteamInventory_DestroyResult   func(uintptr, SteamInventoryResult_t)
+
 	// ISteamInput
 	ptrAPI_SteamInput                          func() uintptr
 	ptrAPI_ISteamInput_GetConnectedControllers func(uintptr, uintptr) int32
@@ -144,6 +164,21 @@ var (
 	ptrAPI_ISteamUtils_IsSteamRunningOnSteamDeck      func(uintptr) bool
 	ptrAPI_ISteamUtils_ShowFloatingGamepadTextInput   func(uintptr, EFloatingGamepadTextInputMode, int32, int32, int32, int32) bool
 	ptrAPI_ISteamUtils_SetOverlayNotificationInset    func(uintptr, int32, int32)
+
+	// ISteamNetworkingUtils
+	ptrAPI_SteamNetworkingUtils                         func() uintptr
+	ptrAPI_ISteamNetworkingUtils_AllocateMessage        func(uintptr, int32) uintptr
+	ptrAPI_ISteamNetworkingUtils_InitRelayNetworkAccess func(uintptr)
+	ptrAPI_ISteamNetworkingUtils_GetLocalTimestamp      func(uintptr) SteamNetworkingMicroseconds
+
+	// ISteamGameServer
+	ptrAPI_SteamGameServer                     func() uintptr
+	ptrAPI_ISteamGameServer_SetProduct         func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetGameDescription func(uintptr, string)
+	ptrAPI_ISteamGameServer_LogOnAnonymous     func(uintptr)
+	ptrAPI_ISteamGameServer_LogOff             func(uintptr)
+	ptrAPI_ISteamGameServer_BLoggedOn          func(uintptr) bool
+	ptrAPI_ISteamGameServer_GetSteamID         func(uintptr) CSteamID
 
 	// ISteamNetworkingMessages
 	ptrAPI_SteamNetworkingMessages                           func() uintptr
@@ -251,6 +286,26 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyMemberLimit, lib, flatAPI_ISteamMatchmaking_SetLobbyMemberLimit)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyType, lib, flatAPI_ISteamMatchmaking_SetLobbyType)
 
+	// ISteamHTTP
+	purego.RegisterLibFunc(&ptrAPI_SteamHTTP, lib, flatAPI_SteamHTTP)
+	purego.RegisterLibFunc(&ptrAPI_ISteamHTTP_CreateHTTPRequest, lib, flatAPI_ISteamHTTP_CreateHTTPRequest)
+	purego.RegisterLibFunc(&ptrAPI_ISteamHTTP_SetHTTPRequestHeaderValue, lib, flatAPI_ISteamHTTP_SetHTTPRequestHeaderValue)
+	purego.RegisterLibFunc(&ptrAPI_ISteamHTTP_SendHTTPRequest, lib, flatAPI_ISteamHTTP_SendHTTPRequest)
+	purego.RegisterLibFunc(&ptrAPI_ISteamHTTP_GetHTTPResponseBodySize, lib, flatAPI_ISteamHTTP_GetHTTPResponseBodySize)
+	purego.RegisterLibFunc(&ptrAPI_ISteamHTTP_GetHTTPResponseBodyData, lib, flatAPI_ISteamHTTP_GetHTTPResponseBodyData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamHTTP_ReleaseHTTPRequest, lib, flatAPI_ISteamHTTP_ReleaseHTTPRequest)
+
+	// ISteamUGC
+	purego.RegisterLibFunc(&ptrAPI_SteamUGC, lib, flatAPI_SteamUGC)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUGC_GetNumSubscribedItems, lib, flatAPI_ISteamUGC_GetNumSubscribedItems)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUGC_GetSubscribedItems, lib, flatAPI_ISteamUGC_GetSubscribedItems)
+
+	// ISteamInventory
+	purego.RegisterLibFunc(&ptrAPI_SteamInventory, lib, flatAPI_SteamInventory)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInventory_GetResultStatus, lib, flatAPI_ISteamInventory_GetResultStatus)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInventory_GetResultItems, lib, flatAPI_ISteamInventory_GetResultItems)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInventory_DestroyResult, lib, flatAPI_ISteamInventory_DestroyResult)
+
 	// ISteamInput
 	purego.RegisterLibFunc(&ptrAPI_SteamInput, lib, flatAPI_SteamInput)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetConnectedControllers, lib, flatAPI_ISteamInput_GetConnectedControllers)
@@ -298,6 +353,21 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamUtils_ShowFloatingGamepadTextInput, lib, flatAPI_ISteamUtils_ShowFloatingGamepadTextInput)
 	purego.RegisterLibFunc(&ptrAPI_ISteamUtils_SetOverlayNotificationInset, lib, flatAPI_ISteamUtils_SetOverlayNotificationInset)
 
+	// ISteamNetworkingUtils
+	purego.RegisterLibFunc(&ptrAPI_SteamNetworkingUtils, lib, flatAPI_SteamNetworkingUtils)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingUtils_AllocateMessage, lib, flatAPI_ISteamNetworkingUtils_AllocateMessage)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingUtils_InitRelayNetworkAccess, lib, flatAPI_ISteamNetworkingUtils_InitRelayNetworkAccess)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingUtils_GetLocalTimestamp, lib, flatAPI_ISteamNetworkingUtils_GetLocalTimestamp)
+
+	// ISteamGameServer
+	purego.RegisterLibFunc(&ptrAPI_SteamGameServer, lib, flatAPI_SteamGameServer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetProduct, lib, flatAPI_ISteamGameServer_SetProduct)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetGameDescription, lib, flatAPI_ISteamGameServer_SetGameDescription)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_LogOnAnonymous, lib, flatAPI_ISteamGameServer_LogOnAnonymous)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_LogOff, lib, flatAPI_ISteamGameServer_LogOff)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_BLoggedOn, lib, flatAPI_ISteamGameServer_BLoggedOn)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_GetSteamID, lib, flatAPI_ISteamGameServer_GetSteamID)
+
 	// ISteamNetworkingMessages
 	purego.RegisterLibFunc(&ptrAPI_SteamNetworkingMessages, lib, flatAPI_SteamNetworkingMessages)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingMessages_SendMessageToUser, lib, flatAPI_ISteamNetworkingMessages_SendMessageToUser)
@@ -321,24 +391,15 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup, lib, flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup)
 }
 
-var theLib *lib
-
-func init() {
-	l, err := loadLib()
-	if err != nil {
-		panic(err)
-	}
-	registerFunctions(l)
-	theLib = &lib{
-		lib: l,
-	}
-}
-
 func RestartAppIfNecessary(appID uint32) bool {
+	mustLoad()
 	return ptrAPI_RestartAppIfNecessary(appID)
 }
 
 func Init() error {
+	if err := ensureLoaded(); err != nil {
+		return err
+	}
 	var msg steamErrMsg
 	if ptrAPI_InitFlat(uintptr(unsafe.Pointer(&msg))) != ESteamAPIInitResult_OK {
 		return fmt.Errorf("steamworks: InitFlat failed: %s", msg.String())
@@ -347,11 +408,18 @@ func Init() error {
 }
 
 func RunCallbacks() {
+	mustLoad()
 	ptrAPI_RunCallbacks()
 }
 
 func SteamApps() ISteamApps {
+	mustLoad()
 	return steamApps(ptrAPI_SteamApps())
+}
+
+// SteamAppsV008 returns the v008 apps interface.
+func SteamAppsV008() ISteamApps {
+	return SteamApps()
 }
 
 type steamApps uintptr
@@ -525,7 +593,13 @@ func (s steamApps) SetActiveBeta(name string) bool {
 }
 
 func SteamFriends() ISteamFriends {
+	mustLoad()
 	return steamFriends(ptrAPI_SteamFriends())
+}
+
+// SteamFriendsV018 returns the v018 friends interface.
+func SteamFriendsV018() ISteamFriends {
+	return SteamFriends()
 }
 
 type steamFriends uintptr
@@ -605,7 +679,13 @@ func (s steamFriends) ActivateGameOverlayInviteDialogConnectString(connectString
 }
 
 func SteamMatchmaking() ISteamMatchmaking {
+	mustLoad()
 	return steamMatchmaking(ptrAPI_SteamMatchmaking())
+}
+
+// SteamMatchmakingV009 returns the v009 matchmaking interface.
+func SteamMatchmakingV009() ISteamMatchmaking {
+	return SteamMatchmaking()
 }
 
 type steamMatchmaking uintptr
@@ -679,8 +759,112 @@ func (s steamMatchmaking) SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) b
 	return ptrAPI_ISteamMatchmaking_SetLobbyType(uintptr(s), lobbyID, lobbyType)
 }
 
+func SteamHTTP() ISteamHTTP {
+	mustLoad()
+	return steamHTTP(ptrAPI_SteamHTTP())
+}
+
+// SteamHTTPV003 returns the v003 HTTP interface.
+func SteamHTTPV003() ISteamHTTP {
+	return SteamHTTP()
+}
+
+type steamHTTP uintptr
+
+func (s steamHTTP) CreateHTTPRequest(method EHTTPMethod, absoluteURL string) HTTPRequestHandle {
+	return ptrAPI_ISteamHTTP_CreateHTTPRequest(uintptr(s), int32(method), absoluteURL)
+}
+
+func (s steamHTTP) SetHTTPRequestHeaderValue(request HTTPRequestHandle, headerName, headerValue string) bool {
+	return ptrAPI_ISteamHTTP_SetHTTPRequestHeaderValue(uintptr(s), request, headerName, headerValue)
+}
+
+func (s steamHTTP) SendHTTPRequest(request HTTPRequestHandle) (SteamAPICall_t, bool) {
+	var call SteamAPICall_t
+	ok := ptrAPI_ISteamHTTP_SendHTTPRequest(uintptr(s), request, uintptr(unsafe.Pointer(&call)))
+	return call, ok
+}
+
+func (s steamHTTP) GetHTTPResponseBodySize(request HTTPRequestHandle) (uint32, bool) {
+	var size uint32
+	ok := ptrAPI_ISteamHTTP_GetHTTPResponseBodySize(uintptr(s), request, uintptr(unsafe.Pointer(&size)))
+	return size, ok
+}
+
+func (s steamHTTP) GetHTTPResponseBodyData(request HTTPRequestHandle, buffer []byte) bool {
+	if len(buffer) == 0 {
+		return false
+	}
+	return ptrAPI_ISteamHTTP_GetHTTPResponseBodyData(uintptr(s), request, uintptr(unsafe.Pointer(&buffer[0])), uint32(len(buffer)))
+}
+
+func (s steamHTTP) ReleaseHTTPRequest(request HTTPRequestHandle) bool {
+	return ptrAPI_ISteamHTTP_ReleaseHTTPRequest(uintptr(s), request)
+}
+
+func SteamUGC() ISteamUGC {
+	mustLoad()
+	return steamUGC(ptrAPI_SteamUGC())
+}
+
+// SteamUGCV021 returns the v021 UGC interface.
+func SteamUGCV021() ISteamUGC {
+	return SteamUGC()
+}
+
+type steamUGC uintptr
+
+func (s steamUGC) GetNumSubscribedItems(includeLocallyDisabled bool) uint32 {
+	return ptrAPI_ISteamUGC_GetNumSubscribedItems(uintptr(s), includeLocallyDisabled)
+}
+
+func (s steamUGC) GetSubscribedItems(includeLocallyDisabled bool) []PublishedFileId_t {
+	count := ptrAPI_ISteamUGC_GetNumSubscribedItems(uintptr(s), includeLocallyDisabled)
+	if count == 0 {
+		return nil
+	}
+	items := make([]PublishedFileId_t, count)
+	written := ptrAPI_ISteamUGC_GetSubscribedItems(uintptr(s), uintptr(unsafe.Pointer(&items[0])), count, includeLocallyDisabled)
+	return items[:written]
+}
+
+func SteamInventory() ISteamInventory {
+	mustLoad()
+	return steamInventory(ptrAPI_SteamInventory())
+}
+
+// SteamInventoryV003 returns the v003 inventory interface.
+func SteamInventoryV003() ISteamInventory {
+	return SteamInventory()
+}
+
+type steamInventory uintptr
+
+func (s steamInventory) GetResultStatus(result SteamInventoryResult_t) EResult {
+	return EResult(ptrAPI_ISteamInventory_GetResultStatus(uintptr(s), result))
+}
+
+func (s steamInventory) GetResultItems(result SteamInventoryResult_t, outItems []SteamItemDetails) (int, bool) {
+	if len(outItems) == 0 {
+		return 0, false
+	}
+	outSize := uint32(len(outItems))
+	ok := ptrAPI_ISteamInventory_GetResultItems(uintptr(s), result, uintptr(unsafe.Pointer(&outItems[0])), uintptr(unsafe.Pointer(&outSize)))
+	return int(outSize), ok
+}
+
+func (s steamInventory) DestroyResult(result SteamInventoryResult_t) {
+	ptrAPI_ISteamInventory_DestroyResult(uintptr(s), result)
+}
+
 func SteamInput() ISteamInput {
+	mustLoad()
 	return steamInput(ptrAPI_SteamInput())
+}
+
+// SteamInputV006 returns the v006 input interface.
+func SteamInputV006() ISteamInput {
+	return SteamInput()
 }
 
 type steamInput uintptr
@@ -705,7 +889,13 @@ func (s steamInput) RunFrame() {
 }
 
 func SteamRemoteStorage() ISteamRemoteStorage {
+	mustLoad()
 	return steamRemoteStorage(ptrAPI_SteamRemoteStorage())
+}
+
+// SteamRemoteStorageV016 returns the v016 remote storage interface.
+func SteamRemoteStorageV016() ISteamRemoteStorage {
+	return SteamRemoteStorage()
 }
 
 type steamRemoteStorage uintptr
@@ -727,7 +917,13 @@ func (s steamRemoteStorage) GetFileSize(file string) int32 {
 }
 
 func SteamUser() ISteamUser {
+	mustLoad()
 	return steamUser(ptrAPI_SteamUser())
+}
+
+// SteamUserV023 returns the v023 user interface.
+func SteamUserV023() ISteamUser {
+	return SteamUser()
 }
 
 type steamUser uintptr
@@ -737,7 +933,13 @@ func (s steamUser) GetSteamID() CSteamID {
 }
 
 func SteamUserStats() ISteamUserStats {
+	mustLoad()
 	return steamUserStats(ptrAPI_SteamUserStats())
+}
+
+// SteamUserStatsV013 returns the v013 user stats interface.
+func SteamUserStatsV013() ISteamUserStats {
+	return SteamUserStats()
 }
 
 type steamUserStats uintptr
@@ -760,7 +962,13 @@ func (s steamUserStats) StoreStats() bool {
 }
 
 func SteamUtils() ISteamUtils {
+	mustLoad()
 	return steamUtils(ptrAPI_SteamUtils())
+}
+
+// SteamUtilsV010 returns the v010 utils interface.
+func SteamUtilsV010() ISteamUtils {
+	return SteamUtils()
 }
 
 type steamUtils uintptr
@@ -847,8 +1055,81 @@ func (s steamUtils) ShowFloatingGamepadTextInput(keyboardMode EFloatingGamepadTe
 	return ptrAPI_ISteamUtils_ShowFloatingGamepadTextInput(uintptr(s), keyboardMode, textFieldXPosition, textFieldYPosition, textFieldWidth, textFieldHeight)
 }
 
+func SteamNetworkingUtils() ISteamNetworkingUtils {
+	mustLoad()
+	return steamNetworkingUtils(ptrAPI_SteamNetworkingUtils())
+}
+
+// SteamNetworkingUtilsV004 returns the v004 networking utils interface.
+func SteamNetworkingUtilsV004() ISteamNetworkingUtils {
+	return SteamNetworkingUtils()
+}
+
+type steamNetworkingUtils uintptr
+
+func (s steamNetworkingUtils) AllocateMessage(size int) *SteamNetworkingMessage {
+	if size <= 0 {
+		return nil
+	}
+	ptr := ptrAPI_ISteamNetworkingUtils_AllocateMessage(uintptr(s), int32(size))
+	if ptr == 0 {
+		return nil
+	}
+	return (*SteamNetworkingMessage)(unsafe.Pointer(ptr))
+}
+
+func (s steamNetworkingUtils) InitRelayNetworkAccess() {
+	ptrAPI_ISteamNetworkingUtils_InitRelayNetworkAccess(uintptr(s))
+}
+
+func (s steamNetworkingUtils) GetLocalTimestamp() SteamNetworkingMicroseconds {
+	return ptrAPI_ISteamNetworkingUtils_GetLocalTimestamp(uintptr(s))
+}
+
+func SteamGameServer() ISteamGameServer {
+	mustLoad()
+	return steamGameServer(ptrAPI_SteamGameServer())
+}
+
+// SteamGameServerV015 returns the v015 game server interface.
+func SteamGameServerV015() ISteamGameServer {
+	return SteamGameServer()
+}
+
+type steamGameServer uintptr
+
+func (s steamGameServer) SetProduct(product string) {
+	ptrAPI_ISteamGameServer_SetProduct(uintptr(s), product)
+}
+
+func (s steamGameServer) SetGameDescription(description string) {
+	ptrAPI_ISteamGameServer_SetGameDescription(uintptr(s), description)
+}
+
+func (s steamGameServer) LogOnAnonymous() {
+	ptrAPI_ISteamGameServer_LogOnAnonymous(uintptr(s))
+}
+
+func (s steamGameServer) LogOff() {
+	ptrAPI_ISteamGameServer_LogOff(uintptr(s))
+}
+
+func (s steamGameServer) BLoggedOn() bool {
+	return ptrAPI_ISteamGameServer_BLoggedOn(uintptr(s))
+}
+
+func (s steamGameServer) GetSteamID() CSteamID {
+	return ptrAPI_ISteamGameServer_GetSteamID(uintptr(s))
+}
+
 func SteamNetworkingMessages() ISteamNetworkingMessages {
+	mustLoad()
 	return steamNetworkingMessages(ptrAPI_SteamNetworkingMessages())
+}
+
+// SteamNetworkingMessagesV002 returns the v002 networking messages interface.
+func SteamNetworkingMessagesV002() ISteamNetworkingMessages {
+	return SteamNetworkingMessages()
 }
 
 type steamNetworkingMessages uintptr
@@ -886,7 +1167,13 @@ func (s steamNetworkingMessages) CloseChannelWithUser(identity *SteamNetworkingI
 }
 
 func SteamNetworkingSockets() ISteamNetworkingSockets {
+	mustLoad()
 	return steamNetworkingSockets(ptrAPI_SteamNetworkingSockets())
+}
+
+// SteamNetworkingSocketsV012 returns the v012 networking sockets interface.
+func SteamNetworkingSocketsV012() ISteamNetworkingSockets {
+	return SteamNetworkingSockets()
 }
 
 type steamNetworkingSockets uintptr

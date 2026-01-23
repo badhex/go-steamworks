@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2021 The go-steamworks Authors
 
-//go:build !windows
+//go:build steamworks_embedded && !windows
 
 package steamworks
 
@@ -16,16 +16,17 @@ import (
 )
 
 func loadLib() (uintptr, error) {
-	dir, err := os.MkdirTemp("", "")
-	if err != nil {
-		return 0, err
-	}
-
 	ext := ".so"
 	if runtime.GOOS == "darwin" {
 		ext = ".dylib"
 	}
-	path := filepath.Join(dir, "libsteam_api"+ext)
+	file, err := os.CreateTemp("", "go-steamworks-*"+ext)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	path := filepath.Clean(file.Name())
 	if err := os.WriteFile(path, libSteamAPI, 0644); err != nil {
 		return 0, err
 	}
@@ -34,6 +35,8 @@ func loadLib() (uintptr, error) {
 	if err != nil {
 		return 0, fmt.Errorf("steamworks: dlopen failed: %w", err)
 	}
+
+	_ = os.Remove(path)
 
 	return lib, nil
 }
