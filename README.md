@@ -9,6 +9,9 @@ Go bindings for a subset of the Steamworks SDK.
 
 163
 
+> [!NOTE]
+> If newer Steamworks SDK releases add or update symbols that are not yet in these bindings, use the [raw symbol access](#raw-symbol-access) method to call them directly.
+
 ## Getting started
 
 ### Requirements
