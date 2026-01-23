@@ -1,15 +1,17 @@
 # go-steamworks
 
-A Steamworks SDK binding for Go
+Go bindings for a subset of the Steamworks SDK.
 
 > [!WARNING]
-> 32bit OSes are not supported.
+> 32-bit OSes are not supported.
 
 ## Steamworks SDK version
 
 163
 
-## How to use
+## Getting started
+
+### Requirements
 
 Before using this library, make sure Steam's redistributable binaries are
 available on your runtime machine. This repository no longer ships the
@@ -22,31 +24,67 @@ Common locations and filenames:
 * macOS: `libsteam_api.dylib`
 * Windows (64-bit): `steam_api64.dll`
 
-On Windows, copy one of these files on the working directory:
+On Windows, copy the DLL into the working directory:
 
- * `steam_api64.dll` (For 64bit. Copy `redistribution_bin\win64\steam_api64.dll` in the SDK)
+* `steam_api64.dll` (copy from `redistribution_bin\\win64\\steam_api64.dll` in the SDK)
+
+For local development, ensure `steam_appid.txt` is available next to the
+executable (or run Steam with your app ID configured).
+
+### Initialization
+
+The Steamworks client must be running and the API must be initialized before
+calling most interfaces. `Load` is optional, but allows you to surface missing
+redistributables early.
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/badhex/go-steamworks"
+)
+
+const appID = 480 // Replace with your own App ID.
+
+func main() {
+	if steamworks.RestartAppIfNecessary(appID) {
+		os.Exit(0)
+	}
+	if err := steamworks.Load(); err != nil {
+		log.Fatalf("failed to load steamworks: %v", err)
+	}
+	if err := steamworks.Init(); err != nil {
+		log.Fatalf("steamworks.Init failed: %v", err)
+	}
+
+	fmt.Printf("SteamID: %v\n", steamworks.SteamUser().GetSteamID())
+}
+```
+
+### Callback pump
+
+Steamworks expects you to poll callbacks regularly on your main thread.
+
+```go
+for running {
+	steamworks.RunCallbacks()
+	// ...your game loop...
+}
+```
+
+### Example: language selection
 
 ```go
 package steamapi
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/badhex/go-steamworks"
 	"golang.org/x/text/language"
 )
-
-const appID = 480 // Rewrite this
-
-func init() {
-	if steamworks.RestartAppIfNecessary(appID) {
-		os.Exit(1)
-	}
-	if err := steamworks.Init(); err != nil {
-		panic(fmt.Sprintf("steamworks.Init failed: %v", err))
-	}
-}
 
 func SystemLang() language.Tag {
 	switch steamworks.SteamApps().GetCurrentGameLanguage() {
@@ -58,6 +96,70 @@ func SystemLang() language.Tag {
 	return language.Und
 }
 ```
+
+### Example: achievements
+
+```go
+if achieved, ok := steamworks.SteamUserStats().GetAchievement("FIRST_WIN"); ok && !achieved {
+	steamworks.SteamUserStats().SetAchievement("FIRST_WIN")
+	steamworks.SteamUserStats().StoreStats()
+}
+```
+
+### Example: async call results
+
+```go
+call := steamworks.SteamHTTP().CreateHTTPRequest(steamworks.EHTTPMethodGET, "https://example.com")
+callHandle, ok := steamworks.SteamHTTP().SendHTTPRequest(call)
+if !ok {
+	// handle request creation failure
+}
+
+type HTTPRequestCompleted struct {
+	Request steamworks.HTTPRequestHandle
+	Context uint64
+	Status  int32
+}
+
+// Define the struct to mirror the Steamworks callback payload you expect.
+// Use the SDK's callback ID for the expected payload.
+result := steamworks.NewCallResult[HTTPRequestCompleted](callHandle, 2101)
+
+if _, failed, err := result.Wait(context.Background(), 0); err == nil && !failed {
+	// process response
+}
+```
+
+## SDK-aligned helpers
+
+This repository ships typed helpers for async call results and manual callback
+dispatch, plus additional interface accessors to align with common Steamworks
+flows.
+
+* Use `NewCallResult` to await async call results with typed payloads.
+* Use `NewCallbackDispatcher` + `RegisterCallback` for manual callback registration and dispatch.
+* Use versioned accessors such as `SteamAppsV008()` when you need explicit
+  interface versions.
+
+## Build tags and runtime loading
+
+By default, the package expects Steam redistributables to be available on the
+runtime library path. You can also opt into embedding redistributables with a
+build tag:
+
+* Runtime loading (default): rely on `libsteam_api.so` / `libsteam_api.dylib`
+  being in the dynamic linker path or alongside your executable.
+* Embedded loading: build with `-tags steamworks_embedded` to embed the SDK
+  redistributables and load them from a temporary file at runtime.
+
+Use `STEAMWORKS_LIB_PATH` to point at a custom shared library location when
+runtime loading.
+
+## Repository layout
+
+* `steam/` — Steamworks SDK headers and metadata used for code generation.
+* `gen.go` — code generator for parsing the SDK and building bindings.
+* `examples/` — runnable samples for common startup flows.
 
 ### Supported APIs and methods
 
@@ -154,6 +256,26 @@ implemented methods include:
 * `SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool`
 * `SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool`
 
+**ISteamHTTP** (`steamworks.SteamHTTP()`)
+
+* `CreateHTTPRequest(method EHTTPMethod, absoluteURL string) HTTPRequestHandle`
+* `SetHTTPRequestHeaderValue(request HTTPRequestHandle, headerName, headerValue string) bool`
+* `SendHTTPRequest(request HTTPRequestHandle) (SteamAPICall_t, bool)`
+* `GetHTTPResponseBodySize(request HTTPRequestHandle) (uint32, bool)`
+* `GetHTTPResponseBodyData(request HTTPRequestHandle, buffer []byte) bool`
+* `ReleaseHTTPRequest(request HTTPRequestHandle) bool`
+
+**ISteamUGC** (`steamworks.SteamUGC()`)
+
+* `GetNumSubscribedItems(includeLocallyDisabled bool) uint32`
+* `GetSubscribedItems(includeLocallyDisabled bool) []PublishedFileId_t`
+
+**ISteamInventory** (`steamworks.SteamInventory()`)
+
+* `GetResultStatus(result SteamInventoryResult_t) EResult`
+* `GetResultItems(result SteamInventoryResult_t, outItems []SteamItemDetails) (int, bool)`
+* `DestroyResult(result SteamInventoryResult_t)`
+
 **ISteamNetworkingMessages** (`steamworks.SteamNetworkingMessages()`)
 
 * `SendMessageToUser(identity *SteamNetworkingIdentity, data []byte, sendFlags SteamNetworkingSendFlags, remoteChannel int) EResult`
@@ -161,6 +283,12 @@ implemented methods include:
 * `AcceptSessionWithUser(identity *SteamNetworkingIdentity) bool`
 * `CloseSessionWithUser(identity *SteamNetworkingIdentity) bool`
 * `CloseChannelWithUser(identity *SteamNetworkingIdentity, channel int) bool`
+
+**ISteamNetworkingUtils** (`steamworks.SteamNetworkingUtils()`)
+
+* `AllocateMessage(size int) *SteamNetworkingMessage`
+* `InitRelayNetworkAccess()`
+* `GetLocalTimestamp() SteamNetworkingMicroseconds`
 
 **ISteamNetworkingSockets** (`steamworks.SteamNetworkingSockets()`)
 
@@ -175,6 +303,15 @@ implemented methods include:
 * `DestroyPollGroup(group HSteamNetPollGroup) bool`
 * `SetConnectionPollGroup(connection HSteamNetConnection, group HSteamNetPollGroup) bool`
 * `ReceiveMessagesOnPollGroup(group HSteamNetPollGroup, maxMessages int) []*SteamNetworkingMessage`
+
+**ISteamGameServer** (`steamworks.SteamGameServer()`)
+
+* `SetProduct(product string)`
+* `SetGameDescription(description string)`
+* `LogOnAnonymous()`
+* `LogOff()`
+* `BLoggedOn() bool`
+* `GetSteamID() CSteamID`
 
 **ISteamRemoteStorage** (`steamworks.SteamRemoteStorage()`)
 
