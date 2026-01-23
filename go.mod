@@ -1,4 +1,4 @@
-module github.com/hajimehoshi/go-steamworks
+module github.com/badhex/go-steamworks
 
 go 1.23.0
 

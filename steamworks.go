@@ -6,8 +6,22 @@
 package steamworks
 
 type AppId_t uint32
+type CGameID uint64
 type CSteamID uint64
+type DepotId_t uint32
 type InputHandle_t uint64
+type SteamAPICall_t uint64
+type HTTPRequestHandle uint32
+type HTTPCookieContainerHandle uint32
+type PublishedFileId_t uint64
+type SteamItemInstanceID_t uint64
+type SteamItemDef_t int32
+type SteamInventoryResult_t int32
+
+type HSteamNetConnection uint32
+type HSteamListenSocket uint32
+type HSteamNetPollGroup uint32
+type SteamNetworkingMicroseconds int64
 
 type ESteamAPIInitResult int32
 
@@ -53,12 +67,307 @@ const (
 	EFloatingGamepadTextInputMode_ModeNumeric       EFloatingGamepadTextInputMode = 3
 )
 
+type EOverlayToStoreFlag int32
+
+const (
+	EOverlayToStoreFlag_None             EOverlayToStoreFlag = 0
+	EOverlayToStoreFlag_AddToCart        EOverlayToStoreFlag = 1
+	EOverlayToStoreFlag_AddToCartAndShow EOverlayToStoreFlag = 2
+)
+
+type EActivateGameOverlayToWebPageMode int32
+
+const (
+	EActivateGameOverlayToWebPageMode_Default EActivateGameOverlayToWebPageMode = 0
+	EActivateGameOverlayToWebPageMode_Modal   EActivateGameOverlayToWebPageMode = 1
+)
+
+type ELobbyType int32
+
+const (
+	ELobbyType_Private     ELobbyType = 0
+	ELobbyType_FriendsOnly ELobbyType = 1
+	ELobbyType_Public      ELobbyType = 2
+	ELobbyType_Invisible   ELobbyType = 3
+)
+
+type EResult int32
+
+const (
+	EResultNone         EResult = 0
+	EResultOK           EResult = 1
+	EResultFail         EResult = 2
+	EResultNoConnection EResult = 3
+	EResultInvalidParam EResult = 8
+	EResultBusy         EResult = 10
+	EResultTimeout      EResult = 16
+)
+
+type SteamNetworkingSendFlags int32
+
+const (
+	SteamNetworkingSend_Unreliable               SteamNetworkingSendFlags = 0
+	SteamNetworkingSend_NoNagle                  SteamNetworkingSendFlags = 1
+	SteamNetworkingSend_NoDelay                  SteamNetworkingSendFlags = 4
+	SteamNetworkingSend_Reliable                 SteamNetworkingSendFlags = 8
+	SteamNetworkingSend_UseCurrentThread         SteamNetworkingSendFlags = 16
+	SteamNetworkingSend_AutoRestartBrokenSession SteamNetworkingSendFlags = 32
+)
+
+type FriendGameInfo struct {
+	GameID       CGameID
+	GameIP       uint32
+	GamePort     uint16
+	QueryPort    uint16
+	LobbySteamID CSteamID
+}
+
+type EHTTPMethod int32
+
+const (
+	EHTTPMethodInvalid EHTTPMethod = 0
+	EHTTPMethodGET     EHTTPMethod = 1
+	EHTTPMethodHEAD    EHTTPMethod = 2
+	EHTTPMethodPOST    EHTTPMethod = 3
+	EHTTPMethodPUT     EHTTPMethod = 4
+	EHTTPMethodDELETE  EHTTPMethod = 5
+	EHTTPMethodOPTIONS EHTTPMethod = 6
+	EHTTPMethodPATCH   EHTTPMethod = 7
+)
+
+type SteamItemDetails struct {
+	ItemID     SteamItemInstanceID_t
+	Definition SteamItemDef_t
+	Quantity   uint16
+	Flags      uint16
+}
+
+type EFriendRelationship int32
+
+const (
+	EFriendRelationshipNone                EFriendRelationship = 0
+	EFriendRelationshipBlocked             EFriendRelationship = 1
+	EFriendRelationshipRequestRecipient    EFriendRelationship = 2
+	EFriendRelationshipFriend              EFriendRelationship = 3
+	EFriendRelationshipRequestInitiator    EFriendRelationship = 4
+	EFriendRelationshipIgnored             EFriendRelationship = 5
+	EFriendRelationshipIgnoredFriend       EFriendRelationship = 6
+	EFriendRelationshipSuggestedDeprecated EFriendRelationship = 7
+	EFriendRelationshipMax                 EFriendRelationship = 8
+)
+
+type EPersonaState int32
+
+const (
+	EPersonaStateOffline        EPersonaState = 0
+	EPersonaStateOnline         EPersonaState = 1
+	EPersonaStateBusy           EPersonaState = 2
+	EPersonaStateAway           EPersonaState = 3
+	EPersonaStateSnooze         EPersonaState = 4
+	EPersonaStateLookingToTrade EPersonaState = 5
+	EPersonaStateLookingToPlay  EPersonaState = 6
+	EPersonaStateInvisible      EPersonaState = 7
+	EPersonaStateMax            EPersonaState = 8
+)
+
+type EFriendFlags int32
+
+const (
+	EFriendFlagNone                 EFriendFlags = 0x00
+	EFriendFlagBlocked              EFriendFlags = 0x01
+	EFriendFlagFriendshipRequested  EFriendFlags = 0x02
+	EFriendFlagImmediate            EFriendFlags = 0x04
+	EFriendFlagClanMember           EFriendFlags = 0x08
+	EFriendFlagOnGameServer         EFriendFlags = 0x10
+	EFriendFlagRequestingFriendship EFriendFlags = 0x80
+	EFriendFlagRequestingInfo       EFriendFlags = 0x100
+	EFriendFlagIgnored              EFriendFlags = 0x200
+	EFriendFlagIgnoredFriend        EFriendFlags = 0x400
+	EFriendFlagChatMember           EFriendFlags = 0x1000
+	EFriendFlagAll                  EFriendFlags = 0xFFFF
+)
+
+type ESteamAPICallFailure int32
+
+const (
+	ESteamAPICallFailureNone               ESteamAPICallFailure = -1
+	ESteamAPICallFailureSteamGone          ESteamAPICallFailure = 0
+	ESteamAPICallFailureNetworkFailure     ESteamAPICallFailure = 1
+	ESteamAPICallFailureInvalidHandle      ESteamAPICallFailure = 2
+	ESteamAPICallFailureMismatchedCallback ESteamAPICallFailure = 3
+)
+
+type EUniverse int32
+
+const (
+	EUniverseInvalid  EUniverse = 0
+	EUniversePublic   EUniverse = 1
+	EUniverseBeta     EUniverse = 2
+	EUniverseInternal EUniverse = 3
+	EUniverseDev      EUniverse = 4
+	EUniverseMax      EUniverse = 5
+)
+
+type ENotificationPosition int32
+
+const (
+	ENotificationPositionInvalid     ENotificationPosition = -1
+	ENotificationPositionTopLeft     ENotificationPosition = 0
+	ENotificationPositionTopRight    ENotificationPosition = 1
+	ENotificationPositionBottomLeft  ENotificationPosition = 2
+	ENotificationPositionBottomRight ENotificationPosition = 3
+)
+
+type SteamNetworkingIPAddr struct {
+	data [18]byte
+}
+
+func (a *SteamNetworkingIPAddr) setIPv4(ip uint32, port uint16) {
+	a.data[0] = 0
+	a.data[1] = 0
+	a.data[2] = 0
+	a.data[3] = 0
+	a.data[4] = 0
+	a.data[5] = 0
+	a.data[6] = 0
+	a.data[7] = 0
+	a.data[8] = 0
+	a.data[9] = 0
+	a.data[10] = 0xff
+	a.data[11] = 0xff
+	a.data[12] = byte(ip >> 24)
+	a.data[13] = byte(ip >> 16)
+	a.data[14] = byte(ip >> 8)
+	a.data[15] = byte(ip)
+	a.data[16] = byte(port)
+	a.data[17] = byte(port >> 8)
+}
+
+type ESteamNetworkingIdentityType int32
+
+const (
+	SteamNetworkingIdentity_Invalid       ESteamNetworkingIdentityType = 0
+	SteamNetworkingIdentity_SteamID       ESteamNetworkingIdentityType = 16
+	SteamNetworkingIdentity_IPAddress     ESteamNetworkingIdentityType = 1
+	SteamNetworkingIdentity_GenericString ESteamNetworkingIdentityType = 2
+	SteamNetworkingIdentity_GenericBytes  ESteamNetworkingIdentityType = 3
+)
+
+type SteamNetworkingIdentity struct {
+	data [136]byte
+}
+
+func (i *SteamNetworkingIdentity) SetSteamID64(steamID uint64) {
+	i.setTypeAndSize(SteamNetworkingIdentity_SteamID, 8)
+	i.setUint64(8, steamID)
+}
+
+func (i *SteamNetworkingIdentity) SetSteamID(steamID CSteamID) {
+	i.SetSteamID64(uint64(steamID))
+}
+
+func (i *SteamNetworkingIdentity) SetIPv4Addr(ip uint32, port uint16) {
+	i.setTypeAndSize(SteamNetworkingIdentity_IPAddress, 18)
+	var addr SteamNetworkingIPAddr
+	addr.setIPv4(ip, port)
+	copy(i.data[8:], addr.data[:])
+}
+
+func (i *SteamNetworkingIdentity) setTypeAndSize(identityType ESteamNetworkingIdentityType, size int32) {
+	putUint32(i.data[0:4], uint32(identityType))
+	putUint32(i.data[4:8], uint32(size))
+}
+
+func (i *SteamNetworkingIdentity) setUint64(offset int, value uint64) {
+	putUint64(i.data[offset:offset+8], value)
+}
+
+type SteamNetworkingMessage struct {
+	Data          uintptr
+	Size          int32
+	Connection    HSteamNetConnection
+	IdentityPeer  SteamNetworkingIdentity
+	ConnUserData  int64
+	TimeReceived  SteamNetworkingMicroseconds
+	MessageNumber int64
+	FreeDataFunc  uintptr
+	ReleaseFunc   uintptr
+	Channel       int32
+	Flags         int32
+	UserData      int64
+	Lane          uint16
+	_pad1         uint16
+}
+
 type ISteamApps interface {
 	BGetDLCDataByIndex(iDLC int) (appID AppId_t, available bool, pchName string, success bool)
+	BIsSubscribed() bool
+	BIsLowViolence() bool
+	BIsCybercafe() bool
+	BIsVACBanned() bool
 	BIsDlcInstalled(appID AppId_t) bool
+	BIsSubscribedApp(appID AppId_t) bool
+	BIsSubscribedFromFreeWeekend() bool
+	BIsSubscribedFromFamilySharing() bool
+	BIsTimedTrial() (allowedSeconds, playedSeconds uint32, ok bool)
+	BIsAppInstalled(appID AppId_t) bool
+	GetAvailableGameLanguages() string
+	GetEarliestPurchaseUnixTime(appID AppId_t) uint32
 	GetAppInstallDir(appID AppId_t) string
 	GetCurrentGameLanguage() string
 	GetDLCCount() int32
+	GetCurrentBetaName() (string, bool)
+	GetInstalledDepots(appID AppId_t) []DepotId_t
+	GetAppOwner() CSteamID
+	GetLaunchQueryParam(key string) string
+	GetDlcDownloadProgress(appID AppId_t) (downloaded, total uint64, ok bool)
+	GetAppBuildId() int32
+	GetFileDetails(filename string) SteamAPICall_t
+	GetLaunchCommandLine(bufferSize int) string
+	GetNumBetas() (total int, available int, private int)
+	GetBetaInfo(index int) (flags uint32, buildID uint32, name string, description string, ok bool)
+	InstallDLC(appID AppId_t)
+	UninstallDLC(appID AppId_t)
+	RequestAppProofOfPurchaseKey(appID AppId_t)
+	RequestAllProofOfPurchaseKeys()
+	MarkContentCorrupt(missingFilesOnly bool) bool
+	SetDlcContext(appID AppId_t) bool
+	SetActiveBeta(name string) bool
+}
+
+type ISteamHTTP interface {
+	CreateHTTPRequest(method EHTTPMethod, absoluteURL string) HTTPRequestHandle
+	SetHTTPRequestHeaderValue(request HTTPRequestHandle, headerName, headerValue string) bool
+	SendHTTPRequest(request HTTPRequestHandle) (SteamAPICall_t, bool)
+	GetHTTPResponseBodySize(request HTTPRequestHandle) (uint32, bool)
+	GetHTTPResponseBodyData(request HTTPRequestHandle, buffer []byte) bool
+	ReleaseHTTPRequest(request HTTPRequestHandle) bool
+}
+
+type ISteamUGC interface {
+	GetNumSubscribedItems(includeLocallyDisabled bool) uint32
+	GetSubscribedItems(includeLocallyDisabled bool) []PublishedFileId_t
+}
+
+type ISteamInventory interface {
+	GetResultStatus(result SteamInventoryResult_t) EResult
+	GetResultItems(result SteamInventoryResult_t, outItems []SteamItemDetails) (int, bool)
+	DestroyResult(result SteamInventoryResult_t)
+}
+
+type ISteamNetworkingUtils interface {
+	AllocateMessage(size int) *SteamNetworkingMessage
+	InitRelayNetworkAccess()
+	GetLocalTimestamp() SteamNetworkingMicroseconds
+}
+
+type ISteamGameServer interface {
+	SetProduct(product string)
+	SetGameDescription(description string)
+	LogOnAnonymous()
+	LogOff()
+	BLoggedOn() bool
+	GetSteamID() CSteamID
 }
 
 type ISteamInput interface {
@@ -87,14 +396,94 @@ type ISteamUserStats interface {
 }
 
 type ISteamUtils interface {
+	GetSecondsSinceAppActive() uint32
+	GetSecondsSinceComputerActive() uint32
+	GetConnectedUniverse() EUniverse
+	GetServerRealTime() uint32
+	GetIPCountry() string
+	GetImageSize(image int) (width, height uint32, ok bool)
+	GetImageRGBA(image int, dest []byte) bool
+	GetCurrentBatteryPower() uint8
+	GetAppID() uint32
 	IsOverlayEnabled() bool
+	BOverlayNeedsPresent() bool
 	IsSteamRunningOnSteamDeck() bool
+	SetOverlayNotificationPosition(position ENotificationPosition)
+	SetOverlayNotificationInset(horizontal, vertical int32)
+	IsAPICallCompleted(call SteamAPICall_t) (failed bool, ok bool)
+	GetAPICallFailureReason(call SteamAPICall_t) ESteamAPICallFailure
+	GetAPICallResult(call SteamAPICall_t, callback uintptr, callbackSize int32, expectedCallback int32) (failed bool, ok bool)
+	GetIPCCallCount() uint32
 	ShowFloatingGamepadTextInput(keyboardMode EFloatingGamepadTextInputMode, textFieldXPosition, textFieldYPosition, textFieldWidth, textFieldHeight int32) bool
 }
 
 type ISteamFriends interface {
 	GetPersonaName() string
+	GetPersonaState() EPersonaState
+	GetFriendCount(flags EFriendFlags) int
+	GetFriendByIndex(index int, flags EFriendFlags) CSteamID
+	GetFriendRelationship(friend CSteamID) EFriendRelationship
+	GetFriendPersonaState(friend CSteamID) EPersonaState
+	GetFriendPersonaName(friend CSteamID) string
+	GetFriendPersonaNameHistory(friend CSteamID, index int) string
+	GetFriendSteamLevel(friend CSteamID) int
 	SetRichPresence(string, string) bool
+	GetFriendGamePlayed(friend CSteamID) (FriendGameInfo, bool)
+	InviteUserToGame(friend CSteamID, connectString string) bool
+	ActivateGameOverlay(dialog string)
+	ActivateGameOverlayToUser(dialog string, steamID CSteamID)
+	ActivateGameOverlayToWebPage(url string, mode EActivateGameOverlayToWebPageMode)
+	ActivateGameOverlayToStore(appID AppId_t, flag EOverlayToStoreFlag)
+	ActivateGameOverlayInviteDialog(lobbyID CSteamID)
+	ActivateGameOverlayInviteDialogConnectString(connectString string)
+}
+
+type ISteamMatchmaking interface {
+	RequestLobbyList() SteamAPICall_t
+	GetLobbyByIndex(index int) CSteamID
+	CreateLobby(lobbyType ELobbyType, maxMembers int) SteamAPICall_t
+	JoinLobby(lobbyID CSteamID) SteamAPICall_t
+	LeaveLobby(lobbyID CSteamID)
+	InviteUserToLobby(lobbyID, invitee CSteamID) bool
+	GetNumLobbyMembers(lobbyID CSteamID) int
+	GetLobbyMemberByIndex(lobbyID CSteamID, memberIndex int) CSteamID
+	GetLobbyData(lobbyID CSteamID, key string) string
+	SetLobbyData(lobbyID CSteamID, key, value string) bool
+	GetLobbyOwner(lobbyID CSteamID) CSteamID
+	SetLobbyOwner(lobbyID, owner CSteamID) bool
+	SetLobbyGameServer(lobbyID CSteamID, ip uint32, port uint16, server CSteamID)
+	GetLobbyGameServer(lobbyID CSteamID) (ip uint32, port uint16, server CSteamID, ok bool)
+	SetLobbyJoinable(lobbyID CSteamID, joinable bool) bool
+	SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool
+	SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool
+}
+
+type ISteamNetworkingMessages interface {
+	SendMessageToUser(identity *SteamNetworkingIdentity, data []byte, sendFlags SteamNetworkingSendFlags, remoteChannel int) EResult
+	ReceiveMessagesOnChannel(channel int, maxMessages int) []*SteamNetworkingMessage
+	AcceptSessionWithUser(identity *SteamNetworkingIdentity) bool
+	CloseSessionWithUser(identity *SteamNetworkingIdentity) bool
+	CloseChannelWithUser(identity *SteamNetworkingIdentity, channel int) bool
+}
+
+type ISteamNetworkingSockets interface {
+	CreateListenSocketP2P(localVirtualPort int, options []SteamNetworkingConfigValue) HSteamListenSocket
+	ConnectP2P(identity *SteamNetworkingIdentity, remoteVirtualPort int, options []SteamNetworkingConfigValue) HSteamNetConnection
+	AcceptConnection(connection HSteamNetConnection) EResult
+	CloseConnection(connection HSteamNetConnection, reason int, debug string, enableLinger bool) bool
+	CloseListenSocket(socket HSteamListenSocket) bool
+	SendMessageToConnection(connection HSteamNetConnection, data []byte, sendFlags SteamNetworkingSendFlags) (EResult, int64)
+	ReceiveMessagesOnConnection(connection HSteamNetConnection, maxMessages int) []*SteamNetworkingMessage
+	CreatePollGroup() HSteamNetPollGroup
+	DestroyPollGroup(group HSteamNetPollGroup) bool
+	SetConnectionPollGroup(connection HSteamNetConnection, group HSteamNetPollGroup) bool
+	ReceiveMessagesOnPollGroup(group HSteamNetPollGroup, maxMessages int) []*SteamNetworkingMessage
+}
+
+type SteamNetworkingConfigValue struct {
+	Value    int32
+	DataType int32
+	Data     uint64
 }
 
 const (
@@ -102,16 +491,96 @@ const (
 	flatAPI_InitFlat              = "SteamAPI_InitFlat"
 	flatAPI_RunCallbacks          = "SteamAPI_RunCallbacks"
 
-	flatAPI_SteamApps                         = "SteamAPI_SteamApps_v008"
-	flatAPI_ISteamApps_BGetDLCDataByIndex     = "SteamAPI_ISteamApps_BGetDLCDataByIndex"
-	flatAPI_ISteamApps_BIsDlcInstalled        = "SteamAPI_ISteamApps_BIsDlcInstalled"
-	flatAPI_ISteamApps_GetAppInstallDir       = "SteamAPI_ISteamApps_GetAppInstallDir"
-	flatAPI_ISteamApps_GetCurrentGameLanguage = "SteamAPI_ISteamApps_GetCurrentGameLanguage"
-	flatAPI_ISteamApps_GetDLCCount            = "SteamAPI_ISteamApps_GetDLCCount"
+	flatAPI_SteamApps                                 = "SteamAPI_SteamApps_v008"
+	flatAPI_ISteamApps_BIsSubscribed                  = "SteamAPI_ISteamApps_BIsSubscribed"
+	flatAPI_ISteamApps_BIsLowViolence                 = "SteamAPI_ISteamApps_BIsLowViolence"
+	flatAPI_ISteamApps_BIsCybercafe                   = "SteamAPI_ISteamApps_BIsCybercafe"
+	flatAPI_ISteamApps_BIsVACBanned                   = "SteamAPI_ISteamApps_BIsVACBanned"
+	flatAPI_ISteamApps_BGetDLCDataByIndex             = "SteamAPI_ISteamApps_BGetDLCDataByIndex"
+	flatAPI_ISteamApps_BIsDlcInstalled                = "SteamAPI_ISteamApps_BIsDlcInstalled"
+	flatAPI_ISteamApps_GetAvailableGameLanguages      = "SteamAPI_ISteamApps_GetAvailableGameLanguages"
+	flatAPI_ISteamApps_BIsSubscribedApp               = "SteamAPI_ISteamApps_BIsSubscribedApp"
+	flatAPI_ISteamApps_GetEarliestPurchaseUnixTime    = "SteamAPI_ISteamApps_GetEarliestPurchaseUnixTime"
+	flatAPI_ISteamApps_BIsSubscribedFromFreeWeekend   = "SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekend"
+	flatAPI_ISteamApps_GetAppInstallDir               = "SteamAPI_ISteamApps_GetAppInstallDir"
+	flatAPI_ISteamApps_GetCurrentGameLanguage         = "SteamAPI_ISteamApps_GetCurrentGameLanguage"
+	flatAPI_ISteamApps_GetDLCCount                    = "SteamAPI_ISteamApps_GetDLCCount"
+	flatAPI_ISteamApps_InstallDLC                     = "SteamAPI_ISteamApps_InstallDLC"
+	flatAPI_ISteamApps_UninstallDLC                   = "SteamAPI_ISteamApps_UninstallDLC"
+	flatAPI_ISteamApps_RequestAppProofOfPurchaseKey   = "SteamAPI_ISteamApps_RequestAppProofOfPurchaseKey"
+	flatAPI_ISteamApps_GetCurrentBetaName             = "SteamAPI_ISteamApps_GetCurrentBetaName"
+	flatAPI_ISteamApps_MarkContentCorrupt             = "SteamAPI_ISteamApps_MarkContentCorrupt"
+	flatAPI_ISteamApps_GetInstalledDepots             = "SteamAPI_ISteamApps_GetInstalledDepots"
+	flatAPI_ISteamApps_BIsAppInstalled                = "SteamAPI_ISteamApps_BIsAppInstalled"
+	flatAPI_ISteamApps_GetAppOwner                    = "SteamAPI_ISteamApps_GetAppOwner"
+	flatAPI_ISteamApps_GetLaunchQueryParam            = "SteamAPI_ISteamApps_GetLaunchQueryParam"
+	flatAPI_ISteamApps_GetDlcDownloadProgress         = "SteamAPI_ISteamApps_GetDlcDownloadProgress"
+	flatAPI_ISteamApps_GetAppBuildId                  = "SteamAPI_ISteamApps_GetAppBuildId"
+	flatAPI_ISteamApps_RequestAllProofOfPurchaseKeys  = "SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys"
+	flatAPI_ISteamApps_GetFileDetails                 = "SteamAPI_ISteamApps_GetFileDetails"
+	flatAPI_ISteamApps_GetLaunchCommandLine           = "SteamAPI_ISteamApps_GetLaunchCommandLine"
+	flatAPI_ISteamApps_BIsSubscribedFromFamilySharing = "SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing"
+	flatAPI_ISteamApps_BIsTimedTrial                  = "SteamAPI_ISteamApps_BIsTimedTrial"
+	flatAPI_ISteamApps_SetDlcContext                  = "SteamAPI_ISteamApps_SetDlcContext"
+	flatAPI_ISteamApps_GetNumBetas                    = "SteamAPI_ISteamApps_GetNumBetas"
+	flatAPI_ISteamApps_GetBetaInfo                    = "SteamAPI_ISteamApps_GetBetaInfo"
+	flatAPI_ISteamApps_SetActiveBeta                  = "SteamAPI_ISteamApps_SetActiveBeta"
 
-	flatAPI_SteamFriends                  = "SteamAPI_SteamFriends_v017"
-	flatAPI_ISteamFriends_GetPersonaName  = "SteamAPI_ISteamFriends_GetPersonaName"
-	flatAPI_ISteamFriends_SetRichPresence = "SteamAPI_ISteamFriends_SetRichPresence"
+	flatAPI_SteamFriends                                               = "SteamAPI_SteamFriends_v018"
+	flatAPI_ISteamFriends_GetPersonaName                               = "SteamAPI_ISteamFriends_GetPersonaName"
+	flatAPI_ISteamFriends_GetPersonaState                              = "SteamAPI_ISteamFriends_GetPersonaState"
+	flatAPI_ISteamFriends_GetFriendCount                               = "SteamAPI_ISteamFriends_GetFriendCount"
+	flatAPI_ISteamFriends_GetFriendByIndex                             = "SteamAPI_ISteamFriends_GetFriendByIndex"
+	flatAPI_ISteamFriends_GetFriendRelationship                        = "SteamAPI_ISteamFriends_GetFriendRelationship"
+	flatAPI_ISteamFriends_GetFriendPersonaState                        = "SteamAPI_ISteamFriends_GetFriendPersonaState"
+	flatAPI_ISteamFriends_GetFriendPersonaName                         = "SteamAPI_ISteamFriends_GetFriendPersonaName"
+	flatAPI_ISteamFriends_GetFriendPersonaNameHistory                  = "SteamAPI_ISteamFriends_GetFriendPersonaNameHistory"
+	flatAPI_ISteamFriends_GetFriendSteamLevel                          = "SteamAPI_ISteamFriends_GetFriendSteamLevel"
+	flatAPI_ISteamFriends_SetRichPresence                              = "SteamAPI_ISteamFriends_SetRichPresence"
+	flatAPI_ISteamFriends_GetFriendGamePlayed                          = "SteamAPI_ISteamFriends_GetFriendGamePlayed"
+	flatAPI_ISteamFriends_InviteUserToGame                             = "SteamAPI_ISteamFriends_InviteUserToGame"
+	flatAPI_ISteamFriends_ActivateGameOverlay                          = "SteamAPI_ISteamFriends_ActivateGameOverlay"
+	flatAPI_ISteamFriends_ActivateGameOverlayToUser                    = "SteamAPI_ISteamFriends_ActivateGameOverlayToUser"
+	flatAPI_ISteamFriends_ActivateGameOverlayToWebPage                 = "SteamAPI_ISteamFriends_ActivateGameOverlayToWebPage"
+	flatAPI_ISteamFriends_ActivateGameOverlayToStore                   = "SteamAPI_ISteamFriends_ActivateGameOverlayToStore"
+	flatAPI_ISteamFriends_ActivateGameOverlayInviteDialog              = "SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialog"
+	flatAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString = "SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString"
+
+	flatAPI_SteamMatchmaking                        = "SteamAPI_SteamMatchmaking_v009"
+	flatAPI_ISteamMatchmaking_RequestLobbyList      = "SteamAPI_ISteamMatchmaking_RequestLobbyList"
+	flatAPI_ISteamMatchmaking_GetLobbyByIndex       = "SteamAPI_ISteamMatchmaking_GetLobbyByIndex"
+	flatAPI_ISteamMatchmaking_CreateLobby           = "SteamAPI_ISteamMatchmaking_CreateLobby"
+	flatAPI_ISteamMatchmaking_JoinLobby             = "SteamAPI_ISteamMatchmaking_JoinLobby"
+	flatAPI_ISteamMatchmaking_LeaveLobby            = "SteamAPI_ISteamMatchmaking_LeaveLobby"
+	flatAPI_ISteamMatchmaking_InviteUserToLobby     = "SteamAPI_ISteamMatchmaking_InviteUserToLobby"
+	flatAPI_ISteamMatchmaking_GetNumLobbyMembers    = "SteamAPI_ISteamMatchmaking_GetNumLobbyMembers"
+	flatAPI_ISteamMatchmaking_GetLobbyMemberByIndex = "SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex"
+	flatAPI_ISteamMatchmaking_GetLobbyData          = "SteamAPI_ISteamMatchmaking_GetLobbyData"
+	flatAPI_ISteamMatchmaking_SetLobbyData          = "SteamAPI_ISteamMatchmaking_SetLobbyData"
+	flatAPI_ISteamMatchmaking_GetLobbyOwner         = "SteamAPI_ISteamMatchmaking_GetLobbyOwner"
+	flatAPI_ISteamMatchmaking_SetLobbyOwner         = "SteamAPI_ISteamMatchmaking_SetLobbyOwner"
+	flatAPI_ISteamMatchmaking_SetLobbyGameServer    = "SteamAPI_ISteamMatchmaking_SetLobbyGameServer"
+	flatAPI_ISteamMatchmaking_GetLobbyGameServer    = "SteamAPI_ISteamMatchmaking_GetLobbyGameServer"
+	flatAPI_ISteamMatchmaking_SetLobbyJoinable      = "SteamAPI_ISteamMatchmaking_SetLobbyJoinable"
+	flatAPI_ISteamMatchmaking_SetLobbyMemberLimit   = "SteamAPI_ISteamMatchmaking_SetLobbyMemberLimit"
+	flatAPI_ISteamMatchmaking_SetLobbyType          = "SteamAPI_ISteamMatchmaking_SetLobbyType"
+
+	flatAPI_SteamHTTP                            = "SteamAPI_SteamHTTP_v003"
+	flatAPI_ISteamHTTP_CreateHTTPRequest         = "SteamAPI_ISteamHTTP_CreateHTTPRequest"
+	flatAPI_ISteamHTTP_SetHTTPRequestHeaderValue = "SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue"
+	flatAPI_ISteamHTTP_SendHTTPRequest           = "SteamAPI_ISteamHTTP_SendHTTPRequest"
+	flatAPI_ISteamHTTP_GetHTTPResponseBodySize   = "SteamAPI_ISteamHTTP_GetHTTPResponseBodySize"
+	flatAPI_ISteamHTTP_GetHTTPResponseBodyData   = "SteamAPI_ISteamHTTP_GetHTTPResponseBodyData"
+	flatAPI_ISteamHTTP_ReleaseHTTPRequest        = "SteamAPI_ISteamHTTP_ReleaseHTTPRequest"
+
+	flatAPI_SteamUGC                        = "SteamAPI_SteamUGC_v021"
+	flatAPI_ISteamUGC_GetNumSubscribedItems = "SteamAPI_ISteamUGC_GetNumSubscribedItems"
+	flatAPI_ISteamUGC_GetSubscribedItems    = "SteamAPI_ISteamUGC_GetSubscribedItems"
+
+	flatAPI_SteamInventory                  = "SteamAPI_SteamInventory_v003"
+	flatAPI_ISteamInventory_GetResultStatus = "SteamAPI_ISteamInventory_GetResultStatus"
+	flatAPI_ISteamInventory_GetResultItems  = "SteamAPI_ISteamInventory_GetResultItems"
+	flatAPI_ISteamInventory_DestroyResult   = "SteamAPI_ISteamInventory_DestroyResult"
 
 	flatAPI_SteamInput                          = "SteamAPI_SteamInput_v006"
 	flatAPI_ISteamInput_GetConnectedControllers = "SteamAPI_ISteamInput_GetConnectedControllers"
@@ -134,10 +603,59 @@ const (
 	flatAPI_ISteamUserStats_ClearAchievement = "SteamAPI_ISteamUserStats_ClearAchievement"
 	flatAPI_ISteamUserStats_StoreStats       = "SteamAPI_ISteamUserStats_StoreStats"
 
-	flatAPI_SteamUtils                               = "SteamAPI_SteamUtils_v010"
-	flatAPI_ISteamUtils_IsOverlayEnabled             = "SteamAPI_ISteamUtils_IsOverlayEnabled"
-	flatAPI_ISteamUtils_IsSteamRunningOnSteamDeck    = "SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck"
-	flatAPI_ISteamUtils_ShowFloatingGamepadTextInput = "SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput"
+	flatAPI_SteamUtils                                 = "SteamAPI_SteamUtils_v010"
+	flatAPI_ISteamUtils_GetSecondsSinceAppActive       = "SteamAPI_ISteamUtils_GetSecondsSinceAppActive"
+	flatAPI_ISteamUtils_GetSecondsSinceComputerActive  = "SteamAPI_ISteamUtils_GetSecondsSinceComputerActive"
+	flatAPI_ISteamUtils_GetConnectedUniverse           = "SteamAPI_ISteamUtils_GetConnectedUniverse"
+	flatAPI_ISteamUtils_GetServerRealTime              = "SteamAPI_ISteamUtils_GetServerRealTime"
+	flatAPI_ISteamUtils_GetIPCountry                   = "SteamAPI_ISteamUtils_GetIPCountry"
+	flatAPI_ISteamUtils_GetImageSize                   = "SteamAPI_ISteamUtils_GetImageSize"
+	flatAPI_ISteamUtils_GetImageRGBA                   = "SteamAPI_ISteamUtils_GetImageRGBA"
+	flatAPI_ISteamUtils_GetCurrentBatteryPower         = "SteamAPI_ISteamUtils_GetCurrentBatteryPower"
+	flatAPI_ISteamUtils_GetAppID                       = "SteamAPI_ISteamUtils_GetAppID"
+	flatAPI_ISteamUtils_SetOverlayNotificationPosition = "SteamAPI_ISteamUtils_SetOverlayNotificationPosition"
+	flatAPI_ISteamUtils_IsAPICallCompleted             = "SteamAPI_ISteamUtils_IsAPICallCompleted"
+	flatAPI_ISteamUtils_GetAPICallFailureReason        = "SteamAPI_ISteamUtils_GetAPICallFailureReason"
+	flatAPI_ISteamUtils_GetAPICallResult               = "SteamAPI_ISteamUtils_GetAPICallResult"
+	flatAPI_ISteamUtils_GetIPCCallCount                = "SteamAPI_ISteamUtils_GetIPCCallCount"
+	flatAPI_ISteamUtils_IsOverlayEnabled               = "SteamAPI_ISteamUtils_IsOverlayEnabled"
+	flatAPI_ISteamUtils_BOverlayNeedsPresent           = "SteamAPI_ISteamUtils_BOverlayNeedsPresent"
+	flatAPI_ISteamUtils_IsSteamRunningOnSteamDeck      = "SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck"
+	flatAPI_ISteamUtils_ShowFloatingGamepadTextInput   = "SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput"
+	flatAPI_ISteamUtils_SetOverlayNotificationInset    = "SteamAPI_ISteamUtils_SetOverlayNotificationInset"
+
+	flatAPI_SteamNetworkingUtils                         = "SteamAPI_SteamNetworkingUtils_SteamAPI_v004"
+	flatAPI_ISteamNetworkingUtils_AllocateMessage        = "SteamAPI_ISteamNetworkingUtils_AllocateMessage"
+	flatAPI_ISteamNetworkingUtils_InitRelayNetworkAccess = "SteamAPI_ISteamNetworkingUtils_InitRelayNetworkAccess"
+	flatAPI_ISteamNetworkingUtils_GetLocalTimestamp      = "SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp"
+
+	flatAPI_SteamNetworkingMessages                           = "SteamAPI_SteamNetworkingMessages_SteamAPI_v002"
+	flatAPI_ISteamNetworkingMessages_SendMessageToUser        = "SteamAPI_ISteamNetworkingMessages_SendMessageToUser"
+	flatAPI_ISteamNetworkingMessages_ReceiveMessagesOnChannel = "SteamAPI_ISteamNetworkingMessages_ReceiveMessagesOnChannel"
+	flatAPI_ISteamNetworkingMessages_AcceptSessionWithUser    = "SteamAPI_ISteamNetworkingMessages_AcceptSessionWithUser"
+	flatAPI_ISteamNetworkingMessages_CloseSessionWithUser     = "SteamAPI_ISteamNetworkingMessages_CloseSessionWithUser"
+	flatAPI_ISteamNetworkingMessages_CloseChannelWithUser     = "SteamAPI_ISteamNetworkingMessages_CloseChannelWithUser"
+
+	flatAPI_SteamNetworkingSockets                              = "SteamAPI_SteamNetworkingSockets_SteamAPI_v012"
+	flatAPI_ISteamNetworkingSockets_CreateListenSocketP2P       = "SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2P"
+	flatAPI_ISteamNetworkingSockets_ConnectP2P                  = "SteamAPI_ISteamNetworkingSockets_ConnectP2P"
+	flatAPI_ISteamNetworkingSockets_AcceptConnection            = "SteamAPI_ISteamNetworkingSockets_AcceptConnection"
+	flatAPI_ISteamNetworkingSockets_CloseConnection             = "SteamAPI_ISteamNetworkingSockets_CloseConnection"
+	flatAPI_ISteamNetworkingSockets_CloseListenSocket           = "SteamAPI_ISteamNetworkingSockets_CloseListenSocket"
+	flatAPI_ISteamNetworkingSockets_SendMessageToConnection     = "SteamAPI_ISteamNetworkingSockets_SendMessageToConnection"
+	flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnConnection = "SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnConnection"
+	flatAPI_ISteamNetworkingSockets_CreatePollGroup             = "SteamAPI_ISteamNetworkingSockets_CreatePollGroup"
+	flatAPI_ISteamNetworkingSockets_DestroyPollGroup            = "SteamAPI_ISteamNetworkingSockets_DestroyPollGroup"
+	flatAPI_ISteamNetworkingSockets_SetConnectionPollGroup      = "SteamAPI_ISteamNetworkingSockets_SetConnectionPollGroup"
+	flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup  = "SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup"
+
+	flatAPI_SteamGameServer                     = "SteamAPI_SteamGameServer_v015"
+	flatAPI_ISteamGameServer_SetProduct         = "SteamAPI_ISteamGameServer_SetProduct"
+	flatAPI_ISteamGameServer_SetGameDescription = "SteamAPI_ISteamGameServer_SetGameDescription"
+	flatAPI_ISteamGameServer_LogOnAnonymous     = "SteamAPI_ISteamGameServer_LogOnAnonymous"
+	flatAPI_ISteamGameServer_LogOff             = "SteamAPI_ISteamGameServer_LogOff"
+	flatAPI_ISteamGameServer_BLoggedOn          = "SteamAPI_ISteamGameServer_BLoggedOn"
+	flatAPI_ISteamGameServer_GetSteamID         = "SteamAPI_ISteamGameServer_GetSteamID"
 )
 
 type steamErrMsg [1024]byte
@@ -149,4 +667,22 @@ func (s *steamErrMsg) String() string {
 		}
 	}
 	return ""
+}
+
+func putUint32(dst []byte, v uint32) {
+	dst[0] = byte(v)
+	dst[1] = byte(v >> 8)
+	dst[2] = byte(v >> 16)
+	dst[3] = byte(v >> 24)
+}
+
+func putUint64(dst []byte, v uint64) {
+	dst[0] = byte(v)
+	dst[1] = byte(v >> 8)
+	dst[2] = byte(v >> 16)
+	dst[3] = byte(v >> 24)
+	dst[4] = byte(v >> 32)
+	dst[5] = byte(v >> 40)
+	dst[6] = byte(v >> 48)
+	dst[7] = byte(v >> 56)
 }
