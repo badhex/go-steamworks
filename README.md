@@ -157,7 +157,6 @@ runtime loading.
 
 ## Repository layout
 
-* `steam/` — Steamworks SDK headers and metadata used for code generation.
 * `gen.go` — code generator for parsing the SDK and building bindings.
 * `examples/` — runnable samples for common startup flows.
 
@@ -381,11 +380,6 @@ _ = result
 ## License
 
 All the source code files are licensed under Apache License 2.0.
-
-This repository no longer ships Steamworks redistribution binaries. You must
-obtain the appropriate shared libraries from the Steamworks SDK and distribute
-them with your application in accordance with the
-[Valve Corporation Steamworks SDK Access Agreement](https://partner.steamgames.com/documentation/sdk_access_agreement).
 
 ## Resources
 
