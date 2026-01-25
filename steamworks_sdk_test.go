@@ -7,9 +7,15 @@ package steamworks
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/ebitengine/purego"
 	"github.com/jupiterrider/ffi"
@@ -20,10 +26,57 @@ func sdkLibraryPath() (string, error) {
 	if envPath == "" {
 		return "", fmt.Errorf("%s must be set to the Steamworks SDK library path", steamworksLibEnv)
 	}
+	if isRemoteLocation(envPath) {
+		return downloadLibrary(envPath)
+	}
 	if _, err := os.Stat(envPath); err != nil {
 		return "", fmt.Errorf("%s points to missing file: %w", steamworksLibEnv, err)
 	}
 	return envPath, nil
+}
+
+func isRemoteLocation(path string) bool {
+	parsed, err := url.Parse(path)
+	if err != nil {
+		return false
+	}
+	return parsed.Scheme == "http" || parsed.Scheme == "https"
+}
+
+func downloadLibrary(location string) (string, error) {
+	client := &http.Client{Timeout: 2 * time.Minute}
+	resp, err := client.Get(location)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("download failed: %s", resp.Status)
+	}
+
+	tmpDir, err := os.MkdirTemp("", "steamworks-sdk-*")
+	if err != nil {
+		return "", err
+	}
+
+	filename := filepath.Base(location)
+	if filename == "." || filename == "/" || filename == "" {
+		filename = "libsteam_api"
+	}
+	filename = strings.TrimSuffix(filename, filepath.Ext(filename))
+	outPath := filepath.Join(tmpDir, filename)
+	outFile, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
+	if err != nil {
+		return "", err
+	}
+	defer outFile.Close()
+
+	if _, err := io.Copy(outFile, resp.Body); err != nil {
+		return "", err
+	}
+
+	return outPath, nil
 }
 
 func TestSDKSymbolResolution(t *testing.T) {
