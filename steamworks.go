@@ -494,7 +494,6 @@ type ISteamInput interface {
 	Shutdown()
 	RunFrame()
 	EnableDeviceCallbacks()
-	DisableDeviceCallbacks()
 	GetActionSetHandle(actionSetName string) InputActionSetHandle_t
 	ActivateActionSet(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)
 	GetCurrentActionSet(inputHandle InputHandle_t) InputActionSetHandle_t
@@ -746,7 +745,6 @@ const (
 	flatAPI_ISteamInput_Shutdown                     = "SteamAPI_ISteamInput_Shutdown"
 	flatAPI_ISteamInput_RunFrame                     = "SteamAPI_ISteamInput_RunFrame"
 	flatAPI_ISteamInput_EnableDeviceCallbacks        = "SteamAPI_ISteamInput_EnableDeviceCallbacks"
-	flatAPI_ISteamInput_DisableDeviceCallbacks       = "SteamAPI_ISteamInput_DisableDeviceCallbacks"
 	flatAPI_ISteamInput_GetActionSetHandle           = "SteamAPI_ISteamInput_GetActionSetHandle"
 	flatAPI_ISteamInput_ActivateActionSet            = "SteamAPI_ISteamInput_ActivateActionSet"
 	flatAPI_ISteamInput_GetCurrentActionSet          = "SteamAPI_ISteamInput_GetCurrentActionSet"

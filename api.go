@@ -133,7 +133,6 @@ var (
 	ptrAPI_ISteamInput_Shutdown                     func(uintptr)
 	ptrAPI_ISteamInput_RunFrame                     func(uintptr, bool)
 	ptrAPI_ISteamInput_EnableDeviceCallbacks        func(uintptr)
-	ptrAPI_ISteamInput_DisableDeviceCallbacks       func(uintptr)
 	ptrAPI_ISteamInput_GetActionSetHandle           func(uintptr, string) InputActionSetHandle_t
 	ptrAPI_ISteamInput_ActivateActionSet            func(uintptr, InputHandle_t, InputActionSetHandle_t)
 	ptrAPI_ISteamInput_GetCurrentActionSet          func(uintptr, InputHandle_t) InputActionSetHandle_t
@@ -358,7 +357,6 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_Shutdown, lib, flatAPI_ISteamInput_Shutdown)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_RunFrame, lib, flatAPI_ISteamInput_RunFrame)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_EnableDeviceCallbacks, lib, flatAPI_ISteamInput_EnableDeviceCallbacks)
-	purego.RegisterLibFunc(&ptrAPI_ISteamInput_DisableDeviceCallbacks, lib, flatAPI_ISteamInput_DisableDeviceCallbacks)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetActionSetHandle, lib, flatAPI_ISteamInput_GetActionSetHandle)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_ActivateActionSet, lib, flatAPI_ISteamInput_ActivateActionSet)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetCurrentActionSet, lib, flatAPI_ISteamInput_GetCurrentActionSet)
@@ -1004,10 +1002,6 @@ func (s steamInput) RunFrame() {
 
 func (s steamInput) EnableDeviceCallbacks() {
 	ptrAPI_ISteamInput_EnableDeviceCallbacks(uintptr(s))
-}
-
-func (s steamInput) DisableDeviceCallbacks() {
-	ptrAPI_ISteamInput_DisableDeviceCallbacks(uintptr(s))
 }
 
 func (s steamInput) GetActionSetHandle(actionSetName string) InputActionSetHandle_t {
