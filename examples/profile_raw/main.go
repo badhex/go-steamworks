@@ -38,7 +38,7 @@ func main() {
 	steamLevel := int(callSymbol("SteamAPI_ISteamFriends_GetFriendSteamLevel", friendsPtr, uintptr(steamID)))
 
 	log.Printf("Signed in as %s (%d)", personaName, steamID)
-	log.Printf("Persona state: %s", personaState)
+	log.Printf("Persona state: %v", personaState)
 	log.Printf("Steam level: %d", steamLevel)
 
 	avatarHandle, err := fetchLargeAvatarHandle(friendsPtr, steamID, 5*time.Second)

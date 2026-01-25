@@ -77,6 +77,25 @@ func TestSteamNetworkingIdentitySetIPv4Addr(t *testing.T) {
 	}
 }
 
+func TestSteamNetworkingIPAddrSetIPv4(t *testing.T) {
+	var addr SteamNetworkingIPAddr
+	addr.SetIPv4(0x7f000001, 27015)
+	want := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x01, 0x87, 0x69}
+	if !bytes.Equal(addr.data[:], want) {
+		t.Fatalf("addr data = %v, want %v", addr.data, want)
+	}
+}
+
+func TestSteamNetworkingIPAddrSetIPv6(t *testing.T) {
+	var addr SteamNetworkingIPAddr
+	ip := [16]byte{0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+	addr.SetIPv6(ip, 8080)
+	want := append(ip[:], 0x90, 0x1f)
+	if !bytes.Equal(addr.data[:], want) {
+		t.Fatalf("addr data = %v, want %v", addr.data, want)
+	}
+}
+
 func TestOptionsPtr(t *testing.T) {
 	if ptr := optionsPtr(nil); ptr != 0 {
 		t.Fatalf("optionsPtr(nil)=%d, want 0", ptr)

@@ -329,6 +329,16 @@ type SteamNetworkingIPAddr struct {
 	data [18]byte
 }
 
+func (a *SteamNetworkingIPAddr) SetIPv4(ip uint32, port uint16) {
+	a.setIPv4(ip, port)
+}
+
+func (a *SteamNetworkingIPAddr) SetIPv6(ip [16]byte, port uint16) {
+	copy(a.data[:16], ip[:])
+	a.data[16] = byte(port)
+	a.data[17] = byte(port >> 8)
+}
+
 func (a *SteamNetworkingIPAddr) setIPv4(ip uint32, port uint16) {
 	a.data[0] = 0
 	a.data[1] = 0
@@ -602,7 +612,9 @@ type ISteamNetworkingMessages interface {
 }
 
 type ISteamNetworkingSockets interface {
+	CreateListenSocketIP(localAddress *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamListenSocket
 	CreateListenSocketP2P(localVirtualPort int, options []SteamNetworkingConfigValue) HSteamListenSocket
+	ConnectByIPAddress(address *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamNetConnection
 	ConnectP2P(identity *SteamNetworkingIdentity, remoteVirtualPort int, options []SteamNetworkingConfigValue) HSteamNetConnection
 	AcceptConnection(connection HSteamNetConnection) EResult
 	CloseConnection(connection HSteamNetConnection, reason int, debug string, enableLinger bool) bool
@@ -800,7 +812,9 @@ const (
 	flatAPI_ISteamNetworkingMessages_CloseChannelWithUser     = "SteamAPI_ISteamNetworkingMessages_CloseChannelWithUser"
 
 	flatAPI_SteamNetworkingSockets                              = "SteamAPI_SteamNetworkingSockets_SteamAPI_v012"
+	flatAPI_ISteamNetworkingSockets_CreateListenSocketIP        = "SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP"
 	flatAPI_ISteamNetworkingSockets_CreateListenSocketP2P       = "SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2P"
+	flatAPI_ISteamNetworkingSockets_ConnectByIPAddress          = "SteamAPI_ISteamNetworkingSockets_ConnectByIPAddress"
 	flatAPI_ISteamNetworkingSockets_ConnectP2P                  = "SteamAPI_ISteamNetworkingSockets_ConnectP2P"
 	flatAPI_ISteamNetworkingSockets_AcceptConnection            = "SteamAPI_ISteamNetworkingSockets_AcceptConnection"
 	flatAPI_ISteamNetworkingSockets_CloseConnection             = "SteamAPI_ISteamNetworkingSockets_CloseConnection"

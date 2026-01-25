@@ -322,7 +322,9 @@ implemented methods include:
 
 **ISteamNetworkingSockets** (`steamworks.SteamNetworkingSockets()`)
 
+* `CreateListenSocketIP(localAddress *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamListenSocket`
 * `CreateListenSocketP2P(localVirtualPort int, options []SteamNetworkingConfigValue) HSteamListenSocket`
+* `ConnectByIPAddress(address *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamNetConnection`
 * `ConnectP2P(identity *SteamNetworkingIdentity, remoteVirtualPort int, options []SteamNetworkingConfigValue) HSteamNetConnection`
 * `AcceptConnection(connection HSteamNetConnection) EResult`
 * `CloseConnection(connection HSteamNetConnection, reason int, debug string, enableLinger bool) bool`

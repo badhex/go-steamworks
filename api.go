@@ -218,7 +218,9 @@ var (
 
 	// ISteamNetworkingSockets
 	ptrAPI_SteamNetworkingSockets                              func() uintptr
+	ptrAPI_ISteamNetworkingSockets_CreateListenSocketIP        func(uintptr, uintptr, int32, uintptr) HSteamListenSocket
 	ptrAPI_ISteamNetworkingSockets_CreateListenSocketP2P       func(uintptr, int32, int32, uintptr) HSteamListenSocket
+	ptrAPI_ISteamNetworkingSockets_ConnectByIPAddress          func(uintptr, uintptr, int32, uintptr) HSteamNetConnection
 	ptrAPI_ISteamNetworkingSockets_ConnectP2P                  func(uintptr, uintptr, int32, int32, uintptr) HSteamNetConnection
 	ptrAPI_ISteamNetworkingSockets_AcceptConnection            func(uintptr, HSteamNetConnection) EResult
 	ptrAPI_ISteamNetworkingSockets_CloseConnection             func(uintptr, HSteamNetConnection, int32, string, bool) bool
@@ -434,7 +436,9 @@ func registerFunctions(lib uintptr) {
 
 	// ISteamNetworkingSockets
 	purego.RegisterLibFunc(&ptrAPI_SteamNetworkingSockets, lib, flatAPI_SteamNetworkingSockets)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_CreateListenSocketIP, lib, flatAPI_ISteamNetworkingSockets_CreateListenSocketIP)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_CreateListenSocketP2P, lib, flatAPI_ISteamNetworkingSockets_CreateListenSocketP2P)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_ConnectByIPAddress, lib, flatAPI_ISteamNetworkingSockets_ConnectByIPAddress)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_ConnectP2P, lib, flatAPI_ISteamNetworkingSockets_ConnectP2P)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_AcceptConnection, lib, flatAPI_ISteamNetworkingSockets_AcceptConnection)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_CloseConnection, lib, flatAPI_ISteamNetworkingSockets_CloseConnection)
@@ -1355,8 +1359,16 @@ func SteamNetworkingSocketsV012() ISteamNetworkingSockets {
 
 type steamNetworkingSockets uintptr
 
+func (s steamNetworkingSockets) CreateListenSocketIP(localAddress *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamListenSocket {
+	return ptrAPI_ISteamNetworkingSockets_CreateListenSocketIP(uintptr(s), uintptr(unsafe.Pointer(localAddress)), int32(len(options)), optionsPtr(options))
+}
+
 func (s steamNetworkingSockets) CreateListenSocketP2P(localVirtualPort int, options []SteamNetworkingConfigValue) HSteamListenSocket {
 	return ptrAPI_ISteamNetworkingSockets_CreateListenSocketP2P(uintptr(s), int32(localVirtualPort), int32(len(options)), optionsPtr(options))
+}
+
+func (s steamNetworkingSockets) ConnectByIPAddress(address *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamNetConnection {
+	return ptrAPI_ISteamNetworkingSockets_ConnectByIPAddress(uintptr(s), uintptr(unsafe.Pointer(address)), int32(len(options)), optionsPtr(options))
 }
 
 func (s steamNetworkingSockets) ConnectP2P(identity *SteamNetworkingIdentity, remoteVirtualPort int, options []SteamNetworkingConfigValue) HSteamNetConnection {
