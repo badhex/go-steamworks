@@ -6,165 +6,24 @@
 package steamworks
 
 import (
-	"archive/zip"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
-	"path/filepath"
 	"reflect"
-	"runtime"
-	"sync"
 	"testing"
-	"time"
 
 	"github.com/ebitengine/purego"
+	"github.com/jupiterrider/ffi"
 )
 
-const steamworksSDKURL = "https://inflict.io/sdk/steamworks_sdk_163.zip"
-
-var (
-	sdkOnce sync.Once
-	sdkPath string
-	sdkErr  error
-)
-
-func TestMain(m *testing.M) {
-	path, err := prepareSDK()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "steamworks sdk setup failed:", err)
-		os.Exit(1)
+func sdkLibraryPath() (string, error) {
+	envPath := os.Getenv(steamworksLibEnv)
+	if envPath == "" {
+		return "", fmt.Errorf("%s must be set to the Steamworks SDK library path", steamworksLibEnv)
 	}
-	if path != "" {
-		_ = os.Setenv(steamworksLibEnv, path)
+	if _, err := os.Stat(envPath); err != nil {
+		return "", fmt.Errorf("%s points to missing file: %w", steamworksLibEnv, err)
 	}
-	os.Exit(m.Run())
-}
-
-func prepareSDK() (string, error) {
-	sdkOnce.Do(func() {
-		if envPath := os.Getenv(steamworksLibEnv); envPath != "" {
-			if _, err := os.Stat(envPath); err == nil {
-				sdkPath = envPath
-				return
-			}
-		}
-
-		libName, err := sdkLibraryEntry()
-		if err != nil {
-			sdkErr = err
-			return
-		}
-
-		tmpDir, err := os.MkdirTemp("", "steamworks-sdk-*")
-		if err != nil {
-			sdkErr = err
-			return
-		}
-
-		zipPath := filepath.Join(tmpDir, filepath.Base(steamworksSDKURL))
-		if err := downloadFile(steamworksSDKURL, zipPath); err != nil {
-			sdkErr = err
-			return
-		}
-
-		libPath, err := extractZipFile(zipPath, libName, tmpDir)
-		if err != nil {
-			sdkErr = err
-			return
-		}
-
-		sdkPath = libPath
-	})
-
-	return sdkPath, sdkErr
-}
-
-func sdkLibraryEntry() (string, error) {
-	switch runtime.GOOS {
-	case "linux":
-		switch runtime.GOARCH {
-		case "amd64":
-			return "sdk/redistributable_bin/linux64/libsteam_api.so", nil
-		case "386":
-			return "sdk/redistributable_bin/linux32/libsteam_api.so", nil
-		}
-	case "darwin":
-		return "sdk/redistributable_bin/osx/libsteam_api.dylib", nil
-	}
-	return "", fmt.Errorf("unsupported platform %s/%s", runtime.GOOS, runtime.GOARCH)
-}
-
-func downloadFile(url, dest string) error {
-	client := &http.Client{Timeout: 2 * time.Minute}
-	resp, err := client.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("download failed: %s", resp.Status)
-	}
-
-	file, err := os.Create(dest)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, resp.Body)
-	return err
-}
-
-func extractZipFile(zipPath, entryName, destDir string) (string, error) {
-	zipFile, err := os.Open(zipPath)
-	if err != nil {
-		return "", err
-	}
-	defer zipFile.Close()
-
-	info, err := zipFile.Stat()
-	if err != nil {
-		return "", err
-	}
-
-	reader, err := zip.NewReader(zipFile, info.Size())
-	if err != nil {
-		return "", err
-	}
-
-	for _, file := range reader.File {
-		if file.Name != entryName {
-			continue
-		}
-
-		src, err := file.Open()
-		if err != nil {
-			return "", err
-		}
-		defer src.Close()
-
-		outPath := filepath.Join(destDir, filepath.Base(entryName))
-		outFile, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
-		if err != nil {
-			return "", err
-		}
-
-		if _, err := io.Copy(outFile, src); err != nil {
-			outFile.Close()
-			return "", err
-		}
-
-		if err := outFile.Close(); err != nil {
-			return "", err
-		}
-
-		return outPath, nil
-	}
-
-	return "", errors.New("sdk library not found in archive")
+	return envPath, nil
 }
 
 func TestSDKSymbolResolution(t *testing.T) {
@@ -214,6 +73,30 @@ func TestSDKFunctionSignatures(t *testing.T) {
 		}
 		assertSignature(t, expectation.name, actual, expectation.expected)
 	}
+}
+
+func TestSDKInputStructReturns(t *testing.T) {
+	lib := loadSDKLibrary(t)
+	registerInputStructReturns(lib)
+
+	ptrs := []struct {
+		name string
+		ptr  uintptr
+	}{
+		{name: flatAPI_ISteamInput_GetDigitalActionData, ptr: ptrAPI_ISteamInput_GetDigitalActionData},
+		{name: flatAPI_ISteamInput_GetAnalogActionData, ptr: ptrAPI_ISteamInput_GetAnalogActionData},
+		{name: flatAPI_ISteamInput_GetMotionData, ptr: ptrAPI_ISteamInput_GetMotionData},
+	}
+
+	for _, item := range ptrs {
+		if item.ptr == 0 {
+			t.Fatalf("%s not registered for struct returns", item.name)
+		}
+	}
+
+	_ = ffi.CallInputDigitalActionData(ptrAPI_ISteamInput_GetDigitalActionData, 0, 0, 0)
+	_ = ffi.CallInputAnalogActionData(ptrAPI_ISteamInput_GetAnalogActionData, 0, 0, 0)
+	_ = ffi.CallInputMotionData(ptrAPI_ISteamInput_GetMotionData, 0, 0)
 }
 
 type signatureExpectation struct {
@@ -439,9 +322,11 @@ func allRegisteredFunctions() []registeredFunction {
 func loadSDKLibrary(t *testing.T) uintptr {
 	t.Helper()
 
-	if _, err := prepareSDK(); err != nil {
-		t.Fatalf("prepareSDK: %v", err)
+	path, err := sdkLibraryPath()
+	if err != nil {
+		t.Skipf("steamworks sdk not configured: %v", err)
 	}
+	_ = os.Setenv(steamworksLibEnv, path)
 
 	lib, err := loadLib()
 	if err != nil {
