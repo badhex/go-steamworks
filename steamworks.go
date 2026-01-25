@@ -9,6 +9,9 @@ type AppId_t uint32
 type CGameID uint64
 type CSteamID uint64
 type DepotId_t uint32
+type InputActionSetHandle_t uint64
+type InputAnalogActionHandle_t uint64
+type InputDigitalActionHandle_t uint64
 type InputHandle_t uint64
 type SteamAPICall_t uint64
 type HTTPRequestHandle uint32
@@ -57,6 +60,110 @@ const (
 const (
 	_STEAM_INPUT_MAX_COUNT = 16
 )
+
+type ESteamInputLEDFlag uint32
+
+const (
+	ESteamInputLEDFlag_SetColor           ESteamInputLEDFlag = 0x01
+	ESteamInputLEDFlag_RestoreUserDefault ESteamInputLEDFlag = 0x02
+)
+
+type ESteamControllerPad int32
+
+const (
+	ESteamControllerPad_Left  ESteamControllerPad = 0
+	ESteamControllerPad_Right ESteamControllerPad = 1
+)
+
+type EInputSourceMode int32
+
+const (
+	EInputSourceMode_None           EInputSourceMode = 0
+	EInputSourceMode_Dpad           EInputSourceMode = 1
+	EInputSourceMode_Buttons        EInputSourceMode = 2
+	EInputSourceMode_FourButtons    EInputSourceMode = 3
+	EInputSourceMode_AbsoluteMouse  EInputSourceMode = 4
+	EInputSourceMode_RelativeMouse  EInputSourceMode = 5
+	EInputSourceMode_JoystickMove   EInputSourceMode = 6
+	EInputSourceMode_JoystickCamera EInputSourceMode = 7
+	EInputSourceMode_ScrollWheel    EInputSourceMode = 8
+	EInputSourceMode_Trigger        EInputSourceMode = 9
+	EInputSourceMode_TouchMenu      EInputSourceMode = 10
+	EInputSourceMode_MouseJoystick  EInputSourceMode = 11
+	EInputSourceMode_MouseRegion    EInputSourceMode = 12
+	EInputSourceMode_RadialMenu     EInputSourceMode = 13
+	EInputSourceMode_SingleButton   EInputSourceMode = 14
+	EInputSourceMode_Switches       EInputSourceMode = 15
+)
+
+type EInputActionOrigin int32
+
+const (
+	EInputActionOrigin_None                                EInputActionOrigin = 0
+	EInputActionOrigin_SteamController_A                   EInputActionOrigin = 1
+	EInputActionOrigin_SteamController_B                   EInputActionOrigin = 2
+	EInputActionOrigin_SteamController_X                   EInputActionOrigin = 3
+	EInputActionOrigin_SteamController_Y                   EInputActionOrigin = 4
+	EInputActionOrigin_SteamController_LeftBumper          EInputActionOrigin = 5
+	EInputActionOrigin_SteamController_RightBumper         EInputActionOrigin = 6
+	EInputActionOrigin_SteamController_LeftGrip            EInputActionOrigin = 7
+	EInputActionOrigin_SteamController_RightGrip           EInputActionOrigin = 8
+	EInputActionOrigin_SteamController_Start               EInputActionOrigin = 9
+	EInputActionOrigin_SteamController_Back                EInputActionOrigin = 10
+	EInputActionOrigin_SteamController_LeftPad_Touch       EInputActionOrigin = 11
+	EInputActionOrigin_SteamController_LeftPad_Swipe       EInputActionOrigin = 12
+	EInputActionOrigin_SteamController_LeftPad_Click       EInputActionOrigin = 13
+	EInputActionOrigin_SteamController_LeftPad_DPadNorth   EInputActionOrigin = 14
+	EInputActionOrigin_SteamController_LeftPad_DPadSouth   EInputActionOrigin = 15
+	EInputActionOrigin_SteamController_LeftPad_DPadWest    EInputActionOrigin = 16
+	EInputActionOrigin_SteamController_LeftPad_DPadEast    EInputActionOrigin = 17
+	EInputActionOrigin_SteamController_RightPad_Touch      EInputActionOrigin = 18
+	EInputActionOrigin_SteamController_RightPad_Swipe      EInputActionOrigin = 19
+	EInputActionOrigin_SteamController_RightPad_Click      EInputActionOrigin = 20
+	EInputActionOrigin_SteamController_RightPad_DPadNorth  EInputActionOrigin = 21
+	EInputActionOrigin_SteamController_RightPad_DPadSouth  EInputActionOrigin = 22
+	EInputActionOrigin_SteamController_RightPad_DPadWest   EInputActionOrigin = 23
+	EInputActionOrigin_SteamController_RightPad_DPadEast   EInputActionOrigin = 24
+	EInputActionOrigin_SteamController_LeftTrigger_Pull    EInputActionOrigin = 25
+	EInputActionOrigin_SteamController_LeftTrigger_Click   EInputActionOrigin = 26
+	EInputActionOrigin_SteamController_RightTrigger_Pull   EInputActionOrigin = 27
+	EInputActionOrigin_SteamController_RightTrigger_Click  EInputActionOrigin = 28
+	EInputActionOrigin_SteamController_LeftStick_Move      EInputActionOrigin = 29
+	EInputActionOrigin_SteamController_LeftStick_Click     EInputActionOrigin = 30
+	EInputActionOrigin_SteamController_LeftStick_DPadNorth EInputActionOrigin = 31
+	EInputActionOrigin_SteamController_LeftStick_DPadSouth EInputActionOrigin = 32
+	EInputActionOrigin_SteamController_LeftStick_DPadWest  EInputActionOrigin = 33
+	EInputActionOrigin_SteamController_LeftStick_DPadEast  EInputActionOrigin = 34
+	EInputActionOrigin_SteamController_Gyro_Move           EInputActionOrigin = 35
+	EInputActionOrigin_SteamController_Gyro_Pitch          EInputActionOrigin = 36
+	EInputActionOrigin_SteamController_Gyro_Yaw            EInputActionOrigin = 37
+	EInputActionOrigin_SteamController_Gyro_Roll           EInputActionOrigin = 38
+)
+
+type InputDigitalActionData struct {
+	State  bool
+	Active bool
+}
+
+type InputAnalogActionData struct {
+	Mode   EInputSourceMode
+	X      float32
+	Y      float32
+	Active bool
+}
+
+type InputMotionData struct {
+	RotQuatX  float32
+	RotQuatY  float32
+	RotQuatZ  float32
+	RotQuatW  float32
+	PosAccelX float32
+	PosAccelY float32
+	PosAccelZ float32
+	RotVelX   float32
+	RotVelY   float32
+	RotVelZ   float32
+}
 
 type EFloatingGamepadTextInputMode int32
 
@@ -374,7 +481,35 @@ type ISteamInput interface {
 	GetConnectedControllers() []InputHandle_t
 	GetInputTypeForHandle(inputHandle InputHandle_t) ESteamInputType
 	Init(bExplicitlyCallRunFrame bool) bool
+	Shutdown()
 	RunFrame()
+	EnableDeviceCallbacks()
+	DisableDeviceCallbacks()
+	GetActionSetHandle(actionSetName string) InputActionSetHandle_t
+	ActivateActionSet(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)
+	GetCurrentActionSet(inputHandle InputHandle_t) InputActionSetHandle_t
+	ActivateActionSetLayer(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)
+	DeactivateActionSetLayer(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)
+	DeactivateAllActionSetLayers(inputHandle InputHandle_t)
+	GetActiveActionSetLayers(inputHandle InputHandle_t, handles []InputActionSetHandle_t) int
+	GetDigitalActionHandle(actionName string) InputDigitalActionHandle_t
+	GetDigitalActionData(inputHandle InputHandle_t, actionHandle InputDigitalActionHandle_t) InputDigitalActionData
+	GetDigitalActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputDigitalActionHandle_t, origins []EInputActionOrigin) int
+	GetAnalogActionHandle(actionName string) InputAnalogActionHandle_t
+	GetAnalogActionData(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) InputAnalogActionData
+	GetAnalogActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputAnalogActionHandle_t, origins []EInputActionOrigin) int
+	StopAnalogActionMomentum(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t)
+	GetMotionData(inputHandle InputHandle_t) InputMotionData
+	TriggerVibration(inputHandle InputHandle_t, leftSpeed, rightSpeed uint16)
+	TriggerVibrationExtended(inputHandle InputHandle_t, leftSpeed, rightSpeed, leftTriggerSpeed, rightTriggerSpeed uint16)
+	TriggerSimpleHapticEvent(inputHandle InputHandle_t, pad ESteamControllerPad, durationMicroSec, offMicroSec, repeat uint16)
+	SetLEDColor(inputHandle InputHandle_t, red, green, blue uint8, flags ESteamInputLEDFlag)
+	ShowBindingPanel(inputHandle InputHandle_t) bool
+	GetControllerForGamepadIndex(index int) InputHandle_t
+	GetGamepadIndexForController(inputHandle InputHandle_t) int
+	GetStringForActionOrigin(origin EInputActionOrigin) string
+	GetGlyphForActionOrigin(origin EInputActionOrigin) string
+	GetRemotePlaySessionID(inputHandle InputHandle_t) uint32
 }
 
 type ISteamRemoteStorage interface {
@@ -582,11 +717,39 @@ const (
 	flatAPI_ISteamInventory_GetResultItems  = "SteamAPI_ISteamInventory_GetResultItems"
 	flatAPI_ISteamInventory_DestroyResult   = "SteamAPI_ISteamInventory_DestroyResult"
 
-	flatAPI_SteamInput                          = "SteamAPI_SteamInput_v006"
-	flatAPI_ISteamInput_GetConnectedControllers = "SteamAPI_ISteamInput_GetConnectedControllers"
-	flatAPI_ISteamInput_GetInputTypeForHandle   = "SteamAPI_ISteamInput_GetInputTypeForHandle"
-	flatAPI_ISteamInput_Init                    = "SteamAPI_ISteamInput_Init"
-	flatAPI_ISteamInput_RunFrame                = "SteamAPI_ISteamInput_RunFrame"
+	flatAPI_SteamInput                               = "SteamAPI_SteamInput_v006"
+	flatAPI_ISteamInput_GetConnectedControllers      = "SteamAPI_ISteamInput_GetConnectedControllers"
+	flatAPI_ISteamInput_GetInputTypeForHandle        = "SteamAPI_ISteamInput_GetInputTypeForHandle"
+	flatAPI_ISteamInput_Init                         = "SteamAPI_ISteamInput_Init"
+	flatAPI_ISteamInput_Shutdown                     = "SteamAPI_ISteamInput_Shutdown"
+	flatAPI_ISteamInput_RunFrame                     = "SteamAPI_ISteamInput_RunFrame"
+	flatAPI_ISteamInput_EnableDeviceCallbacks        = "SteamAPI_ISteamInput_EnableDeviceCallbacks"
+	flatAPI_ISteamInput_DisableDeviceCallbacks       = "SteamAPI_ISteamInput_DisableDeviceCallbacks"
+	flatAPI_ISteamInput_GetActionSetHandle           = "SteamAPI_ISteamInput_GetActionSetHandle"
+	flatAPI_ISteamInput_ActivateActionSet            = "SteamAPI_ISteamInput_ActivateActionSet"
+	flatAPI_ISteamInput_GetCurrentActionSet          = "SteamAPI_ISteamInput_GetCurrentActionSet"
+	flatAPI_ISteamInput_ActivateActionSetLayer       = "SteamAPI_ISteamInput_ActivateActionSetLayer"
+	flatAPI_ISteamInput_DeactivateActionSetLayer     = "SteamAPI_ISteamInput_DeactivateActionSetLayer"
+	flatAPI_ISteamInput_DeactivateAllActionSetLayers = "SteamAPI_ISteamInput_DeactivateAllActionSetLayers"
+	flatAPI_ISteamInput_GetActiveActionSetLayers     = "SteamAPI_ISteamInput_GetActiveActionSetLayers"
+	flatAPI_ISteamInput_GetDigitalActionHandle       = "SteamAPI_ISteamInput_GetDigitalActionHandle"
+	flatAPI_ISteamInput_GetDigitalActionData         = "SteamAPI_ISteamInput_GetDigitalActionData"
+	flatAPI_ISteamInput_GetDigitalActionOrigins      = "SteamAPI_ISteamInput_GetDigitalActionOrigins"
+	flatAPI_ISteamInput_GetAnalogActionHandle        = "SteamAPI_ISteamInput_GetAnalogActionHandle"
+	flatAPI_ISteamInput_GetAnalogActionData          = "SteamAPI_ISteamInput_GetAnalogActionData"
+	flatAPI_ISteamInput_GetAnalogActionOrigins       = "SteamAPI_ISteamInput_GetAnalogActionOrigins"
+	flatAPI_ISteamInput_StopAnalogActionMomentum     = "SteamAPI_ISteamInput_StopAnalogActionMomentum"
+	flatAPI_ISteamInput_GetMotionData                = "SteamAPI_ISteamInput_GetMotionData"
+	flatAPI_ISteamInput_TriggerVibration             = "SteamAPI_ISteamInput_TriggerVibration"
+	flatAPI_ISteamInput_TriggerVibrationExtended     = "SteamAPI_ISteamInput_TriggerVibrationExtended"
+	flatAPI_ISteamInput_TriggerSimpleHapticEvent     = "SteamAPI_ISteamInput_TriggerSimpleHapticEvent"
+	flatAPI_ISteamInput_SetLEDColor                  = "SteamAPI_ISteamInput_SetLEDColor"
+	flatAPI_ISteamInput_ShowBindingPanel             = "SteamAPI_ISteamInput_ShowBindingPanel"
+	flatAPI_ISteamInput_GetControllerForGamepadIndex = "SteamAPI_ISteamInput_GetControllerForGamepadIndex"
+	flatAPI_ISteamInput_GetGamepadIndexForController = "SteamAPI_ISteamInput_GetGamepadIndexForController"
+	flatAPI_ISteamInput_GetStringForActionOrigin     = "SteamAPI_ISteamInput_GetStringForActionOrigin"
+	flatAPI_ISteamInput_GetGlyphForActionOrigin      = "SteamAPI_ISteamInput_GetGlyphForActionOrigin"
+	flatAPI_ISteamInput_GetRemotePlaySessionID       = "SteamAPI_ISteamInput_GetRemotePlaySessionID"
 
 	flatAPI_SteamRemoteStorage              = "SteamAPI_SteamRemoteStorage_v016"
 	flatAPI_ISteamRemoteStorage_FileWrite   = "SteamAPI_ISteamRemoteStorage_FileWrite"

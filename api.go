@@ -119,11 +119,39 @@ var (
 	ptrAPI_ISteamInventory_DestroyResult   func(uintptr, SteamInventoryResult_t)
 
 	// ISteamInput
-	ptrAPI_SteamInput                          func() uintptr
-	ptrAPI_ISteamInput_GetConnectedControllers func(uintptr, uintptr) int32
-	ptrAPI_ISteamInput_GetInputTypeForHandle   func(uintptr, InputHandle_t) int32
-	ptrAPI_ISteamInput_Init                    func(uintptr, bool) bool
-	ptrAPI_ISteamInput_RunFrame                func(uintptr, bool)
+	ptrAPI_SteamInput                               func() uintptr
+	ptrAPI_ISteamInput_GetConnectedControllers      func(uintptr, uintptr) int32
+	ptrAPI_ISteamInput_GetInputTypeForHandle        func(uintptr, InputHandle_t) int32
+	ptrAPI_ISteamInput_Init                         func(uintptr, bool) bool
+	ptrAPI_ISteamInput_Shutdown                     func(uintptr)
+	ptrAPI_ISteamInput_RunFrame                     func(uintptr, bool)
+	ptrAPI_ISteamInput_EnableDeviceCallbacks        func(uintptr)
+	ptrAPI_ISteamInput_DisableDeviceCallbacks       func(uintptr)
+	ptrAPI_ISteamInput_GetActionSetHandle           func(uintptr, string) InputActionSetHandle_t
+	ptrAPI_ISteamInput_ActivateActionSet            func(uintptr, InputHandle_t, InputActionSetHandle_t)
+	ptrAPI_ISteamInput_GetCurrentActionSet          func(uintptr, InputHandle_t) InputActionSetHandle_t
+	ptrAPI_ISteamInput_ActivateActionSetLayer       func(uintptr, InputHandle_t, InputActionSetHandle_t)
+	ptrAPI_ISteamInput_DeactivateActionSetLayer     func(uintptr, InputHandle_t, InputActionSetHandle_t)
+	ptrAPI_ISteamInput_DeactivateAllActionSetLayers func(uintptr, InputHandle_t)
+	ptrAPI_ISteamInput_GetActiveActionSetLayers     func(uintptr, InputHandle_t, uintptr) int32
+	ptrAPI_ISteamInput_GetDigitalActionHandle       func(uintptr, string) InputDigitalActionHandle_t
+	ptrAPI_ISteamInput_GetDigitalActionData         func(uintptr, InputHandle_t, InputDigitalActionHandle_t) InputDigitalActionData
+	ptrAPI_ISteamInput_GetDigitalActionOrigins      func(uintptr, InputHandle_t, InputActionSetHandle_t, InputDigitalActionHandle_t, uintptr) int32
+	ptrAPI_ISteamInput_GetAnalogActionHandle        func(uintptr, string) InputAnalogActionHandle_t
+	ptrAPI_ISteamInput_GetAnalogActionData          func(uintptr, InputHandle_t, InputAnalogActionHandle_t) InputAnalogActionData
+	ptrAPI_ISteamInput_GetAnalogActionOrigins       func(uintptr, InputHandle_t, InputActionSetHandle_t, InputAnalogActionHandle_t, uintptr) int32
+	ptrAPI_ISteamInput_StopAnalogActionMomentum     func(uintptr, InputHandle_t, InputAnalogActionHandle_t)
+	ptrAPI_ISteamInput_GetMotionData                func(uintptr, InputHandle_t) InputMotionData
+	ptrAPI_ISteamInput_TriggerVibration             func(uintptr, InputHandle_t, uint16, uint16)
+	ptrAPI_ISteamInput_TriggerVibrationExtended     func(uintptr, InputHandle_t, uint16, uint16, uint16, uint16)
+	ptrAPI_ISteamInput_TriggerSimpleHapticEvent     func(uintptr, InputHandle_t, ESteamControllerPad, uint16, uint16, uint16)
+	ptrAPI_ISteamInput_SetLEDColor                  func(uintptr, InputHandle_t, uint8, uint8, uint8, ESteamInputLEDFlag)
+	ptrAPI_ISteamInput_ShowBindingPanel             func(uintptr, InputHandle_t) bool
+	ptrAPI_ISteamInput_GetControllerForGamepadIndex func(uintptr, int32) InputHandle_t
+	ptrAPI_ISteamInput_GetGamepadIndexForController func(uintptr, InputHandle_t) int32
+	ptrAPI_ISteamInput_GetStringForActionOrigin     func(uintptr, EInputActionOrigin) string
+	ptrAPI_ISteamInput_GetGlyphForActionOrigin      func(uintptr, EInputActionOrigin) string
+	ptrAPI_ISteamInput_GetRemotePlaySessionID       func(uintptr, InputHandle_t) uint32
 
 	// ISteamRemoteStorage
 	ptrAPI_SteamRemoteStorage              func() uintptr
@@ -311,7 +339,35 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetConnectedControllers, lib, flatAPI_ISteamInput_GetConnectedControllers)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetInputTypeForHandle, lib, flatAPI_ISteamInput_GetInputTypeForHandle)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_Init, lib, flatAPI_ISteamInput_Init)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_Shutdown, lib, flatAPI_ISteamInput_Shutdown)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_RunFrame, lib, flatAPI_ISteamInput_RunFrame)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_EnableDeviceCallbacks, lib, flatAPI_ISteamInput_EnableDeviceCallbacks)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_DisableDeviceCallbacks, lib, flatAPI_ISteamInput_DisableDeviceCallbacks)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetActionSetHandle, lib, flatAPI_ISteamInput_GetActionSetHandle)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_ActivateActionSet, lib, flatAPI_ISteamInput_ActivateActionSet)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetCurrentActionSet, lib, flatAPI_ISteamInput_GetCurrentActionSet)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_ActivateActionSetLayer, lib, flatAPI_ISteamInput_ActivateActionSetLayer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_DeactivateActionSetLayer, lib, flatAPI_ISteamInput_DeactivateActionSetLayer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_DeactivateAllActionSetLayers, lib, flatAPI_ISteamInput_DeactivateAllActionSetLayers)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetActiveActionSetLayers, lib, flatAPI_ISteamInput_GetActiveActionSetLayers)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetDigitalActionHandle, lib, flatAPI_ISteamInput_GetDigitalActionHandle)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetDigitalActionData, lib, flatAPI_ISteamInput_GetDigitalActionData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetDigitalActionOrigins, lib, flatAPI_ISteamInput_GetDigitalActionOrigins)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetAnalogActionHandle, lib, flatAPI_ISteamInput_GetAnalogActionHandle)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetAnalogActionData, lib, flatAPI_ISteamInput_GetAnalogActionData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetAnalogActionOrigins, lib, flatAPI_ISteamInput_GetAnalogActionOrigins)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_StopAnalogActionMomentum, lib, flatAPI_ISteamInput_StopAnalogActionMomentum)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetMotionData, lib, flatAPI_ISteamInput_GetMotionData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_TriggerVibration, lib, flatAPI_ISteamInput_TriggerVibration)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_TriggerVibrationExtended, lib, flatAPI_ISteamInput_TriggerVibrationExtended)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_TriggerSimpleHapticEvent, lib, flatAPI_ISteamInput_TriggerSimpleHapticEvent)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_SetLEDColor, lib, flatAPI_ISteamInput_SetLEDColor)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_ShowBindingPanel, lib, flatAPI_ISteamInput_ShowBindingPanel)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetControllerForGamepadIndex, lib, flatAPI_ISteamInput_GetControllerForGamepadIndex)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetGamepadIndexForController, lib, flatAPI_ISteamInput_GetGamepadIndexForController)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetStringForActionOrigin, lib, flatAPI_ISteamInput_GetStringForActionOrigin)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetGlyphForActionOrigin, lib, flatAPI_ISteamInput_GetGlyphForActionOrigin)
+	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetRemotePlaySessionID, lib, flatAPI_ISteamInput_GetRemotePlaySessionID)
 
 	// ISteamRemoteStorage
 	purego.RegisterLibFunc(&ptrAPI_SteamRemoteStorage, lib, flatAPI_SteamRemoteStorage)
@@ -884,8 +940,129 @@ func (s steamInput) Init(bExplicitlyCallRunFrame bool) bool {
 	return ptrAPI_ISteamInput_Init(uintptr(s), bExplicitlyCallRunFrame)
 }
 
+func (s steamInput) Shutdown() {
+	ptrAPI_ISteamInput_Shutdown(uintptr(s))
+}
+
 func (s steamInput) RunFrame() {
 	ptrAPI_ISteamInput_RunFrame(uintptr(s), false)
+}
+
+func (s steamInput) EnableDeviceCallbacks() {
+	ptrAPI_ISteamInput_EnableDeviceCallbacks(uintptr(s))
+}
+
+func (s steamInput) DisableDeviceCallbacks() {
+	ptrAPI_ISteamInput_DisableDeviceCallbacks(uintptr(s))
+}
+
+func (s steamInput) GetActionSetHandle(actionSetName string) InputActionSetHandle_t {
+	return ptrAPI_ISteamInput_GetActionSetHandle(uintptr(s), actionSetName)
+}
+
+func (s steamInput) ActivateActionSet(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t) {
+	ptrAPI_ISteamInput_ActivateActionSet(uintptr(s), inputHandle, actionSetHandle)
+}
+
+func (s steamInput) GetCurrentActionSet(inputHandle InputHandle_t) InputActionSetHandle_t {
+	return ptrAPI_ISteamInput_GetCurrentActionSet(uintptr(s), inputHandle)
+}
+
+func (s steamInput) ActivateActionSetLayer(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t) {
+	ptrAPI_ISteamInput_ActivateActionSetLayer(uintptr(s), inputHandle, actionSetHandle)
+}
+
+func (s steamInput) DeactivateActionSetLayer(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t) {
+	ptrAPI_ISteamInput_DeactivateActionSetLayer(uintptr(s), inputHandle, actionSetHandle)
+}
+
+func (s steamInput) DeactivateAllActionSetLayers(inputHandle InputHandle_t) {
+	ptrAPI_ISteamInput_DeactivateAllActionSetLayers(uintptr(s), inputHandle)
+}
+
+func (s steamInput) GetActiveActionSetLayers(inputHandle InputHandle_t, handles []InputActionSetHandle_t) int {
+	if len(handles) == 0 {
+		return 0
+	}
+	return int(ptrAPI_ISteamInput_GetActiveActionSetLayers(uintptr(s), inputHandle, uintptr(unsafe.Pointer(&handles[0]))))
+}
+
+func (s steamInput) GetDigitalActionHandle(actionName string) InputDigitalActionHandle_t {
+	return ptrAPI_ISteamInput_GetDigitalActionHandle(uintptr(s), actionName)
+}
+
+func (s steamInput) GetDigitalActionData(inputHandle InputHandle_t, actionHandle InputDigitalActionHandle_t) InputDigitalActionData {
+	return ptrAPI_ISteamInput_GetDigitalActionData(uintptr(s), inputHandle, actionHandle)
+}
+
+func (s steamInput) GetDigitalActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputDigitalActionHandle_t, origins []EInputActionOrigin) int {
+	if len(origins) == 0 {
+		return 0
+	}
+	return int(ptrAPI_ISteamInput_GetDigitalActionOrigins(uintptr(s), inputHandle, actionSetHandle, actionHandle, uintptr(unsafe.Pointer(&origins[0]))))
+}
+
+func (s steamInput) GetAnalogActionHandle(actionName string) InputAnalogActionHandle_t {
+	return ptrAPI_ISteamInput_GetAnalogActionHandle(uintptr(s), actionName)
+}
+
+func (s steamInput) GetAnalogActionData(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) InputAnalogActionData {
+	return ptrAPI_ISteamInput_GetAnalogActionData(uintptr(s), inputHandle, actionHandle)
+}
+
+func (s steamInput) GetAnalogActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputAnalogActionHandle_t, origins []EInputActionOrigin) int {
+	if len(origins) == 0 {
+		return 0
+	}
+	return int(ptrAPI_ISteamInput_GetAnalogActionOrigins(uintptr(s), inputHandle, actionSetHandle, actionHandle, uintptr(unsafe.Pointer(&origins[0]))))
+}
+
+func (s steamInput) StopAnalogActionMomentum(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) {
+	ptrAPI_ISteamInput_StopAnalogActionMomentum(uintptr(s), inputHandle, actionHandle)
+}
+
+func (s steamInput) GetMotionData(inputHandle InputHandle_t) InputMotionData {
+	return ptrAPI_ISteamInput_GetMotionData(uintptr(s), inputHandle)
+}
+
+func (s steamInput) TriggerVibration(inputHandle InputHandle_t, leftSpeed, rightSpeed uint16) {
+	ptrAPI_ISteamInput_TriggerVibration(uintptr(s), inputHandle, leftSpeed, rightSpeed)
+}
+
+func (s steamInput) TriggerVibrationExtended(inputHandle InputHandle_t, leftSpeed, rightSpeed, leftTriggerSpeed, rightTriggerSpeed uint16) {
+	ptrAPI_ISteamInput_TriggerVibrationExtended(uintptr(s), inputHandle, leftSpeed, rightSpeed, leftTriggerSpeed, rightTriggerSpeed)
+}
+
+func (s steamInput) TriggerSimpleHapticEvent(inputHandle InputHandle_t, pad ESteamControllerPad, durationMicroSec, offMicroSec, repeat uint16) {
+	ptrAPI_ISteamInput_TriggerSimpleHapticEvent(uintptr(s), inputHandle, pad, durationMicroSec, offMicroSec, repeat)
+}
+
+func (s steamInput) SetLEDColor(inputHandle InputHandle_t, red, green, blue uint8, flags ESteamInputLEDFlag) {
+	ptrAPI_ISteamInput_SetLEDColor(uintptr(s), inputHandle, red, green, blue, flags)
+}
+
+func (s steamInput) ShowBindingPanel(inputHandle InputHandle_t) bool {
+	return ptrAPI_ISteamInput_ShowBindingPanel(uintptr(s), inputHandle)
+}
+
+func (s steamInput) GetControllerForGamepadIndex(index int) InputHandle_t {
+	return ptrAPI_ISteamInput_GetControllerForGamepadIndex(uintptr(s), int32(index))
+}
+
+func (s steamInput) GetGamepadIndexForController(inputHandle InputHandle_t) int {
+	return int(ptrAPI_ISteamInput_GetGamepadIndexForController(uintptr(s), inputHandle))
+}
+
+func (s steamInput) GetStringForActionOrigin(origin EInputActionOrigin) string {
+	return ptrAPI_ISteamInput_GetStringForActionOrigin(uintptr(s), origin)
+}
+
+func (s steamInput) GetGlyphForActionOrigin(origin EInputActionOrigin) string {
+	return ptrAPI_ISteamInput_GetGlyphForActionOrigin(uintptr(s), origin)
+}
+
+func (s steamInput) GetRemotePlaySessionID(inputHandle InputHandle_t) uint32 {
+	return ptrAPI_ISteamInput_GetRemotePlaySessionID(uintptr(s), inputHandle)
 }
 
 func SteamRemoteStorage() ISteamRemoteStorage {
