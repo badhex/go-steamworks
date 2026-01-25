@@ -254,6 +254,14 @@ func registerInputStructReturns(lib uintptr) {
 	ptrAPI_ISteamInput_GetMotionData = mustLookupSymbol(lib, flatAPI_ISteamInput_GetMotionData)
 }
 
+func registerOptionalFunc(fptr any, lib uintptr, name string) {
+	ptr, err := purego.Dlsym(lib, name)
+	if err != nil {
+		return
+	}
+	purego.RegisterFunc(fptr, ptr)
+}
+
 func registerFunctions(lib uintptr) {
 	// General
 	purego.RegisterLibFunc(&ptrAPI_RestartAppIfNecessary, lib, flatAPI_RestartAppIfNecessary)
@@ -392,7 +400,7 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetControllerForGamepadIndex, lib, flatAPI_ISteamInput_GetControllerForGamepadIndex)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetGamepadIndexForController, lib, flatAPI_ISteamInput_GetGamepadIndexForController)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetStringForActionOrigin, lib, flatAPI_ISteamInput_GetStringForActionOrigin)
-	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetGlyphForActionOrigin, lib, flatAPI_ISteamInput_GetGlyphForActionOrigin)
+	registerOptionalFunc(&ptrAPI_ISteamInput_GetGlyphForActionOrigin, lib, flatAPI_ISteamInput_GetGlyphForActionOrigin)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetRemotePlaySessionID, lib, flatAPI_ISteamInput_GetRemotePlaySessionID)
 
 	// ISteamRemoteStorage

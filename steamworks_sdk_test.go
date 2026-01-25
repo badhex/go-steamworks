@@ -7,8 +7,10 @@ package steamworks
 
 import (
 	"archive/zip"
+	"bytes"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -18,6 +20,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
+	"unsafe"
 
 	"github.com/ebitengine/purego"
 	"github.com/jupiterrider/ffi"
@@ -26,13 +30,24 @@ import (
 func sdkLibraryPath() (string, error) {
 	envPath := os.Getenv(steamworksLibEnv)
 	if envPath == "" {
-		return "", fmt.Errorf("%s must be set to the Steamworks SDK library path", steamworksLibEnv)
+		return "", fmt.Errorf("%s must be set to the Steamworks SDK zip URL or library path", steamworksLibEnv)
 	}
 	if isRemoteLocation(envPath) {
 		return downloadLibrary(envPath)
 	}
 	if _, err := os.Stat(envPath); err != nil {
 		return "", fmt.Errorf("%s points to missing file: %w", steamworksLibEnv, err)
+	}
+	isZip, err := isZipArchive(envPath)
+	if err != nil {
+		return "", err
+	}
+	if isZip {
+		tmpDir, err := os.MkdirTemp("", "steamworks-sdk-*")
+		if err != nil {
+			return "", err
+		}
+		return extractSDKZip(envPath, tmpDir)
 	}
 	return envPath, nil
 }
@@ -74,11 +89,30 @@ func downloadLibrary(location string) (string, error) {
 		return "", err
 	}
 
+	return extractSDKZip(zipPath, tmpDir)
+}
+
+func isZipArchive(path string) (bool, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+
+	header := make([]byte, 4)
+	if _, err := io.ReadFull(file, header); err != nil {
+		return false, err
+	}
+
+	return bytes.HasPrefix(header, []byte("PK")), nil
+}
+
+func extractSDKZip(zipPath, destDir string) (string, error) {
 	entryName, err := sdkLibraryEntry()
 	if err != nil {
 		return "", err
 	}
-	return extractZipFile(zipPath, entryName, tmpDir)
+	return extractZipFile(zipPath, entryName, destDir)
 }
 
 func sdkLibraryEntry() (string, error) {
@@ -156,19 +190,23 @@ func TestSDKSymbolResolution(t *testing.T) {
 		flatAPI_ISteamInput_GetGlyphForActionOrigin: {},
 	}
 	for _, symbol := range allFlatAPISymbols() {
-		ptr, err := purego.Dlsym(lib, symbol)
-		if err != nil {
-			if _, ok := expectedMissing[symbol]; ok {
-				continue
+		t.Run(symbol, func(t *testing.T) {
+			ptr, err := purego.Dlsym(lib, symbol)
+			if err != nil {
+				if _, ok := expectedMissing[symbol]; ok {
+					t.Logf("expected missing symbol: %s", symbol)
+					return
+				}
+				t.Fatalf("Dlsym(%s): %v", symbol, err)
 			}
-			t.Fatalf("Dlsym(%s): %v", symbol, err)
-		}
-		if _, ok := expectedMissing[symbol]; ok {
-			t.Fatalf("expected missing symbol %s, but it was present", symbol)
-		}
-		if ptr == 0 {
-			t.Fatalf("Dlsym(%s) returned 0", symbol)
-		}
+			if _, ok := expectedMissing[symbol]; ok {
+				t.Fatalf("expected missing symbol %s, but it was present", symbol)
+			}
+			if ptr == 0 {
+				t.Fatalf("Dlsym(%s) returned 0", symbol)
+			}
+			t.Logf("resolved symbol %s: 0x%x", symbol, ptr)
+		})
 	}
 }
 
@@ -191,11 +229,320 @@ func TestSDKFunctionSignatures(t *testing.T) {
 	}
 
 	for _, expectation := range signatureExpectations() {
-		actual, ok := actuals[expectation.name]
-		if !ok {
-			t.Fatalf("missing registered function %s", expectation.name)
+		t.Run(expectation.name, func(t *testing.T) {
+			actual, ok := actuals[expectation.name]
+			if !ok {
+				t.Fatalf("missing registered function %s", expectation.name)
+			}
+			assertSignature(t, expectation.name, actual, expectation.expected)
+			t.Logf("signature ok: %s is %T", expectation.name, actual)
+		})
+	}
+}
+
+func TestSDKFunctionExecution(t *testing.T) {
+	lib := loadSDKLibrary(t)
+	registerFunctions(lib)
+	registerInputStructReturns(lib)
+
+	initOK := initSteamAPI(t)
+	interfacePtrs := interfacePointers()
+
+	expectedMissing := map[string]struct{}{
+		"ptrAPI_ISteamInput_GetGlyphForActionOrigin": {},
+	}
+
+	actuals := make(map[string]interface{})
+	for _, item := range allRegisteredFunctions() {
+		actuals[item.name] = item.value
+	}
+
+	for _, expectation := range signatureExpectations() {
+		t.Run(expectation.name, func(t *testing.T) {
+			actual, ok := actuals[expectation.name]
+			if !ok {
+				t.Fatalf("missing registered function %s", expectation.name)
+			}
+
+			if _, ok := expectation.expected.(uintptr); ok {
+				ptr, ok := actual.(uintptr)
+				if !ok {
+					t.Fatalf("%s has type %T, want uintptr", expectation.name, actual)
+				}
+				if ptr == 0 {
+					t.Fatalf("%s ffi pointer is 0", expectation.name)
+				}
+				runFFIInputCall(t, expectation.name, ptr, interfacePtrs["ISteamInput"])
+				t.Logf("ffi call ok for %s: 0x%x", expectation.name, ptr)
+				return
+			}
+
+			value := reflect.ValueOf(actual)
+			if value.Kind() != reflect.Func {
+				t.Fatalf("%s has type %T, want func", expectation.name, actual)
+			}
+			if value.IsNil() {
+				if _, ok := expectedMissing[expectation.name]; ok {
+					t.Logf("expected missing function: %s", expectation.name)
+					return
+				}
+				t.Fatalf("%s is nil after registration", expectation.name)
+			}
+			validateSignatureTypes(t, expectation.name, value.Type())
+			callRegisteredFunction(t, expectation.name, value, interfacePtrs, initOK)
+		})
+	}
+}
+
+func validateSignatureTypes(t *testing.T, name string, fnType reflect.Type) {
+	t.Helper()
+
+	for i := 0; i < fnType.NumIn(); i++ {
+		arg := fnType.In(i)
+		if !isSupportedType(arg) {
+			t.Fatalf("%s arg[%d] unsupported type: %s", name, i, arg)
 		}
-		assertSignature(t, expectation.name, actual, expectation.expected)
+	}
+	for i := 0; i < fnType.NumOut(); i++ {
+		out := fnType.Out(i)
+		if !isSupportedType(out) {
+			t.Fatalf("%s return[%d] unsupported type: %s", name, i, out)
+		}
+	}
+}
+
+func initSteamAPI(t *testing.T) bool {
+	t.Helper()
+
+	var msg steamErrMsg
+	result := ptrAPI_InitFlat(uintptr(unsafe.Pointer(&msg)))
+	if result != ESteamAPIInitResult_OK {
+		t.Logf("InitFlat failed (%d): %s", result, msg.String())
+		return false
+	}
+	t.Log("InitFlat succeeded")
+	return true
+}
+
+func interfacePointers() map[string]uintptr {
+	return map[string]uintptr{
+		"ISteamApps":               ptrAPI_SteamApps(),
+		"ISteamFriends":            ptrAPI_SteamFriends(),
+		"ISteamMatchmaking":        ptrAPI_SteamMatchmaking(),
+		"ISteamHTTP":               ptrAPI_SteamHTTP(),
+		"ISteamUGC":                ptrAPI_SteamUGC(),
+		"ISteamInventory":          ptrAPI_SteamInventory(),
+		"ISteamInput":              ptrAPI_SteamInput(),
+		"ISteamRemoteStorage":      ptrAPI_SteamRemoteStorage(),
+		"ISteamUser":               ptrAPI_SteamUser(),
+		"ISteamUserStats":          ptrAPI_SteamUserStats(),
+		"ISteamUtils":              ptrAPI_SteamUtils(),
+		"ISteamNetworkingUtils":    ptrAPI_SteamNetworkingUtils(),
+		"ISteamNetworkingMessages": ptrAPI_SteamNetworkingMessages(),
+		"ISteamNetworkingSockets":  ptrAPI_SteamNetworkingSockets(),
+		"ISteamGameServer":         ptrAPI_SteamGameServer(),
+	}
+}
+
+func runFFIInputCall(t *testing.T, name string, ptr uintptr, steamInput uintptr) {
+	t.Helper()
+
+	switch name {
+	case "ptrAPI_ISteamInput_GetDigitalActionData":
+		result := ffi.CallInputDigitalActionData(ptr, steamInput, 0, 0)
+		validateFFIResult(t, name, result)
+	case "ptrAPI_ISteamInput_GetAnalogActionData":
+		result := ffi.CallInputAnalogActionData(ptr, steamInput, 0, 0)
+		validateFFIResult(t, name, result)
+	case "ptrAPI_ISteamInput_GetMotionData":
+		result := ffi.CallInputMotionData(ptr, steamInput, 0)
+		validateFFIResult(t, name, result)
+	default:
+		t.Fatalf("unknown ffi pointer %s", name)
+	}
+}
+
+func validateFFIResult(t *testing.T, name string, result interface{}) {
+	t.Helper()
+
+	value := reflect.ValueOf(result)
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		switch field.Kind() {
+		case reflect.Float32, reflect.Float64:
+			if math.IsNaN(field.Convert(reflect.TypeOf(float64(0))).Float()) {
+				t.Fatalf("%s returned NaN for field %d", name, i)
+			}
+		}
+	}
+}
+
+func callRegisteredFunction(t *testing.T, name string, fn reflect.Value, interfacePtrs map[string]uintptr, initOK bool) {
+	t.Helper()
+
+	fnType := fn.Type()
+	args, keepAlive := buildArgs(t, name, fnType, interfacePtrs, initOK)
+	for _, value := range keepAlive {
+		_ = value
+	}
+
+	results := fn.Call(args)
+	validateResults(t, name, results, initOK)
+	t.Logf("call ok for %s", name)
+}
+
+func buildArgs(t *testing.T, name string, fnType reflect.Type, interfacePtrs map[string]uintptr, initOK bool) ([]reflect.Value, []interface{}) {
+	t.Helper()
+
+	args := make([]reflect.Value, 0, fnType.NumIn())
+	keepAlive := make([]interface{}, 0, fnType.NumIn())
+	var lastBufferSize int
+	lastWasBuffer := false
+
+	if name == "ptrAPI_InitFlat" && fnType.NumIn() == 1 && fnType.In(0).Kind() == reflect.Uintptr {
+		var msg steamErrMsg
+		args = append(args, reflect.ValueOf(uintptr(unsafe.Pointer(&msg))))
+		keepAlive = append(keepAlive, &msg)
+		return args, keepAlive
+	}
+
+	for i := 0; i < fnType.NumIn(); i++ {
+		argType := fnType.In(i)
+		if i == 0 {
+			if ifaceName := interfaceNameFor(name); ifaceName != "" && argType.Kind() == reflect.Uintptr {
+				iface := interfacePtrs[ifaceName]
+				if iface == 0 {
+					t.Fatalf("interface pointer %s is 0", ifaceName)
+				}
+				args = append(args, reflect.ValueOf(iface))
+				lastWasBuffer = false
+				continue
+			}
+		}
+
+		switch argType.Kind() {
+		case reflect.Bool:
+			args = append(args, reflect.ValueOf(true))
+			lastWasBuffer = false
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			value := int64(1)
+			if lastWasBuffer && (argType.Kind() == reflect.Int32 || argType.Kind() == reflect.Int64) {
+				value = int64(lastBufferSize)
+			}
+			args = append(args, reflect.ValueOf(value).Convert(argType))
+			lastWasBuffer = false
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+			if argType.Kind() == reflect.Uintptr {
+				buf := make([]byte, 256)
+				ptr := uintptr(unsafe.Pointer(&buf[0]))
+				args = append(args, reflect.ValueOf(ptr))
+				keepAlive = append(keepAlive, buf)
+				lastBufferSize = len(buf)
+				lastWasBuffer = true
+				continue
+			}
+			value := uint64(1)
+			if lastWasBuffer && (argType.Kind() == reflect.Uint32 || argType.Kind() == reflect.Uint64) {
+				value = uint64(lastBufferSize)
+			}
+			args = append(args, reflect.ValueOf(value).Convert(argType))
+			lastWasBuffer = false
+		case reflect.Float32, reflect.Float64:
+			args = append(args, reflect.Zero(argType))
+			lastWasBuffer = false
+		case reflect.String:
+			args = append(args, reflect.ValueOf("test"))
+			lastWasBuffer = false
+		default:
+			t.Fatalf("%s has unsupported arg type %s", name, argType)
+		}
+	}
+
+	return args, keepAlive
+}
+
+func interfaceNameFor(name string) string {
+	switch {
+	case strings.HasPrefix(name, "ptrAPI_ISteamApps_"):
+		return "ISteamApps"
+	case strings.HasPrefix(name, "ptrAPI_ISteamFriends_"):
+		return "ISteamFriends"
+	case strings.HasPrefix(name, "ptrAPI_ISteamMatchmaking_"):
+		return "ISteamMatchmaking"
+	case strings.HasPrefix(name, "ptrAPI_ISteamHTTP_"):
+		return "ISteamHTTP"
+	case strings.HasPrefix(name, "ptrAPI_ISteamUGC_"):
+		return "ISteamUGC"
+	case strings.HasPrefix(name, "ptrAPI_ISteamInventory_"):
+		return "ISteamInventory"
+	case strings.HasPrefix(name, "ptrAPI_ISteamInput_"):
+		return "ISteamInput"
+	case strings.HasPrefix(name, "ptrAPI_ISteamRemoteStorage_"):
+		return "ISteamRemoteStorage"
+	case strings.HasPrefix(name, "ptrAPI_ISteamUser_"):
+		return "ISteamUser"
+	case strings.HasPrefix(name, "ptrAPI_ISteamUserStats_"):
+		return "ISteamUserStats"
+	case strings.HasPrefix(name, "ptrAPI_ISteamUtils_"):
+		return "ISteamUtils"
+	case strings.HasPrefix(name, "ptrAPI_ISteamNetworkingUtils_"):
+		return "ISteamNetworkingUtils"
+	case strings.HasPrefix(name, "ptrAPI_ISteamNetworkingMessages_"):
+		return "ISteamNetworkingMessages"
+	case strings.HasPrefix(name, "ptrAPI_ISteamNetworkingSockets_"):
+		return "ISteamNetworkingSockets"
+	case strings.HasPrefix(name, "ptrAPI_ISteamGameServer_"):
+		return "ISteamGameServer"
+	default:
+		return ""
+	}
+}
+
+func validateResults(t *testing.T, name string, results []reflect.Value, initOK bool) {
+	t.Helper()
+
+	for idx, result := range results {
+		switch result.Kind() {
+		case reflect.Bool:
+			t.Logf("%s return[%d]=%v", name, idx, result.Bool())
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			t.Logf("%s return[%d]=%d", name, idx, result.Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			t.Logf("%s return[%d]=%d", name, idx, result.Uint())
+		case reflect.Uintptr:
+			if initOK && result.Uint() == 0 && strings.HasPrefix(name, "ptrAPI_Steam") {
+				t.Fatalf("%s return[%d]=0 with initialized API", name, idx)
+			}
+			t.Logf("%s return[%d]=0x%x", name, idx, result.Uint())
+		case reflect.Float32, reflect.Float64:
+			value := result.Convert(reflect.TypeOf(float64(0))).Float()
+			if math.IsNaN(value) || math.IsInf(value, 0) {
+				t.Fatalf("%s return[%d] invalid float %f", name, idx, value)
+			}
+			t.Logf("%s return[%d]=%f", name, idx, value)
+		case reflect.String:
+			value := result.String()
+			if !utf8.ValidString(value) {
+				t.Fatalf("%s return[%d] invalid utf8", name, idx)
+			}
+			t.Logf("%s return[%d]=%q", name, idx, value)
+		default:
+			t.Fatalf("%s return[%d] unsupported kind %s", name, idx, result.Kind())
+		}
+	}
+}
+
+func isSupportedType(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Uintptr,
+		reflect.Float32, reflect.Float64,
+		reflect.String:
+		return true
+	default:
+		return false
 	}
 }
 
