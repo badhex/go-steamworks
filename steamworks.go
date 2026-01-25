@@ -572,6 +572,9 @@ type ISteamFriends interface {
 	GetFriendPersonaName(friend CSteamID) string
 	GetFriendPersonaNameHistory(friend CSteamID, index int) string
 	GetFriendSteamLevel(friend CSteamID) int
+	GetSmallFriendAvatar(friend CSteamID) int32
+	GetMediumFriendAvatar(friend CSteamID) int32
+	GetLargeFriendAvatar(friend CSteamID) int32
 	SetRichPresence(string, string) bool
 	GetFriendGamePlayed(friend CSteamID) (FriendGameInfo, bool)
 	InviteUserToGame(friend CSteamID, connectString string) bool
@@ -637,6 +640,10 @@ const (
 	flatAPI_RestartAppIfNecessary = "SteamAPI_RestartAppIfNecessary"
 	flatAPI_InitFlat              = "SteamAPI_InitFlat"
 	flatAPI_RunCallbacks          = "SteamAPI_RunCallbacks"
+	flatAPI_Shutdown              = "SteamAPI_Shutdown"
+	flatAPI_IsSteamRunning        = "SteamAPI_IsSteamRunning"
+	flatAPI_GetSteamInstallPath   = "SteamAPI_GetSteamInstallPath"
+	flatAPI_ReleaseCurrentThreadMemory = "SteamAPI_ReleaseCurrentThreadMemory"
 
 	flatAPI_SteamApps                                 = "SteamAPI_SteamApps_v008"
 	flatAPI_ISteamApps_BIsSubscribed                  = "SteamAPI_ISteamApps_BIsSubscribed"
@@ -683,6 +690,9 @@ const (
 	flatAPI_ISteamFriends_GetFriendPersonaName                         = "SteamAPI_ISteamFriends_GetFriendPersonaName"
 	flatAPI_ISteamFriends_GetFriendPersonaNameHistory                  = "SteamAPI_ISteamFriends_GetFriendPersonaNameHistory"
 	flatAPI_ISteamFriends_GetFriendSteamLevel                          = "SteamAPI_ISteamFriends_GetFriendSteamLevel"
+	flatAPI_ISteamFriends_GetSmallFriendAvatar                         = "SteamAPI_ISteamFriends_GetSmallFriendAvatar"
+	flatAPI_ISteamFriends_GetMediumFriendAvatar                        = "SteamAPI_ISteamFriends_GetMediumFriendAvatar"
+	flatAPI_ISteamFriends_GetLargeFriendAvatar                         = "SteamAPI_ISteamFriends_GetLargeFriendAvatar"
 	flatAPI_ISteamFriends_SetRichPresence                              = "SteamAPI_ISteamFriends_SetRichPresence"
 	flatAPI_ISteamFriends_GetFriendGamePlayed                          = "SteamAPI_ISteamFriends_GetFriendGamePlayed"
 	flatAPI_ISteamFriends_InviteUserToGame                             = "SteamAPI_ISteamFriends_InviteUserToGame"

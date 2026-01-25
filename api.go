@@ -20,6 +20,10 @@ var (
 	ptrAPI_RestartAppIfNecessary func(uint32) bool
 	ptrAPI_InitFlat              func(uintptr) ESteamAPIInitResult
 	ptrAPI_RunCallbacks          func()
+	ptrAPI_Shutdown              func()
+	ptrAPI_IsSteamRunning        func() bool
+	ptrAPI_GetSteamInstallPath   func() string
+	ptrAPI_ReleaseCurrentThreadMemory func()
 
 	// ISteamApps
 	ptrAPI_SteamApps                                 func() uintptr
@@ -68,6 +72,9 @@ var (
 	ptrAPI_ISteamFriends_GetFriendPersonaName                         func(uintptr, CSteamID) string
 	ptrAPI_ISteamFriends_GetFriendPersonaNameHistory                  func(uintptr, CSteamID, int32) string
 	ptrAPI_ISteamFriends_GetFriendSteamLevel                          func(uintptr, CSteamID) int32
+	ptrAPI_ISteamFriends_GetSmallFriendAvatar                         func(uintptr, CSteamID) int32
+	ptrAPI_ISteamFriends_GetMediumFriendAvatar                        func(uintptr, CSteamID) int32
+	ptrAPI_ISteamFriends_GetLargeFriendAvatar                         func(uintptr, CSteamID) int32
 	ptrAPI_ISteamFriends_SetRichPresence                              func(uintptr, string, string) bool
 	ptrAPI_ISteamFriends_GetFriendGamePlayed                          func(uintptr, CSteamID, uintptr) bool
 	ptrAPI_ISteamFriends_InviteUserToGame                             func(uintptr, CSteamID, string) bool
@@ -238,6 +245,10 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_RestartAppIfNecessary, lib, flatAPI_RestartAppIfNecessary)
 	purego.RegisterLibFunc(&ptrAPI_InitFlat, lib, flatAPI_InitFlat)
 	purego.RegisterLibFunc(&ptrAPI_RunCallbacks, lib, flatAPI_RunCallbacks)
+	purego.RegisterLibFunc(&ptrAPI_Shutdown, lib, flatAPI_Shutdown)
+	purego.RegisterLibFunc(&ptrAPI_IsSteamRunning, lib, flatAPI_IsSteamRunning)
+	purego.RegisterLibFunc(&ptrAPI_GetSteamInstallPath, lib, flatAPI_GetSteamInstallPath)
+	purego.RegisterLibFunc(&ptrAPI_ReleaseCurrentThreadMemory, lib, flatAPI_ReleaseCurrentThreadMemory)
 
 	// ISteamApps
 	purego.RegisterLibFunc(&ptrAPI_SteamApps, lib, flatAPI_SteamApps)
@@ -286,6 +297,9 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_GetFriendPersonaName, lib, flatAPI_ISteamFriends_GetFriendPersonaName)
 	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_GetFriendPersonaNameHistory, lib, flatAPI_ISteamFriends_GetFriendPersonaNameHistory)
 	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_GetFriendSteamLevel, lib, flatAPI_ISteamFriends_GetFriendSteamLevel)
+	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_GetSmallFriendAvatar, lib, flatAPI_ISteamFriends_GetSmallFriendAvatar)
+	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_GetMediumFriendAvatar, lib, flatAPI_ISteamFriends_GetMediumFriendAvatar)
+	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_GetLargeFriendAvatar, lib, flatAPI_ISteamFriends_GetLargeFriendAvatar)
 	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_SetRichPresence, lib, flatAPI_ISteamFriends_SetRichPresence)
 	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_GetFriendGamePlayed, lib, flatAPI_ISteamFriends_GetFriendGamePlayed)
 	purego.RegisterLibFunc(&ptrAPI_ISteamFriends_InviteUserToGame, lib, flatAPI_ISteamFriends_InviteUserToGame)
@@ -470,6 +484,30 @@ func Init() error {
 func RunCallbacks() {
 	mustLoad()
 	ptrAPI_RunCallbacks()
+}
+
+// Shutdown shuts down the Steamworks API.
+func Shutdown() {
+	mustLoad()
+	ptrAPI_Shutdown()
+}
+
+// IsSteamRunning reports whether the Steam client is currently running.
+func IsSteamRunning() bool {
+	mustLoad()
+	return ptrAPI_IsSteamRunning()
+}
+
+// GetSteamInstallPath returns the Steam installation directory, if available.
+func GetSteamInstallPath() string {
+	mustLoad()
+	return ptrAPI_GetSteamInstallPath()
+}
+
+// ReleaseCurrentThreadMemory releases per-thread memory used by the Steamworks API.
+func ReleaseCurrentThreadMemory() {
+	mustLoad()
+	ptrAPI_ReleaseCurrentThreadMemory()
 }
 
 func SteamApps() ISteamApps {
@@ -698,6 +736,18 @@ func (s steamFriends) GetFriendPersonaNameHistory(friend CSteamID, index int) st
 
 func (s steamFriends) GetFriendSteamLevel(friend CSteamID) int {
 	return int(ptrAPI_ISteamFriends_GetFriendSteamLevel(uintptr(s), friend))
+}
+
+func (s steamFriends) GetSmallFriendAvatar(friend CSteamID) int32 {
+	return ptrAPI_ISteamFriends_GetSmallFriendAvatar(uintptr(s), friend)
+}
+
+func (s steamFriends) GetMediumFriendAvatar(friend CSteamID) int32 {
+	return ptrAPI_ISteamFriends_GetMediumFriendAvatar(uintptr(s), friend)
+}
+
+func (s steamFriends) GetLargeFriendAvatar(friend CSteamID) int32 {
+	return ptrAPI_ISteamFriends_GetLargeFriendAvatar(uintptr(s), friend)
 }
 
 func (s steamFriends) SetRichPresence(key, value string) bool {

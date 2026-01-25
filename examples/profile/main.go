@@ -65,23 +65,9 @@ func main() {
 }
 
 func fetchLargeAvatarHandle(steamID steamworks.CSteamID, timeout time.Duration) (int32, error) {
-	friendsPtr, err := steamworks.CallSymbol("SteamAPI_SteamFriends_v018")
-	if err != nil {
-		return 0, err
-	}
-
 	deadline := time.Now().Add(timeout)
 	for {
-		avatarHandle, err := steamworks.CallSymbol(
-			"SteamAPI_ISteamFriends_GetLargeFriendAvatar",
-			friendsPtr,
-			uintptr(steamID),
-		)
-		if err != nil {
-			return 0, err
-		}
-
-		avatar := int32(avatarHandle)
+		avatar := steamworks.SteamFriends().GetLargeFriendAvatar(steamID)
 		if avatar != -1 {
 			return avatar, nil
 		}
