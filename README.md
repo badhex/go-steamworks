@@ -236,7 +236,35 @@ implemented methods include:
 * `GetConnectedControllers() []InputHandle_t`
 * `GetInputTypeForHandle(inputHandle InputHandle_t) ESteamInputType`
 * `Init(bExplicitlyCallRunFrame bool) bool`
+* `Shutdown()`
 * `RunFrame()`
+* `EnableDeviceCallbacks()`
+* `DisableDeviceCallbacks()`
+* `GetActionSetHandle(actionSetName string) InputActionSetHandle_t`
+* `ActivateActionSet(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)`
+* `GetCurrentActionSet(inputHandle InputHandle_t) InputActionSetHandle_t`
+* `ActivateActionSetLayer(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)`
+* `DeactivateActionSetLayer(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)`
+* `DeactivateAllActionSetLayers(inputHandle InputHandle_t)`
+* `GetActiveActionSetLayers(inputHandle InputHandle_t, handles []InputActionSetHandle_t) int`
+* `GetDigitalActionHandle(actionName string) InputDigitalActionHandle_t`
+* `GetDigitalActionData(inputHandle InputHandle_t, actionHandle InputDigitalActionHandle_t) InputDigitalActionData`
+* `GetDigitalActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputDigitalActionHandle_t, origins []EInputActionOrigin) int`
+* `GetAnalogActionHandle(actionName string) InputAnalogActionHandle_t`
+* `GetAnalogActionData(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) InputAnalogActionData`
+* `GetAnalogActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputAnalogActionHandle_t, origins []EInputActionOrigin) int`
+* `StopAnalogActionMomentum(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t)`
+* `GetMotionData(inputHandle InputHandle_t) InputMotionData`
+* `TriggerVibration(inputHandle InputHandle_t, leftSpeed, rightSpeed uint16)`
+* `TriggerVibrationExtended(inputHandle InputHandle_t, leftSpeed, rightSpeed, leftTriggerSpeed, rightTriggerSpeed uint16)`
+* `TriggerSimpleHapticEvent(inputHandle InputHandle_t, pad ESteamControllerPad, durationMicroSec, offMicroSec, repeat uint16)`
+* `SetLEDColor(inputHandle InputHandle_t, red, green, blue uint8, flags ESteamInputLEDFlag)`
+* `ShowBindingPanel(inputHandle InputHandle_t) bool`
+* `GetControllerForGamepadIndex(index int) InputHandle_t`
+* `GetGamepadIndexForController(inputHandle InputHandle_t) int`
+* `GetStringForActionOrigin(origin EInputActionOrigin) string`
+* `GetGlyphForActionOrigin(origin EInputActionOrigin) string`
+* `GetRemotePlaySessionID(inputHandle InputHandle_t) uint32`
 
 **ISteamMatchmaking** (`steamworks.SteamMatchmaking()`)
 
