@@ -173,6 +173,10 @@ implemented methods include:
 * `RestartAppIfNecessary(appID uint32) bool`
 * `Init() error`
 * `RunCallbacks()`
+* `Shutdown()`
+* `IsSteamRunning() bool`
+* `GetSteamInstallPath() string`
+* `ReleaseCurrentThreadMemory()`
 
 **ISteamApps** (`steamworks.SteamApps()`)
 
@@ -221,6 +225,9 @@ implemented methods include:
 * `GetFriendPersonaName(friend CSteamID) string`
 * `GetFriendPersonaNameHistory(friend CSteamID, index int) string`
 * `GetFriendSteamLevel(friend CSteamID) int`
+* `GetSmallFriendAvatar(friend CSteamID) int32`
+* `GetMediumFriendAvatar(friend CSteamID) int32`
+* `GetLargeFriendAvatar(friend CSteamID) int32`
 * `SetRichPresence(key, value string) bool`
 * `GetFriendGamePlayed(friend CSteamID) (FriendGameInfo, bool)`
 * `InviteUserToGame(friend CSteamID, connectString string) bool`
