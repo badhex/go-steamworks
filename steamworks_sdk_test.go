@@ -6,6 +6,7 @@
 package steamworks
 
 import (
+	"archive/zip"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -59,24 +61,93 @@ func downloadLibrary(location string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	filename := filepath.Base(location)
-	if filename == "." || filename == "/" || filename == "" {
-		filename = "libsteam_api"
-	}
-	filename = strings.TrimSuffix(filename, filepath.Ext(filename))
-	outPath := filepath.Join(tmpDir, filename)
-	outFile, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
+	zipPath := filepath.Join(tmpDir, "steamworks_sdk.zip")
+	zipFile, err := os.OpenFile(zipPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
 		return "", err
 	}
-	defer outFile.Close()
-
-	if _, err := io.Copy(outFile, resp.Body); err != nil {
+	if _, err := io.Copy(zipFile, resp.Body); err != nil {
+		zipFile.Close()
+		return "", err
+	}
+	if err := zipFile.Close(); err != nil {
 		return "", err
 	}
 
-	return outPath, nil
+	entryName, err := sdkLibraryEntry()
+	if err != nil {
+		return "", err
+	}
+	return extractZipFile(zipPath, entryName, tmpDir)
+}
+
+func sdkLibraryEntry() (string, error) {
+	switch runtime.GOOS {
+	case "linux":
+		switch runtime.GOARCH {
+		case "amd64":
+			return "sdk/redistributable_bin/linux64/libsteam_api.so", nil
+		case "386":
+			return "sdk/redistributable_bin/linux32/libsteam_api.so", nil
+		}
+	case "darwin":
+		return "sdk/redistributable_bin/osx/libsteam_api.dylib", nil
+	}
+	return "", fmt.Errorf("unsupported platform %s/%s", runtime.GOOS, runtime.GOARCH)
+}
+
+func extractZipFile(zipPath, entryName, destDir string) (string, error) {
+	zipFile, err := os.Open(zipPath)
+	if err != nil {
+		return "", err
+	}
+	defer zipFile.Close()
+
+	info, err := zipFile.Stat()
+	if err != nil {
+		return "", err
+	}
+
+	reader, err := zip.NewReader(zipFile, info.Size())
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range reader.File {
+		if file.Name != entryName {
+			continue
+		}
+
+		src, err := file.Open()
+		if err != nil {
+			return "", err
+		}
+		defer src.Close()
+
+		filename := filepath.Base(entryName)
+		if filename == "." || filename == "/" || filename == "" {
+			filename = "libsteam_api"
+		}
+		filename = strings.TrimSuffix(filename, filepath.Ext(filename))
+		outPath := filepath.Join(destDir, filename)
+		outFile, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
+		if err != nil {
+			return "", err
+		}
+
+		if _, err := io.Copy(outFile, src); err != nil {
+			outFile.Close()
+			return "", err
+		}
+
+		if err := outFile.Close(); err != nil {
+			return "", err
+		}
+
+		return outPath, nil
+	}
+
+	return "", fmt.Errorf("sdk library %s not found in archive", entryName)
 }
 
 func TestSDKSymbolResolution(t *testing.T) {
