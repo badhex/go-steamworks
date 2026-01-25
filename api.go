@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/JupiterRider/ffi"
+	"github.com/jupiterrider/ffi"
 	"github.com/ebitengine/purego"
 )
 
