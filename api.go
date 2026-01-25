@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/JupiterRider/ffi"
 	"github.com/ebitengine/purego"
 )
 
@@ -17,12 +18,12 @@ type lib struct {
 
 var (
 	// General
-	ptrAPI_RestartAppIfNecessary func(uint32) bool
-	ptrAPI_InitFlat              func(uintptr) ESteamAPIInitResult
-	ptrAPI_RunCallbacks          func()
-	ptrAPI_Shutdown              func()
-	ptrAPI_IsSteamRunning        func() bool
-	ptrAPI_GetSteamInstallPath   func() string
+	ptrAPI_RestartAppIfNecessary      func(uint32) bool
+	ptrAPI_InitFlat                   func(uintptr) ESteamAPIInitResult
+	ptrAPI_RunCallbacks               func()
+	ptrAPI_Shutdown                   func()
+	ptrAPI_IsSteamRunning             func() bool
+	ptrAPI_GetSteamInstallPath        func() string
 	ptrAPI_ReleaseCurrentThreadMemory func()
 
 	// ISteamApps
@@ -141,13 +142,13 @@ var (
 	ptrAPI_ISteamInput_DeactivateAllActionSetLayers func(uintptr, InputHandle_t)
 	ptrAPI_ISteamInput_GetActiveActionSetLayers     func(uintptr, InputHandle_t, uintptr) int32
 	ptrAPI_ISteamInput_GetDigitalActionHandle       func(uintptr, string) InputDigitalActionHandle_t
-	ptrAPI_ISteamInput_GetDigitalActionData         func(uintptr, InputHandle_t, InputDigitalActionHandle_t) InputDigitalActionData
+	ptrAPI_ISteamInput_GetDigitalActionData         uintptr
 	ptrAPI_ISteamInput_GetDigitalActionOrigins      func(uintptr, InputHandle_t, InputActionSetHandle_t, InputDigitalActionHandle_t, uintptr) int32
 	ptrAPI_ISteamInput_GetAnalogActionHandle        func(uintptr, string) InputAnalogActionHandle_t
-	ptrAPI_ISteamInput_GetAnalogActionData          func(uintptr, InputHandle_t, InputAnalogActionHandle_t) InputAnalogActionData
+	ptrAPI_ISteamInput_GetAnalogActionData          uintptr
 	ptrAPI_ISteamInput_GetAnalogActionOrigins       func(uintptr, InputHandle_t, InputActionSetHandle_t, InputAnalogActionHandle_t, uintptr) int32
 	ptrAPI_ISteamInput_StopAnalogActionMomentum     func(uintptr, InputHandle_t, InputAnalogActionHandle_t)
-	ptrAPI_ISteamInput_GetMotionData                func(uintptr, InputHandle_t) InputMotionData
+	ptrAPI_ISteamInput_GetMotionData                uintptr
 	ptrAPI_ISteamInput_TriggerVibration             func(uintptr, InputHandle_t, uint16, uint16)
 	ptrAPI_ISteamInput_TriggerVibrationExtended     func(uintptr, InputHandle_t, uint16, uint16, uint16, uint16)
 	ptrAPI_ISteamInput_TriggerSimpleHapticEvent     func(uintptr, InputHandle_t, ESteamControllerPad, uint16, uint16, uint16)
@@ -238,6 +239,20 @@ var (
 	ptrAPI_ISteamNetworkingSockets_SetConnectionPollGroup      func(uintptr, HSteamNetConnection, HSteamNetPollGroup) bool
 	ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup  func(uintptr, HSteamNetPollGroup, uintptr, int32) int32
 )
+
+func mustLookupSymbol(lib uintptr, name string) uintptr {
+	ptr, err := purego.Dlsym(lib, name)
+	if err != nil {
+		panic(fmt.Errorf("steamworks: dlsym failed for %s: %w", name, err))
+	}
+	return ptr
+}
+
+func registerInputStructReturns(lib uintptr) {
+	ptrAPI_ISteamInput_GetDigitalActionData = mustLookupSymbol(lib, flatAPI_ISteamInput_GetDigitalActionData)
+	ptrAPI_ISteamInput_GetAnalogActionData = mustLookupSymbol(lib, flatAPI_ISteamInput_GetAnalogActionData)
+	ptrAPI_ISteamInput_GetMotionData = mustLookupSymbol(lib, flatAPI_ISteamInput_GetMotionData)
+}
 
 func registerFunctions(lib uintptr) {
 	// General
@@ -365,13 +380,10 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_DeactivateAllActionSetLayers, lib, flatAPI_ISteamInput_DeactivateAllActionSetLayers)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetActiveActionSetLayers, lib, flatAPI_ISteamInput_GetActiveActionSetLayers)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetDigitalActionHandle, lib, flatAPI_ISteamInput_GetDigitalActionHandle)
-	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetDigitalActionData, lib, flatAPI_ISteamInput_GetDigitalActionData)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetDigitalActionOrigins, lib, flatAPI_ISteamInput_GetDigitalActionOrigins)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetAnalogActionHandle, lib, flatAPI_ISteamInput_GetAnalogActionHandle)
-	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetAnalogActionData, lib, flatAPI_ISteamInput_GetAnalogActionData)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetAnalogActionOrigins, lib, flatAPI_ISteamInput_GetAnalogActionOrigins)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_StopAnalogActionMomentum, lib, flatAPI_ISteamInput_StopAnalogActionMomentum)
-	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetMotionData, lib, flatAPI_ISteamInput_GetMotionData)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_TriggerVibration, lib, flatAPI_ISteamInput_TriggerVibration)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_TriggerVibrationExtended, lib, flatAPI_ISteamInput_TriggerVibrationExtended)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_TriggerSimpleHapticEvent, lib, flatAPI_ISteamInput_TriggerSimpleHapticEvent)
@@ -461,6 +473,8 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_DestroyPollGroup, lib, flatAPI_ISteamNetworkingSockets_DestroyPollGroup)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_SetConnectionPollGroup, lib, flatAPI_ISteamNetworkingSockets_SetConnectionPollGroup)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup, lib, flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup)
+
+	registerInputStructReturns(lib)
 }
 
 func RestartAppIfNecessary(appID uint32) bool {
@@ -1040,7 +1054,16 @@ func (s steamInput) GetDigitalActionHandle(actionName string) InputDigitalAction
 }
 
 func (s steamInput) GetDigitalActionData(inputHandle InputHandle_t, actionHandle InputDigitalActionHandle_t) InputDigitalActionData {
-	return ptrAPI_ISteamInput_GetDigitalActionData(uintptr(s), inputHandle, actionHandle)
+	data := ffi.CallInputDigitalActionData(
+		ptrAPI_ISteamInput_GetDigitalActionData,
+		uintptr(s),
+		uint64(inputHandle),
+		uint64(actionHandle),
+	)
+	return InputDigitalActionData{
+		State:  data.State,
+		Active: data.Active,
+	}
 }
 
 func (s steamInput) GetDigitalActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputDigitalActionHandle_t, origins []EInputActionOrigin) int {
@@ -1055,7 +1078,18 @@ func (s steamInput) GetAnalogActionHandle(actionName string) InputAnalogActionHa
 }
 
 func (s steamInput) GetAnalogActionData(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) InputAnalogActionData {
-	return ptrAPI_ISteamInput_GetAnalogActionData(uintptr(s), inputHandle, actionHandle)
+	data := ffi.CallInputAnalogActionData(
+		ptrAPI_ISteamInput_GetAnalogActionData,
+		uintptr(s),
+		uint64(inputHandle),
+		uint64(actionHandle),
+	)
+	return InputAnalogActionData{
+		Mode:   EInputSourceMode(data.Mode),
+		X:      data.X,
+		Y:      data.Y,
+		Active: data.Active,
+	}
 }
 
 func (s steamInput) GetAnalogActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputAnalogActionHandle_t, origins []EInputActionOrigin) int {
@@ -1070,7 +1104,23 @@ func (s steamInput) StopAnalogActionMomentum(inputHandle InputHandle_t, actionHa
 }
 
 func (s steamInput) GetMotionData(inputHandle InputHandle_t) InputMotionData {
-	return ptrAPI_ISteamInput_GetMotionData(uintptr(s), inputHandle)
+	data := ffi.CallInputMotionData(
+		ptrAPI_ISteamInput_GetMotionData,
+		uintptr(s),
+		uint64(inputHandle),
+	)
+	return InputMotionData{
+		RotQuatX:  data.RotQuatX,
+		RotQuatY:  data.RotQuatY,
+		RotQuatZ:  data.RotQuatZ,
+		RotQuatW:  data.RotQuatW,
+		PosAccelX: data.PosAccelX,
+		PosAccelY: data.PosAccelY,
+		PosAccelZ: data.PosAccelZ,
+		RotVelX:   data.RotVelX,
+		RotVelY:   data.RotVelY,
+		RotVelZ:   data.RotVelZ,
+	}
 }
 
 func (s steamInput) TriggerVibration(inputHandle InputHandle_t, leftSpeed, rightSpeed uint16) {
