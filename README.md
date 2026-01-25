@@ -246,7 +246,6 @@ implemented methods include:
 * `Shutdown()`
 * `RunFrame()`
 * `EnableDeviceCallbacks()`
-* `DisableDeviceCallbacks()`
 * `GetActionSetHandle(actionSetName string) InputActionSetHandle_t`
 * `ActivateActionSet(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t)`
 * `GetCurrentActionSet(inputHandle InputHandle_t) InputActionSetHandle_t`
