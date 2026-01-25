@@ -7,4 +7,4 @@ require (
 	github.com/ebitengine/purego v0.9.1
 )
 
-replace github.com/JupiterRider/ffi => ./internal/ffi
+replace github.com/jupiterrider/ffi => ./internal/ffi
