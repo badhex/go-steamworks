@@ -377,7 +377,7 @@ func loadSDKLibrary(t *testing.T) uintptr {
 
 	path, err := sdkLibraryPath()
 	if err != nil {
-		t.Skipf("steamworks sdk not configured: %v", err)
+		t.Fatalf("sdkLibraryPath: %v", err)
 	}
 	_ = os.Setenv(steamworksLibEnv, path)
 
