@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2025 The go-steamworks Authors
 
-//go:build !windows
-
 package steamworks
 
 import (
@@ -159,6 +157,13 @@ func sdkLibraryEntry() (string, error) {
 		}
 	case "darwin":
 		return "sdk/redistributable_bin/osx/libsteam_api.dylib", nil
+	case "windows":
+		switch runtime.GOARCH {
+		case "amd64":
+			return "sdk/redistributable_bin/win64/steam_api64.dll", nil
+		case "386":
+			return "sdk/redistributable_bin/steam_api.dll", nil
+		}
 	}
 	return "", fmt.Errorf("unsupported platform %s/%s", runtime.GOOS, runtime.GOARCH)
 }
