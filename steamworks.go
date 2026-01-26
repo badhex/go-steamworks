@@ -5,6 +5,10 @@
 
 package steamworks
 
+import (
+	"iter"
+)
+
 type AppId_t uint32
 type CGameID uint64
 type CSteamID uint64
@@ -489,6 +493,7 @@ type ISteamGameServer interface {
 
 type ISteamInput interface {
 	GetConnectedControllers() []InputHandle_t
+	ConnectedControllers() iter.Seq[InputHandle_t]
 	GetInputTypeForHandle(inputHandle InputHandle_t) ESteamInputType
 	Init(bExplicitlyCallRunFrame bool) bool
 	Shutdown()
@@ -566,6 +571,7 @@ type ISteamFriends interface {
 	GetPersonaState() EPersonaState
 	GetFriendCount(flags EFriendFlags) int
 	GetFriendByIndex(index int, flags EFriendFlags) CSteamID
+	Friends(flags EFriendFlags) iter.Seq[CSteamID]
 	GetFriendRelationship(friend CSteamID) EFriendRelationship
 	GetFriendPersonaState(friend CSteamID) EPersonaState
 	GetFriendPersonaName(friend CSteamID) string
@@ -594,6 +600,7 @@ type ISteamMatchmaking interface {
 	InviteUserToLobby(lobbyID, invitee CSteamID) bool
 	GetNumLobbyMembers(lobbyID CSteamID) int
 	GetLobbyMemberByIndex(lobbyID CSteamID, memberIndex int) CSteamID
+	LobbyMembers(lobbyID CSteamID) iter.Seq[CSteamID]
 	GetLobbyData(lobbyID CSteamID, key string) string
 	SetLobbyData(lobbyID CSteamID, key, value string) bool
 	GetLobbyOwner(lobbyID CSteamID) CSteamID
@@ -636,12 +643,12 @@ type SteamNetworkingConfigValue struct {
 }
 
 const (
-	flatAPI_RestartAppIfNecessary = "SteamAPI_RestartAppIfNecessary"
-	flatAPI_InitFlat              = "SteamAPI_InitFlat"
-	flatAPI_RunCallbacks          = "SteamAPI_RunCallbacks"
-	flatAPI_Shutdown              = "SteamAPI_Shutdown"
-	flatAPI_IsSteamRunning        = "SteamAPI_IsSteamRunning"
-	flatAPI_GetSteamInstallPath   = "SteamAPI_GetSteamInstallPath"
+	flatAPI_RestartAppIfNecessary      = "SteamAPI_RestartAppIfNecessary"
+	flatAPI_InitFlat                   = "SteamAPI_InitFlat"
+	flatAPI_RunCallbacks               = "SteamAPI_RunCallbacks"
+	flatAPI_Shutdown                   = "SteamAPI_Shutdown"
+	flatAPI_IsSteamRunning             = "SteamAPI_IsSteamRunning"
+	flatAPI_GetSteamInstallPath        = "SteamAPI_GetSteamInstallPath"
 	flatAPI_ReleaseCurrentThreadMemory = "SteamAPI_ReleaseCurrentThreadMemory"
 
 	flatAPI_SteamApps                                 = "SteamAPI_SteamApps_v008"

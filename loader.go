@@ -6,34 +6,32 @@ package steamworks
 import "sync"
 
 var (
-	theLib   *lib
-	loadOnce sync.Once
-	loadErr  error
+	theLib       *lib
+	ensureLoaded = sync.OnceValues(func() (*lib, error) {
+		l, err := loadLib()
+		if err != nil {
+			return nil, err
+		}
+		registerFunctions(l)
+		return &lib{lib: l}, nil
+	})
 )
 
 // Load initializes the Steamworks shared library and registers function pointers.
 // It is safe to call Load multiple times.
 func Load() error {
-	return ensureLoaded()
-}
-
-func ensureLoaded() error {
-	loadOnce.Do(func() {
-		l, err := loadLib()
-		if err != nil {
-			loadErr = err
-			return
-		}
-		registerFunctions(l)
-		theLib = &lib{
-			lib: l,
-		}
-	})
-	return loadErr
+	l, err := ensureLoaded()
+	if err != nil {
+		return err
+	}
+	theLib = l
+	return nil
 }
 
 func mustLoad() {
-	if err := ensureLoaded(); err != nil {
+	l, err := ensureLoaded()
+	if err != nil {
 		panic(err)
 	}
+	theLib = l
 }

@@ -8,9 +8,11 @@ import "github.com/ebitengine/purego"
 // LookupSymbol returns the raw address of a Steamworks SDK symbol for advanced usage.
 // Callers are responsible for providing the correct argument and return types.
 func LookupSymbol(name string) (uintptr, error) {
-	if err := ensureLoaded(); err != nil {
+	l, err := ensureLoaded()
+	if err != nil {
 		return 0, err
 	}
+	theLib = l
 	return purego.Dlsym(theLib.lib, name)
 }
 

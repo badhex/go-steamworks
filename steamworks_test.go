@@ -105,3 +105,21 @@ func TestOptionsPtr(t *testing.T) {
 		t.Fatalf("optionsPtr(values)=0, want non-zero")
 	}
 }
+
+func TestConnectedControllersIterator(t *testing.T) {
+	// This is a smoke test to ensure the iterator is correctly defined.
+	// Since we don't have a real Steam environment, we can't test actual functionality.
+	var s steamInput
+	_ = s.ConnectedControllers()
+}
+
+func TestFriendsIterator(t *testing.T) {
+	var s steamFriends
+	_ = s.Friends(EFriendFlagImmediate)
+}
+
+func TestLobbyMembersIterator(t *testing.T) {
+	var s steamMatchmaking
+	var lobbyID CSteamID
+	_ = s.LobbyMembers(lobbyID)
+}

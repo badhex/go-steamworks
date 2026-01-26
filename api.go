@@ -6,7 +6,9 @@ package steamworks
 import (
 	"bytes"
 	"fmt"
+	"iter"
 	"os"
+	"unique"
 	"unsafe"
 
 	"github.com/ebitengine/purego"
@@ -491,9 +493,11 @@ func RestartAppIfNecessary(appID uint32) bool {
 }
 
 func Init() error {
-	if err := ensureLoaded(); err != nil {
+	l, err := ensureLoaded()
+	if err != nil {
 		return err
 	}
+	theLib = l
 
 	if appID := os.Getenv("STEAM_APPID"); appID != "" {
 		if err := os.WriteFile("steam_appid.txt", []byte(appID), 0644); err != nil {
@@ -597,7 +601,7 @@ func (s steamApps) BIsAppInstalled(appID AppId_t) bool {
 }
 
 func (s steamApps) GetAvailableGameLanguages() string {
-	return ptrAPI_ISteamApps_GetAvailableGameLanguages(uintptr(s))
+	return unique.Make(ptrAPI_ISteamApps_GetAvailableGameLanguages(uintptr(s))).Value()
 }
 
 func (s steamApps) GetEarliestPurchaseUnixTime(appID AppId_t) uint32 {
@@ -614,7 +618,7 @@ func (s steamApps) GetAppInstallDir(appID AppId_t) string {
 }
 
 func (s steamApps) GetCurrentGameLanguage() string {
-	return ptrAPI_ISteamApps_GetCurrentGameLanguage(uintptr(s))
+	return unique.Make(ptrAPI_ISteamApps_GetCurrentGameLanguage(uintptr(s))).Value()
 }
 
 func (s steamApps) GetDLCCount() int32 {
@@ -730,7 +734,7 @@ func SteamFriendsV018() ISteamFriends {
 type steamFriends uintptr
 
 func (s steamFriends) GetPersonaName() string {
-	return ptrAPI_ISteamFriends_GetPersonaName(uintptr(s))
+	return unique.Make(ptrAPI_ISteamFriends_GetPersonaName(uintptr(s))).Value()
 }
 
 func (s steamFriends) GetPersonaState() EPersonaState {
@@ -745,6 +749,17 @@ func (s steamFriends) GetFriendByIndex(index int, flags EFriendFlags) CSteamID {
 	return ptrAPI_ISteamFriends_GetFriendByIndex(uintptr(s), int32(index), int32(flags))
 }
 
+func (s steamFriends) Friends(flags EFriendFlags) iter.Seq[CSteamID] {
+	return func(yield func(CSteamID) bool) {
+		count := s.GetFriendCount(flags)
+		for i := 0; i < count; i++ {
+			if !yield(s.GetFriendByIndex(i, flags)) {
+				return
+			}
+		}
+	}
+}
+
 func (s steamFriends) GetFriendRelationship(friend CSteamID) EFriendRelationship {
 	return EFriendRelationship(ptrAPI_ISteamFriends_GetFriendRelationship(uintptr(s), friend))
 }
@@ -754,11 +769,11 @@ func (s steamFriends) GetFriendPersonaState(friend CSteamID) EPersonaState {
 }
 
 func (s steamFriends) GetFriendPersonaName(friend CSteamID) string {
-	return ptrAPI_ISteamFriends_GetFriendPersonaName(uintptr(s), friend)
+	return unique.Make(ptrAPI_ISteamFriends_GetFriendPersonaName(uintptr(s), friend)).Value()
 }
 
 func (s steamFriends) GetFriendPersonaNameHistory(friend CSteamID, index int) string {
-	return ptrAPI_ISteamFriends_GetFriendPersonaNameHistory(uintptr(s), friend, int32(index))
+	return unique.Make(ptrAPI_ISteamFriends_GetFriendPersonaNameHistory(uintptr(s), friend, int32(index))).Value()
 }
 
 func (s steamFriends) GetFriendSteamLevel(friend CSteamID) int {
@@ -857,6 +872,17 @@ func (s steamMatchmaking) GetNumLobbyMembers(lobbyID CSteamID) int {
 
 func (s steamMatchmaking) GetLobbyMemberByIndex(lobbyID CSteamID, memberIndex int) CSteamID {
 	return ptrAPI_ISteamMatchmaking_GetLobbyMemberByIndex(uintptr(s), lobbyID, int32(memberIndex))
+}
+
+func (s steamMatchmaking) LobbyMembers(lobbyID CSteamID) iter.Seq[CSteamID] {
+	return func(yield func(CSteamID) bool) {
+		count := s.GetNumLobbyMembers(lobbyID)
+		for i := 0; i < count; i++ {
+			if !yield(s.GetLobbyMemberByIndex(lobbyID, i)) {
+				return
+			}
+		}
+	}
 }
 
 func (s steamMatchmaking) GetLobbyData(lobbyID CSteamID, key string) string {
@@ -1010,6 +1036,16 @@ func (s steamInput) GetConnectedControllers() []InputHandle_t {
 	var handles [_STEAM_INPUT_MAX_COUNT]InputHandle_t
 	v := ptrAPI_ISteamInput_GetConnectedControllers(uintptr(s), uintptr(unsafe.Pointer(&handles[0])))
 	return handles[:int(v)]
+}
+
+func (s steamInput) ConnectedControllers() iter.Seq[InputHandle_t] {
+	return func(yield func(InputHandle_t) bool) {
+		for _, h := range s.GetConnectedControllers() {
+			if !yield(h) {
+				return
+			}
+		}
+	}
 }
 
 func (s steamInput) GetInputTypeForHandle(inputHandle InputHandle_t) ESteamInputType {
@@ -1280,7 +1316,7 @@ func (s steamUtils) GetServerRealTime() uint32 {
 }
 
 func (s steamUtils) GetIPCountry() string {
-	return ptrAPI_ISteamUtils_GetIPCountry(uintptr(s))
+	return unique.Make(ptrAPI_ISteamUtils_GetIPCountry(uintptr(s))).Value()
 }
 
 func (s steamUtils) GetImageSize(image int) (width, height uint32, ok bool) {
