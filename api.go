@@ -6,10 +6,11 @@ package steamworks
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"unsafe"
 
-	"github.com/jupiterrider/ffi"
 	"github.com/ebitengine/purego"
+	"github.com/jupiterrider/ffi"
 )
 
 type lib struct {
@@ -254,6 +255,14 @@ func registerInputStructReturns(lib uintptr) {
 	ptrAPI_ISteamInput_GetMotionData = mustLookupSymbol(lib, flatAPI_ISteamInput_GetMotionData)
 }
 
+func registerOptionalFunc(fptr any, lib uintptr, name string) {
+	ptr, err := purego.Dlsym(lib, name)
+	if err != nil {
+		return
+	}
+	purego.RegisterFunc(fptr, ptr)
+}
+
 func registerFunctions(lib uintptr) {
 	// General
 	purego.RegisterLibFunc(&ptrAPI_RestartAppIfNecessary, lib, flatAPI_RestartAppIfNecessary)
@@ -392,7 +401,7 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetControllerForGamepadIndex, lib, flatAPI_ISteamInput_GetControllerForGamepadIndex)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetGamepadIndexForController, lib, flatAPI_ISteamInput_GetGamepadIndexForController)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetStringForActionOrigin, lib, flatAPI_ISteamInput_GetStringForActionOrigin)
-	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetGlyphForActionOrigin, lib, flatAPI_ISteamInput_GetGlyphForActionOrigin)
+	registerOptionalFunc(&ptrAPI_ISteamInput_GetGlyphForActionOrigin, lib, flatAPI_ISteamInput_GetGlyphForActionOrigin)
 	purego.RegisterLibFunc(&ptrAPI_ISteamInput_GetRemotePlaySessionID, lib, flatAPI_ISteamInput_GetRemotePlaySessionID)
 
 	// ISteamRemoteStorage
@@ -486,6 +495,13 @@ func Init() error {
 	if err := ensureLoaded(); err != nil {
 		return err
 	}
+
+	if appID := os.Getenv("STEAM_APPID"); appID != "" {
+		if err := os.WriteFile("steam_appid.txt", []byte(appID), 0644); err != nil {
+			return fmt.Errorf("steamworks: failed to write steam_appid.txt: %w", err)
+		}
+	}
+
 	var msg steamErrMsg
 	if ptrAPI_InitFlat(uintptr(unsafe.Pointer(&msg))) != ESteamAPIInitResult_OK {
 		return fmt.Errorf("steamworks: InitFlat failed: %s", msg.String())
