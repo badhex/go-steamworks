@@ -245,7 +245,7 @@ func TestSDKFunctionExecution(t *testing.T) {
 	registerFunctions(lib)
 	registerInputStructReturns(lib)
 
-	initOK := initSteamAPI(t)
+	initState := initSteamAPI(t)
 	interfacePtrs := interfacePointers()
 
 	expectedMissing := map[string]struct{}{
@@ -289,7 +289,7 @@ func TestSDKFunctionExecution(t *testing.T) {
 				t.Fatalf("%s is nil after registration", expectation.name)
 			}
 			validateSignatureTypes(t, expectation.name, value.Type())
-			callRegisteredFunction(t, expectation.name, value, interfacePtrs, initOK)
+			callRegisteredFunction(t, expectation.name, value, interfacePtrs, initState)
 		})
 	}
 }
@@ -311,17 +311,23 @@ func validateSignatureTypes(t *testing.T, name string, fnType reflect.Type) {
 	}
 }
 
-func initSteamAPI(t *testing.T) bool {
+type initStatus struct {
+	ok      bool
+	message string
+}
+
+func initSteamAPI(t *testing.T) initStatus {
 	t.Helper()
 
 	var msg steamErrMsg
 	result := ptrAPI_InitFlat(uintptr(unsafe.Pointer(&msg)))
 	if result != ESteamAPIInitResult_OK {
-		t.Logf("InitFlat failed (%d): %s", result, msg.String())
-		return false
+		message := fmt.Sprintf("InitFlat failed (%d): %s", result, msg.String())
+		t.Log(message)
+		return initStatus{ok: false, message: message}
 	}
 	t.Log("InitFlat succeeded")
-	return true
+	return initStatus{ok: true}
 }
 
 func interfacePointers() map[string]uintptr {
@@ -377,21 +383,21 @@ func validateFFIResult(t *testing.T, name string, result interface{}) {
 	}
 }
 
-func callRegisteredFunction(t *testing.T, name string, fn reflect.Value, interfacePtrs map[string]uintptr, initOK bool) {
+func callRegisteredFunction(t *testing.T, name string, fn reflect.Value, interfacePtrs map[string]uintptr, initState initStatus) {
 	t.Helper()
 
 	fnType := fn.Type()
-	args, keepAlive := buildArgs(t, name, fnType, interfacePtrs, initOK)
+	args, keepAlive := buildArgs(t, name, fnType, interfacePtrs, initState)
 	for _, value := range keepAlive {
 		_ = value
 	}
 
 	results := fn.Call(args)
-	validateResults(t, name, results, initOK)
+	validateResults(t, name, results, initState)
 	t.Logf("call ok for %s", name)
 }
 
-func buildArgs(t *testing.T, name string, fnType reflect.Type, interfacePtrs map[string]uintptr, initOK bool) ([]reflect.Value, []interface{}) {
+func buildArgs(t *testing.T, name string, fnType reflect.Type, interfacePtrs map[string]uintptr, initState initStatus) ([]reflect.Value, []interface{}) {
 	t.Helper()
 
 	args := make([]reflect.Value, 0, fnType.NumIn())
@@ -412,6 +418,9 @@ func buildArgs(t *testing.T, name string, fnType reflect.Type, interfacePtrs map
 			if ifaceName := interfaceNameFor(name); ifaceName != "" && argType.Kind() == reflect.Uintptr {
 				iface := interfacePtrs[ifaceName]
 				if iface == 0 {
+					if initState.message != "" {
+						t.Fatalf("interface pointer %s is 0 (%s)", ifaceName, initState.message)
+					}
 					t.Fatalf("interface pointer %s is 0", ifaceName)
 				}
 				args = append(args, reflect.ValueOf(iface))
@@ -498,7 +507,7 @@ func interfaceNameFor(name string) string {
 	}
 }
 
-func validateResults(t *testing.T, name string, results []reflect.Value, initOK bool) {
+func validateResults(t *testing.T, name string, results []reflect.Value, initState initStatus) {
 	t.Helper()
 
 	for idx, result := range results {
@@ -510,7 +519,7 @@ func validateResults(t *testing.T, name string, results []reflect.Value, initOK 
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			t.Logf("%s return[%d]=%d", name, idx, result.Uint())
 		case reflect.Uintptr:
-			if initOK && result.Uint() == 0 && strings.HasPrefix(name, "ptrAPI_Steam") {
+			if initState.ok && result.Uint() == 0 && strings.HasPrefix(name, "ptrAPI_Steam") {
 				t.Fatalf("%s return[%d]=0 with initialized API", name, idx)
 			}
 			t.Logf("%s return[%d]=0x%x", name, idx, result.Uint())
