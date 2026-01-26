@@ -6,10 +6,11 @@ package steamworks
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"unsafe"
 
-	"github.com/jupiterrider/ffi"
 	"github.com/ebitengine/purego"
+	"github.com/jupiterrider/ffi"
 )
 
 type lib struct {
@@ -494,6 +495,13 @@ func Init() error {
 	if err := ensureLoaded(); err != nil {
 		return err
 	}
+
+	if appID := os.Getenv("STEAM_APPID"); appID != "" {
+		if err := os.WriteFile("steam_appid.txt", []byte(appID), 0644); err != nil {
+			return fmt.Errorf("steamworks: failed to write steam_appid.txt: %w", err)
+		}
+	}
+
 	var msg steamErrMsg
 	if ptrAPI_InitFlat(uintptr(unsafe.Pointer(&msg))) != ESteamAPIInitResult_OK {
 		return fmt.Errorf("steamworks: InitFlat failed: %s", msg.String())
