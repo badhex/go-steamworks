@@ -23,7 +23,6 @@ import (
 	"unsafe"
 
 	"github.com/ebitengine/purego"
-	"github.com/jupiterrider/ffi"
 )
 
 var (
@@ -424,13 +423,13 @@ func runFFIInputCall(t *testing.T, name string, ptr uintptr, steamInput uintptr)
 
 	switch name {
 	case "ptrAPI_ISteamInput_GetDigitalActionData":
-		result := ffi.CallInputDigitalActionData(ptr, steamInput, 0, 0)
+		result := callInputDigitalActionData(ptr, steamInput, 0, 0)
 		validateFFIResult(t, name, result)
 	case "ptrAPI_ISteamInput_GetAnalogActionData":
-		result := ffi.CallInputAnalogActionData(ptr, steamInput, 0, 0)
+		result := callInputAnalogActionData(ptr, steamInput, 0, 0)
 		validateFFIResult(t, name, result)
 	case "ptrAPI_ISteamInput_GetMotionData":
-		result := ffi.CallInputMotionData(ptr, steamInput, 0)
+		result := callInputMotionData(ptr, steamInput, 0)
 		validateFFIResult(t, name, result)
 	default:
 		t.Fatalf("unknown ffi pointer %s", name)
@@ -658,9 +657,9 @@ func TestSDKInputStructReturns(t *testing.T) {
 		}
 	}
 
-	_ = ffi.CallInputDigitalActionData(ptrAPI_ISteamInput_GetDigitalActionData, 0, 0, 0)
-	_ = ffi.CallInputAnalogActionData(ptrAPI_ISteamInput_GetAnalogActionData, 0, 0, 0)
-	_ = ffi.CallInputMotionData(ptrAPI_ISteamInput_GetMotionData, 0, 0)
+	_ = callInputDigitalActionData(ptrAPI_ISteamInput_GetDigitalActionData, 0, 0, 0)
+	_ = callInputAnalogActionData(ptrAPI_ISteamInput_GetAnalogActionData, 0, 0, 0)
+	_ = callInputMotionData(ptrAPI_ISteamInput_GetMotionData, 0, 0)
 }
 
 type signatureExpectation struct {

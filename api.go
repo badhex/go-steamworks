@@ -10,7 +10,6 @@ import (
 	"unsafe"
 
 	"github.com/ebitengine/purego"
-	"github.com/jupiterrider/ffi"
 )
 
 type lib struct {
@@ -1070,7 +1069,7 @@ func (s steamInput) GetDigitalActionHandle(actionName string) InputDigitalAction
 }
 
 func (s steamInput) GetDigitalActionData(inputHandle InputHandle_t, actionHandle InputDigitalActionHandle_t) InputDigitalActionData {
-	data := ffi.CallInputDigitalActionData(
+	data := callInputDigitalActionData(
 		ptrAPI_ISteamInput_GetDigitalActionData,
 		uintptr(s),
 		uint64(inputHandle),
@@ -1094,7 +1093,7 @@ func (s steamInput) GetAnalogActionHandle(actionName string) InputAnalogActionHa
 }
 
 func (s steamInput) GetAnalogActionData(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) InputAnalogActionData {
-	data := ffi.CallInputAnalogActionData(
+	data := callInputAnalogActionData(
 		ptrAPI_ISteamInput_GetAnalogActionData,
 		uintptr(s),
 		uint64(inputHandle),
@@ -1120,7 +1119,7 @@ func (s steamInput) StopAnalogActionMomentum(inputHandle InputHandle_t, actionHa
 }
 
 func (s steamInput) GetMotionData(inputHandle InputHandle_t) InputMotionData {
-	data := ffi.CallInputMotionData(
+	data := callInputMotionData(
 		ptrAPI_ISteamInput_GetMotionData,
 		uintptr(s),
 		uint64(inputHandle),
