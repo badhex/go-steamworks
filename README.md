@@ -1,6 +1,6 @@
 # go-steamworks
 
-Go bindings for a subset of the Steamworks SDK.
+Go bindings covering all Steamworks API interface families, with typed wrappers for implemented methods and purego/ffi handles for the remaining surfaces.
 
 > [!WARNING]
 > 32-bit OSes are not supported.
@@ -163,10 +163,14 @@ runtime loading.
 * `gen.go` — code generator for parsing the SDK and building bindings.
 * `examples/` — runnable samples for common startup flows.
 
-### Supported APIs and methods
+### Steamworks API coverage and methods
 
-This binding exposes a subset of the Steamworks SDK via Go interfaces. The
-implemented methods include:
+The package now exposes all Steamworks API interface families through friendly
+Go accessors. Interfaces are either:
+
+* fully/partially typed wrappers (method-by-method Go bindings), or
+* handle-backed wrappers exposing native Go structs with `Ptr() uintptr` and `Valid() bool`.
+
 
 **General**
 
@@ -178,7 +182,7 @@ implemented methods include:
 * `GetSteamInstallPath() string`
 * `ReleaseCurrentThreadMemory()`
 
-**ISteamApps** (`steamworks.SteamApps()`)
+**ISteamApps** (`SteamApps() ISteamApps`) — typed wrappers
 
 * `BGetDLCDataByIndex(iDLC int) (appID AppId_t, available bool, name string, success bool)`
 * `BIsSubscribed() bool`
@@ -214,7 +218,19 @@ implemented methods include:
 * `SetDlcContext(appID AppId_t) bool`
 * `SetActiveBeta(name string) bool`
 
-**ISteamFriends** (`steamworks.SteamFriends()`)
+**ISteamAppTicket** (`SteamAppTicket() ISteamAppTicket`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamClient** (`SteamClient() ISteamClient`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamController** (`SteamController() ISteamController`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamFriends** (`SteamFriends() ISteamFriends`) — typed wrappers
 
 * `GetPersonaName() string`
 * `GetPersonaState() EPersonaState`
@@ -230,6 +246,7 @@ implemented methods include:
 * `GetLargeFriendAvatar(friend CSteamID) int32`
 * `SetRichPresence(key, value string) bool`
 * `GetFriendGamePlayed(friend CSteamID) (FriendGameInfo, bool)`
+  * Returns `FriendGameInfo` mapped from SDK `FriendGameInfo_t` (see field breakdown below).
 * `InviteUserToGame(friend CSteamID, connectString string) bool`
 * `ActivateGameOverlay(dialog string)`
 * `ActivateGameOverlayToUser(dialog string, steamID CSteamID)`
@@ -238,7 +255,46 @@ implemented methods include:
 * `ActivateGameOverlayInviteDialog(lobbyID CSteamID)`
 * `ActivateGameOverlayInviteDialogConnectString(connectString string)`
 
-**ISteamInput** (`steamworks.SteamInput()`)
+Returned structure details:
+
+* `FriendGameInfo` (SDK `FriendGameInfo_t`) fields:
+  * `GameID CGameID`
+  * `GameIP uint32`
+  * `GamePort uint16`
+  * `QueryPort uint16`
+  * `LobbySteamID CSteamID`
+
+**ISteamGameCoordinator** (`SteamGameCoordinator() ISteamGameCoordinator`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamGameServer** (`SteamGameServer() ISteamGameServer`) — typed wrappers
+
+* `SetProduct(product string)`
+* `SetGameDescription(description string)`
+* `LogOnAnonymous()`
+* `LogOff()`
+* `BLoggedOn() bool`
+* `GetSteamID() CSteamID`
+
+**ISteamGameServerStats** (`SteamGameServerStats() ISteamGameServerStats`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamHTMLSurface** (`SteamHTMLSurface() ISteamHTMLSurface`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamHTTP** (`SteamHTTP() ISteamHTTP`) — typed wrappers
+
+* `CreateHTTPRequest(method EHTTPMethod, absoluteURL string) HTTPRequestHandle`
+* `SetHTTPRequestHeaderValue(request HTTPRequestHandle, headerName, headerValue string) bool`
+* `SendHTTPRequest(request HTTPRequestHandle) (SteamAPICall_t, bool)`
+* `GetHTTPResponseBodySize(request HTTPRequestHandle) (uint32, bool)`
+* `GetHTTPResponseBodyData(request HTTPRequestHandle, buffer []byte) bool`
+* `ReleaseHTTPRequest(request HTTPRequestHandle) bool`
+
+**ISteamInput** (`SteamInput() ISteamInput`) — typed wrappers
 
 * `GetConnectedControllers() []InputHandle_t`
 * `GetInputTypeForHandle(inputHandle InputHandle_t) ESteamInputType`
@@ -255,12 +311,15 @@ implemented methods include:
 * `GetActiveActionSetLayers(inputHandle InputHandle_t, handles []InputActionSetHandle_t) int`
 * `GetDigitalActionHandle(actionName string) InputDigitalActionHandle_t`
 * `GetDigitalActionData(inputHandle InputHandle_t, actionHandle InputDigitalActionHandle_t) InputDigitalActionData`
+  * Returns `InputDigitalActionData` mapped from SDK `InputDigitalActionData_t`.
 * `GetDigitalActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputDigitalActionHandle_t, origins []EInputActionOrigin) int`
 * `GetAnalogActionHandle(actionName string) InputAnalogActionHandle_t`
 * `GetAnalogActionData(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) InputAnalogActionData`
+  * Returns `InputAnalogActionData` mapped from SDK `InputAnalogActionData_t`.
 * `GetAnalogActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputAnalogActionHandle_t, origins []EInputActionOrigin) int`
 * `StopAnalogActionMomentum(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t)`
 * `GetMotionData(inputHandle InputHandle_t) InputMotionData`
+  * Returns `InputMotionData` mapped from SDK `InputMotionData_t`.
 * `TriggerVibration(inputHandle InputHandle_t, leftSpeed, rightSpeed uint16)`
 * `TriggerVibrationExtended(inputHandle InputHandle_t, leftSpeed, rightSpeed, leftTriggerSpeed, rightTriggerSpeed uint16)`
 * `TriggerSimpleHapticEvent(inputHandle InputHandle_t, pad ESteamControllerPad, durationMicroSec, offMicroSec, repeat uint16)`
@@ -272,7 +331,37 @@ implemented methods include:
 * `GetGlyphForActionOrigin(origin EInputActionOrigin) string`
 * `GetRemotePlaySessionID(inputHandle InputHandle_t) uint32`
 
-**ISteamMatchmaking** (`steamworks.SteamMatchmaking()`)
+Returned structure details:
+
+* `InputDigitalActionData` (SDK `InputDigitalActionData_t`) fields:
+  * `State bool`
+  * `Active bool`
+* `InputAnalogActionData` (SDK `InputAnalogActionData_t`) fields:
+  * `Mode EInputSourceMode`
+  * `X float32`
+  * `Y float32`
+  * `Active bool`
+* `InputMotionData` (SDK `InputMotionData_t`) fields:
+  * `RotQuatX float32`, `RotQuatY float32`, `RotQuatZ float32`, `RotQuatW float32`
+  * `PosAccelX float32`, `PosAccelY float32`, `PosAccelZ float32`
+  * `RotVelX float32`, `RotVelY float32`, `RotVelZ float32`
+
+**ISteamInventory** (`SteamInventory() ISteamInventory`) — typed wrappers
+
+* `GetResultStatus(result SteamInventoryResult_t) EResult`
+* `GetResultItems(result SteamInventoryResult_t, outItems []SteamItemDetails) (int, bool)`
+  * Populates `outItems` with `SteamItemDetails` entries mapped from SDK `SteamItemDetails_t`.
+* `DestroyResult(result SteamInventoryResult_t)`
+
+Returned structure details:
+
+* `SteamItemDetails` (SDK `SteamItemDetails_t`) fields:
+  * `ItemID SteamItemInstanceID_t`
+  * `Definition SteamItemDef_t`
+  * `Quantity uint16`
+  * `Flags uint16`
+
+**ISteamMatchmaking** (`SteamMatchmaking() ISteamMatchmaking`) — typed wrappers
 
 * `RequestLobbyList() SteamAPICall_t`
 * `GetLobbyByIndex(index int) CSteamID`
@@ -292,41 +381,44 @@ implemented methods include:
 * `SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool`
 * `SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool`
 
-**ISteamHTTP** (`steamworks.SteamHTTP()`)
+**ISteamMatchmakingServers** (`SteamMatchmakingServers() ISteamMatchmakingServers`) — handle-backed
 
-* `CreateHTTPRequest(method EHTTPMethod, absoluteURL string) HTTPRequestHandle`
-* `SetHTTPRequestHeaderValue(request HTTPRequestHandle, headerName, headerValue string) bool`
-* `SendHTTPRequest(request HTTPRequestHandle) (SteamAPICall_t, bool)`
-* `GetHTTPResponseBodySize(request HTTPRequestHandle) (uint32, bool)`
-* `GetHTTPResponseBodyData(request HTTPRequestHandle, buffer []byte) bool`
-* `ReleaseHTTPRequest(request HTTPRequestHandle) bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
-**ISteamUGC** (`steamworks.SteamUGC()`)
+**ISteamMusic** (`SteamMusic() ISteamMusic`) — handle-backed
 
-* `GetNumSubscribedItems(includeLocallyDisabled bool) uint32`
-* `GetSubscribedItems(includeLocallyDisabled bool) []PublishedFileId_t`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
-**ISteamInventory** (`steamworks.SteamInventory()`)
+**ISteamNetworking** (`SteamNetworking() ISteamNetworking`) — handle-backed
 
-* `GetResultStatus(result SteamInventoryResult_t) EResult`
-* `GetResultItems(result SteamInventoryResult_t, outItems []SteamItemDetails) (int, bool)`
-* `DestroyResult(result SteamInventoryResult_t)`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
-**ISteamNetworkingMessages** (`steamworks.SteamNetworkingMessages()`)
+**ISteamNetworkingMessages** (`SteamNetworkingMessages() ISteamNetworkingMessages`) — typed wrappers
 
 * `SendMessageToUser(identity *SteamNetworkingIdentity, data []byte, sendFlags SteamNetworkingSendFlags, remoteChannel int) EResult`
 * `ReceiveMessagesOnChannel(channel int, maxMessages int) []*SteamNetworkingMessage`
+  * Returns a slice of `*SteamNetworkingMessage` wrappers over SDK `SteamNetworkingMessage_t`.
 * `AcceptSessionWithUser(identity *SteamNetworkingIdentity) bool`
 * `CloseSessionWithUser(identity *SteamNetworkingIdentity) bool`
 * `CloseChannelWithUser(identity *SteamNetworkingIdentity, channel int) bool`
 
-**ISteamNetworkingUtils** (`steamworks.SteamNetworkingUtils()`)
+Returned structure details:
 
-* `AllocateMessage(size int) *SteamNetworkingMessage`
-* `InitRelayNetworkAccess()`
-* `GetLocalTimestamp() SteamNetworkingMicroseconds`
+* `SteamNetworkingIdentity` fields:
+  * `IdentityType int32`
+  * `Reserved [3]int32`
+  * `Data [128]byte`
+* `SteamNetworkingMessage` (SDK `SteamNetworkingMessage_t`) pointer wrapper:
+  * `Data uintptr`
+  * `Size int32`
+  * `Conn HSteamNetConnection`
+  * `IdentityPeer SteamNetworkingIdentity`
+  * `ConnUserData int64`
+  * `TimeReceived int64`
+  * `MessageNumber int64`
+  * `ReleaseFunc uintptr` (invoked by `Release()`)
 
-**ISteamNetworkingSockets** (`steamworks.SteamNetworkingSockets()`)
+**ISteamNetworkingSockets** (`SteamNetworkingSockets() ISteamNetworkingSockets`) — typed wrappers
 
 * `CreateListenSocketIP(localAddress *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamListenSocket`
 * `CreateListenSocketP2P(localVirtualPort int, options []SteamNetworkingConfigValue) HSteamListenSocket`
@@ -337,39 +429,75 @@ implemented methods include:
 * `CloseListenSocket(socket HSteamListenSocket) bool`
 * `SendMessageToConnection(connection HSteamNetConnection, data []byte, sendFlags SteamNetworkingSendFlags) (EResult, int64)`
 * `ReceiveMessagesOnConnection(connection HSteamNetConnection, maxMessages int) []*SteamNetworkingMessage`
+  * Returns a slice of `*SteamNetworkingMessage` wrappers over SDK `SteamNetworkingMessage_t`.
 * `CreatePollGroup() HSteamNetPollGroup`
 * `DestroyPollGroup(group HSteamNetPollGroup) bool`
 * `SetConnectionPollGroup(connection HSteamNetConnection, group HSteamNetPollGroup) bool`
 * `ReceiveMessagesOnPollGroup(group HSteamNetPollGroup, maxMessages int) []*SteamNetworkingMessage`
+  * Returns a slice of `*SteamNetworkingMessage` wrappers over SDK `SteamNetworkingMessage_t`.
 
-**ISteamGameServer** (`steamworks.SteamGameServer()`)
+Returned structure details:
 
-* `SetProduct(product string)`
-* `SetGameDescription(description string)`
-* `LogOnAnonymous()`
-* `LogOff()`
-* `BLoggedOn() bool`
-* `GetSteamID() CSteamID`
+* `SteamNetworkingIPAddr` fields:
+  * `IP [16]byte`
+  * `Port uint16`
+* `SteamNetworkingIdentity` fields:
+  * `IdentityType int32`
+  * `Reserved [3]int32`
+  * `Data [128]byte`
+* `SteamNetworkingMessage` (SDK `SteamNetworkingMessage_t`) pointer wrapper:
+  * `Data uintptr`
+  * `Size int32`
+  * `Conn HSteamNetConnection`
+  * `IdentityPeer SteamNetworkingIdentity`
+  * `ConnUserData int64`
+  * `TimeReceived int64`
+  * `MessageNumber int64`
+  * `ReleaseFunc uintptr` (invoked by `Release()`)
 
-**ISteamRemoteStorage** (`steamworks.SteamRemoteStorage()`)
+**ISteamNetworkingUtils** (`SteamNetworkingUtils() ISteamNetworkingUtils`) — typed wrappers
+
+* `AllocateMessage(size int) *SteamNetworkingMessage`
+  * Returns a `*SteamNetworkingMessage` wrapper over SDK `SteamNetworkingMessage_t`.
+* `InitRelayNetworkAccess()`
+* `GetLocalTimestamp() SteamNetworkingMicroseconds`
+
+**ISteamRemotePlay** (`SteamRemotePlay() ISteamRemotePlay`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamRemoteStorage** (`SteamRemoteStorage() ISteamRemoteStorage`) — typed wrappers
 
 * `FileWrite(file string, data []byte) bool`
 * `FileRead(file string, data []byte) int32`
 * `FileDelete(file string) bool`
 * `GetFileSize(file string) int32`
 
-**ISteamUser** (`steamworks.SteamUser()`)
+**ISteamScreenshots** (`SteamScreenshots() ISteamScreenshots`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamTimeline** (`SteamTimeline() ISteamTimeline`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**ISteamUGC** (`SteamUGC() ISteamUGC`) — typed wrappers
+
+* `GetNumSubscribedItems(includeLocallyDisabled bool) uint32`
+* `GetSubscribedItems(includeLocallyDisabled bool) []PublishedFileId_t`
+
+**ISteamUser** (`SteamUser() ISteamUser`) — typed wrappers
 
 * `GetSteamID() CSteamID`
 
-**ISteamUserStats** (`steamworks.SteamUserStats()`)
+**ISteamUserStats** (`SteamUserStats() ISteamUserStats`) — typed wrappers
 
 * `GetAchievement(name string) (achieved, success bool)`
 * `SetAchievement(name string) bool`
 * `ClearAchievement(name string) bool`
 * `StoreStats() bool`
 
-**ISteamUtils** (`steamworks.SteamUtils()`)
+**ISteamUtils** (`SteamUtils() ISteamUtils`) — typed wrappers
 
 * `GetSecondsSinceAppActive() uint32`
 * `GetSecondsSinceComputerActive() uint32`
@@ -390,6 +518,54 @@ implemented methods include:
 * `GetAPICallResult(call SteamAPICall_t, callback uintptr, callbackSize int32, expectedCallback int32) (failed bool, ok bool)`
 * `GetIPCCallCount() uint32`
 * `ShowFloatingGamepadTextInput(...) bool`
+
+**ISteamVideo** (`SteamVideo() ISteamVideo`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**SteamEncryptedAppTicket** — typed utility wrappers
+
+* `SteamEncryptedAppTicketBDecryptTicket(ticket, decrypted, key []byte) (decryptedSize uint32, ok bool)`
+* `SteamEncryptedAppTicketBIsTicketForApp(decryptedTicket []byte, appID AppId_t) bool`
+* `SteamEncryptedAppTicketGetTicketIssueTime(decryptedTicket []byte) uint32`
+* `SteamEncryptedAppTicketGetTicketSteamID(decryptedTicket []byte) (CSteamID, bool)`
+
+**steam_api** (`SteamAPIClient() ISteamAPIClient`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+**steam_gameserver** (`SteamAPIGameServer() ISteamAPIGameServer`) — handle-backed
+
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+
+### Additional raw symbol helpers (purego/ffi)
+
+Raw helpers return concrete Go wrapper structs per interface family; use `Ptr()` for FFI call entry and `Valid()` before invocation.
+
+Interface raw helpers resolve the `SteamAPI_*` exported factory symbol and invoke it (zero-arg) to obtain the actual ISteam* instance pointer. If `purego.Dlsym` cannot resolve the factory symbol, the package attempts an ffi-based fallback lookup via `github.com/jupiterrider/ffi`.
+
+* `SteamAppTicketRaw() ISteamAppTicket` (ISteamAppTicket)
+* `SteamClientRaw() ISteamClient` (ISteamClient)
+* `SteamControllerRaw() ISteamController` (ISteamController)
+* `SteamGameCoordinatorRaw() ISteamGameCoordinator` (ISteamGameCoordinator)
+* `SteamGameServerStatsRaw() ISteamGameServerStats` (ISteamGameServerStats)
+* `SteamHTMLSurfaceRaw() ISteamHTMLSurface` (ISteamHTMLSurface)
+* `SteamMatchmakingServersRaw() ISteamMatchmakingServers` (ISteamMatchmakingServers)
+* `SteamMusicRaw() ISteamMusic` (ISteamMusic)
+* `SteamNetworkingRaw() ISteamNetworking` (ISteamNetworking)
+* `SteamRemotePlayRaw() ISteamRemotePlay` (ISteamRemotePlay)
+* `SteamScreenshotsRaw() ISteamScreenshots` (ISteamScreenshots)
+* `SteamTimelineRaw() ISteamTimeline` (ISteamTimeline)
+* `SteamVideoRaw() ISteamVideo` (ISteamVideo)
+* `SteamAPIClientRaw() ISteamAPIClient` (`steam_api` foundation; wrapped by `SteamAPIClient()`)
+* `SteamAPIGameServerRaw() ISteamAPIGameServer` (`steam_gameserver` foundation; wrapped by `SteamAPIGameServer()`)
+
+Encrypted ticket utilities are also exposed with direct symbol wrappers:
+
+* `SteamEncryptedAppTicketBDecryptTicket(ticket, decrypted, key []byte) (decryptedSize uint32, ok bool)`
+* `SteamEncryptedAppTicketBIsTicketForApp(decryptedTicket []byte, appID AppId_t) bool`
+* `SteamEncryptedAppTicketGetTicketIssueTime(decryptedTicket []byte) uint32`
+* `SteamEncryptedAppTicketGetTicketSteamID(decryptedTicket []byte) (CSteamID, bool)`
 
 ### Raw symbol access
 

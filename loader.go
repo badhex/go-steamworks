@@ -5,6 +5,8 @@ package steamworks
 
 import "sync"
 
+const steamworksLibEnv = "STEAMWORKS_LIB_PATH"
+
 var (
 	theLib       *lib
 	ensureLoaded = sync.OnceValues(func() (*lib, error) {

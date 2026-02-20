@@ -642,6 +642,81 @@ type SteamNetworkingConfigValue struct {
 	Data     uint64
 }
 
+type ISteamAppTicket struct{ ptr uintptr }
+
+func (i ISteamAppTicket) Ptr() uintptr { return i.ptr }
+func (i ISteamAppTicket) Valid() bool  { return i.ptr != 0 }
+
+type ISteamClient struct{ ptr uintptr }
+
+func (i ISteamClient) Ptr() uintptr { return i.ptr }
+func (i ISteamClient) Valid() bool  { return i.ptr != 0 }
+
+type ISteamController struct{ ptr uintptr }
+
+func (i ISteamController) Ptr() uintptr { return i.ptr }
+func (i ISteamController) Valid() bool  { return i.ptr != 0 }
+
+type ISteamGameCoordinator struct{ ptr uintptr }
+
+func (i ISteamGameCoordinator) Ptr() uintptr { return i.ptr }
+func (i ISteamGameCoordinator) Valid() bool  { return i.ptr != 0 }
+
+type ISteamGameServerStats struct{ ptr uintptr }
+
+func (i ISteamGameServerStats) Ptr() uintptr { return i.ptr }
+func (i ISteamGameServerStats) Valid() bool  { return i.ptr != 0 }
+
+type ISteamHTMLSurface struct{ ptr uintptr }
+
+func (i ISteamHTMLSurface) Ptr() uintptr { return i.ptr }
+func (i ISteamHTMLSurface) Valid() bool  { return i.ptr != 0 }
+
+type ISteamMatchmakingServers struct{ ptr uintptr }
+
+func (i ISteamMatchmakingServers) Ptr() uintptr { return i.ptr }
+func (i ISteamMatchmakingServers) Valid() bool  { return i.ptr != 0 }
+
+type ISteamMusic struct{ ptr uintptr }
+
+func (i ISteamMusic) Ptr() uintptr { return i.ptr }
+func (i ISteamMusic) Valid() bool  { return i.ptr != 0 }
+
+type ISteamNetworking struct{ ptr uintptr }
+
+func (i ISteamNetworking) Ptr() uintptr { return i.ptr }
+func (i ISteamNetworking) Valid() bool  { return i.ptr != 0 }
+
+type ISteamRemotePlay struct{ ptr uintptr }
+
+func (i ISteamRemotePlay) Ptr() uintptr { return i.ptr }
+func (i ISteamRemotePlay) Valid() bool  { return i.ptr != 0 }
+
+type ISteamScreenshots struct{ ptr uintptr }
+
+func (i ISteamScreenshots) Ptr() uintptr { return i.ptr }
+func (i ISteamScreenshots) Valid() bool  { return i.ptr != 0 }
+
+type ISteamTimeline struct{ ptr uintptr }
+
+func (i ISteamTimeline) Ptr() uintptr { return i.ptr }
+func (i ISteamTimeline) Valid() bool  { return i.ptr != 0 }
+
+type ISteamVideo struct{ ptr uintptr }
+
+func (i ISteamVideo) Ptr() uintptr { return i.ptr }
+func (i ISteamVideo) Valid() bool  { return i.ptr != 0 }
+
+type ISteamAPIClient struct{ ptr uintptr }
+
+func (i ISteamAPIClient) Ptr() uintptr { return i.ptr }
+func (i ISteamAPIClient) Valid() bool  { return i.ptr != 0 }
+
+type ISteamAPIGameServer struct{ ptr uintptr }
+
+func (i ISteamAPIGameServer) Ptr() uintptr { return i.ptr }
+func (i ISteamAPIGameServer) Valid() bool  { return i.ptr != 0 }
+
 const (
 	flatAPI_RestartAppIfNecessary      = "SteamAPI_RestartAppIfNecessary"
 	flatAPI_InitFlat                   = "SteamAPI_InitFlat"
