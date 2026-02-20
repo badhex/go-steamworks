@@ -92,24 +92,46 @@ var (
 	ptrAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString func(uintptr, string)
 
 	// ISteamMatchmaking
-	ptrAPI_SteamMatchmaking                        func() uintptr
-	ptrAPI_ISteamMatchmaking_RequestLobbyList      func(uintptr) SteamAPICall_t
-	ptrAPI_ISteamMatchmaking_GetLobbyByIndex       func(uintptr, int32) CSteamID
-	ptrAPI_ISteamMatchmaking_CreateLobby           func(uintptr, ELobbyType, int32) SteamAPICall_t
-	ptrAPI_ISteamMatchmaking_JoinLobby             func(uintptr, CSteamID) SteamAPICall_t
-	ptrAPI_ISteamMatchmaking_LeaveLobby            func(uintptr, CSteamID)
-	ptrAPI_ISteamMatchmaking_InviteUserToLobby     func(uintptr, CSteamID, CSteamID) bool
-	ptrAPI_ISteamMatchmaking_GetNumLobbyMembers    func(uintptr, CSteamID) int32
-	ptrAPI_ISteamMatchmaking_GetLobbyMemberByIndex func(uintptr, CSteamID, int32) CSteamID
-	ptrAPI_ISteamMatchmaking_GetLobbyData          func(uintptr, CSteamID, string) string
-	ptrAPI_ISteamMatchmaking_SetLobbyData          func(uintptr, CSteamID, string, string) bool
-	ptrAPI_ISteamMatchmaking_GetLobbyOwner         func(uintptr, CSteamID) CSteamID
-	ptrAPI_ISteamMatchmaking_SetLobbyOwner         func(uintptr, CSteamID, CSteamID) bool
-	ptrAPI_ISteamMatchmaking_SetLobbyGameServer    func(uintptr, CSteamID, uint32, uint16, CSteamID)
-	ptrAPI_ISteamMatchmaking_GetLobbyGameServer    func(uintptr, CSteamID, uintptr, uintptr, uintptr) bool
-	ptrAPI_ISteamMatchmaking_SetLobbyJoinable      func(uintptr, CSteamID, bool) bool
-	ptrAPI_ISteamMatchmaking_SetLobbyMemberLimit   func(uintptr, CSteamID, int32) bool
-	ptrAPI_ISteamMatchmaking_SetLobbyType          func(uintptr, CSteamID, ELobbyType) bool
+	ptrAPI_SteamMatchmaking                                             func() uintptr
+	ptrAPI_ISteamMatchmaking_GetFavoriteGameCount                       func(uintptr) int32
+	ptrAPI_ISteamMatchmaking_GetFavoriteGame                            func(uintptr, int32, uintptr, uintptr, uintptr, uintptr, uintptr, uintptr) bool
+	ptrAPI_ISteamMatchmaking_AddFavoriteGame                            func(uintptr, AppId_t, uint32, uint16, uint16, uint32, uint32) int32
+	ptrAPI_ISteamMatchmaking_RemoveFavoriteGame                         func(uintptr, AppId_t, uint32, uint16, uint16, uint32) bool
+	ptrAPI_ISteamMatchmaking_RequestLobbyList                           func(uintptr) SteamAPICall_t
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter            func(uintptr, string, string, ELobbyComparison)
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter         func(uintptr, string, int32, ELobbyComparison)
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter         func(uintptr, string, int32)
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable    func(uintptr, int32)
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter          func(uintptr, ELobbyDistanceFilter)
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter       func(uintptr, int32)
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter func(uintptr, CSteamID)
+	ptrAPI_ISteamMatchmaking_GetLobbyByIndex                            func(uintptr, int32) CSteamID
+	ptrAPI_ISteamMatchmaking_CreateLobby                                func(uintptr, ELobbyType, int32) SteamAPICall_t
+	ptrAPI_ISteamMatchmaking_JoinLobby                                  func(uintptr, CSteamID) SteamAPICall_t
+	ptrAPI_ISteamMatchmaking_LeaveLobby                                 func(uintptr, CSteamID)
+	ptrAPI_ISteamMatchmaking_InviteUserToLobby                          func(uintptr, CSteamID, CSteamID) bool
+	ptrAPI_ISteamMatchmaking_GetLobbyMemberLimit                        func(uintptr, CSteamID) int32
+	ptrAPI_ISteamMatchmaking_SetLobbyMemberLimit                        func(uintptr, CSteamID, int32) bool
+	ptrAPI_ISteamMatchmaking_SetLobbyType                               func(uintptr, CSteamID, ELobbyType) bool
+	ptrAPI_ISteamMatchmaking_SetLobbyJoinable                           func(uintptr, CSteamID, bool) bool
+	ptrAPI_ISteamMatchmaking_GetLobbyOwner                              func(uintptr, CSteamID) CSteamID
+	ptrAPI_ISteamMatchmaking_SetLobbyOwner                              func(uintptr, CSteamID, CSteamID) bool
+	ptrAPI_ISteamMatchmaking_SetLinkedLobby                             func(uintptr, CSteamID, CSteamID) bool
+	ptrAPI_ISteamMatchmaking_GetNumLobbyMembers                         func(uintptr, CSteamID) int32
+	ptrAPI_ISteamMatchmaking_GetLobbyMemberByIndex                      func(uintptr, CSteamID, int32) CSteamID
+	ptrAPI_ISteamMatchmaking_SetLobbyData                               func(uintptr, CSteamID, string, string) bool
+	ptrAPI_ISteamMatchmaking_GetLobbyData                               func(uintptr, CSteamID, string) string
+	ptrAPI_ISteamMatchmaking_DeleteLobbyData                            func(uintptr, CSteamID, string) bool
+	ptrAPI_ISteamMatchmaking_GetLobbyDataCount                          func(uintptr, CSteamID) int32
+	ptrAPI_ISteamMatchmaking_GetLobbyDataByIndex                        func(uintptr, CSteamID, int32, uintptr, int32, uintptr, int32) bool
+	ptrAPI_ISteamMatchmaking_SetLobbyMemberData                         func(uintptr, CSteamID, string, string)
+	ptrAPI_ISteamMatchmaking_GetLobbyMemberData                         func(uintptr, CSteamID, CSteamID, string) string
+	ptrAPI_ISteamMatchmaking_SendLobbyChatMsg                           func(uintptr, CSteamID, uintptr, int32) bool
+	ptrAPI_ISteamMatchmaking_GetLobbyChatEntry                          func(uintptr, CSteamID, int32, uintptr, uintptr, int32, uintptr) int32
+	ptrAPI_ISteamMatchmaking_RequestLobbyData                           func(uintptr, CSteamID) bool
+	ptrAPI_ISteamMatchmaking_SetLobbyGameServer                         func(uintptr, CSteamID, uint32, uint16, CSteamID)
+	ptrAPI_ISteamMatchmaking_GetLobbyGameServer                         func(uintptr, CSteamID, uintptr, uintptr, uintptr) bool
+	ptrAPI_ISteamMatchmaking_CheckForPSNGameBootInvite                  func(uintptr, uintptr) bool
 
 	// ISteamHTTP
 	ptrAPI_SteamHTTP                            func() uintptr
@@ -374,23 +396,45 @@ func registerFunctions(lib uintptr) {
 
 	// ISteamMatchmaking
 	purego.RegisterLibFunc(&ptrAPI_SteamMatchmaking, lib, flatAPI_SteamMatchmaking)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetFavoriteGameCount, lib, flatAPI_ISteamMatchmaking_GetFavoriteGameCount)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetFavoriteGame, lib, flatAPI_ISteamMatchmaking_GetFavoriteGame)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddFavoriteGame, lib, flatAPI_ISteamMatchmaking_AddFavoriteGame)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_RemoveFavoriteGame, lib, flatAPI_ISteamMatchmaking_RemoveFavoriteGame)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_RequestLobbyList, lib, flatAPI_ISteamMatchmaking_RequestLobbyList)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter, lib, flatAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter, lib, flatAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter, lib, flatAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable, lib, flatAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter, lib, flatAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter, lib, flatAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter, lib, flatAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyByIndex, lib, flatAPI_ISteamMatchmaking_GetLobbyByIndex)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_CreateLobby, lib, flatAPI_ISteamMatchmaking_CreateLobby)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_JoinLobby, lib, flatAPI_ISteamMatchmaking_JoinLobby)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_LeaveLobby, lib, flatAPI_ISteamMatchmaking_LeaveLobby)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_InviteUserToLobby, lib, flatAPI_ISteamMatchmaking_InviteUserToLobby)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetNumLobbyMembers, lib, flatAPI_ISteamMatchmaking_GetNumLobbyMembers)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyMemberByIndex, lib, flatAPI_ISteamMatchmaking_GetLobbyMemberByIndex)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyData, lib, flatAPI_ISteamMatchmaking_GetLobbyData)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyData, lib, flatAPI_ISteamMatchmaking_SetLobbyData)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyOwner, lib, flatAPI_ISteamMatchmaking_GetLobbyOwner)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyOwner, lib, flatAPI_ISteamMatchmaking_SetLobbyOwner)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyGameServer, lib, flatAPI_ISteamMatchmaking_SetLobbyGameServer)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyGameServer, lib, flatAPI_ISteamMatchmaking_GetLobbyGameServer)
-	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyJoinable, lib, flatAPI_ISteamMatchmaking_SetLobbyJoinable)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyMemberLimit, lib, flatAPI_ISteamMatchmaking_GetLobbyMemberLimit)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyMemberLimit, lib, flatAPI_ISteamMatchmaking_SetLobbyMemberLimit)
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyType, lib, flatAPI_ISteamMatchmaking_SetLobbyType)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyJoinable, lib, flatAPI_ISteamMatchmaking_SetLobbyJoinable)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyOwner, lib, flatAPI_ISteamMatchmaking_GetLobbyOwner)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyOwner, lib, flatAPI_ISteamMatchmaking_SetLobbyOwner)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLinkedLobby, lib, flatAPI_ISteamMatchmaking_SetLinkedLobby)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetNumLobbyMembers, lib, flatAPI_ISteamMatchmaking_GetNumLobbyMembers)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyMemberByIndex, lib, flatAPI_ISteamMatchmaking_GetLobbyMemberByIndex)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyData, lib, flatAPI_ISteamMatchmaking_SetLobbyData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyData, lib, flatAPI_ISteamMatchmaking_GetLobbyData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_DeleteLobbyData, lib, flatAPI_ISteamMatchmaking_DeleteLobbyData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyDataCount, lib, flatAPI_ISteamMatchmaking_GetLobbyDataCount)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyDataByIndex, lib, flatAPI_ISteamMatchmaking_GetLobbyDataByIndex)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyMemberData, lib, flatAPI_ISteamMatchmaking_SetLobbyMemberData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyMemberData, lib, flatAPI_ISteamMatchmaking_GetLobbyMemberData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SendLobbyChatMsg, lib, flatAPI_ISteamMatchmaking_SendLobbyChatMsg)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyChatEntry, lib, flatAPI_ISteamMatchmaking_GetLobbyChatEntry)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_RequestLobbyData, lib, flatAPI_ISteamMatchmaking_RequestLobbyData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_SetLobbyGameServer, lib, flatAPI_ISteamMatchmaking_SetLobbyGameServer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyGameServer, lib, flatAPI_ISteamMatchmaking_GetLobbyGameServer)
+	registerOptionalFunc(&ptrAPI_ISteamMatchmaking_CheckForPSNGameBootInvite, lib, flatAPI_ISteamMatchmaking_CheckForPSNGameBootInvite)
 
 	// ISteamHTTP
 	purego.RegisterLibFunc(&ptrAPI_SteamHTTP, lib, flatAPI_SteamHTTP)
@@ -1035,8 +1079,63 @@ func SteamMatchmakingV009() ISteamMatchmaking {
 
 type steamMatchmaking uintptr
 
+func (s steamMatchmaking) GetFavoriteGameCount() int {
+	return int(ptrAPI_ISteamMatchmaking_GetFavoriteGameCount(uintptr(s)))
+}
+
+func (s steamMatchmaking) GetFavoriteGame(index int) (FavoriteGame, bool) {
+	var favorite FavoriteGame
+	ok := ptrAPI_ISteamMatchmaking_GetFavoriteGame(
+		uintptr(s),
+		int32(index),
+		uintptr(unsafe.Pointer(&favorite.AppID)),
+		uintptr(unsafe.Pointer(&favorite.IP)),
+		uintptr(unsafe.Pointer(&favorite.ConnectionPort)),
+		uintptr(unsafe.Pointer(&favorite.QueryPort)),
+		uintptr(unsafe.Pointer(&favorite.Flags)),
+		uintptr(unsafe.Pointer(&favorite.LastPlayedOnServerTime)),
+	)
+	return favorite, ok
+}
+
+func (s steamMatchmaking) AddFavoriteGame(appID AppId_t, ip uint32, connectionPort, queryPort uint16, flags, lastPlayedOnServerTime uint32) int {
+	return int(ptrAPI_ISteamMatchmaking_AddFavoriteGame(uintptr(s), appID, ip, connectionPort, queryPort, flags, lastPlayedOnServerTime))
+}
+
+func (s steamMatchmaking) RemoveFavoriteGame(appID AppId_t, ip uint32, connectionPort, queryPort uint16, flags uint32) bool {
+	return ptrAPI_ISteamMatchmaking_RemoveFavoriteGame(uintptr(s), appID, ip, connectionPort, queryPort, flags)
+}
+
 func (s steamMatchmaking) RequestLobbyList() SteamAPICall_t {
 	return ptrAPI_ISteamMatchmaking_RequestLobbyList(uintptr(s))
+}
+
+func (s steamMatchmaking) AddRequestLobbyListStringFilter(key, value string, comparisonType ELobbyComparison) {
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter(uintptr(s), key, value, comparisonType)
+}
+
+func (s steamMatchmaking) AddRequestLobbyListNumericalFilter(key string, value int, comparisonType ELobbyComparison) {
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter(uintptr(s), key, int32(value), comparisonType)
+}
+
+func (s steamMatchmaking) AddRequestLobbyListNearValueFilter(key string, value int) {
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter(uintptr(s), key, int32(value))
+}
+
+func (s steamMatchmaking) AddRequestLobbyListFilterSlotsAvailable(slotsAvailable int) {
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable(uintptr(s), int32(slotsAvailable))
+}
+
+func (s steamMatchmaking) AddRequestLobbyListDistanceFilter(distanceFilter ELobbyDistanceFilter) {
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter(uintptr(s), distanceFilter)
+}
+
+func (s steamMatchmaking) AddRequestLobbyListResultCountFilter(maxResults int) {
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter(uintptr(s), int32(maxResults))
+}
+
+func (s steamMatchmaking) AddRequestLobbyListCompatibleMembersFilter(lobbyID CSteamID) {
+	ptrAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter(uintptr(s), lobbyID)
 }
 
 func (s steamMatchmaking) GetLobbyByIndex(index int) CSteamID {
@@ -1059,6 +1158,34 @@ func (s steamMatchmaking) InviteUserToLobby(lobbyID, invitee CSteamID) bool {
 	return ptrAPI_ISteamMatchmaking_InviteUserToLobby(uintptr(s), lobbyID, invitee)
 }
 
+func (s steamMatchmaking) SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool {
+	return ptrAPI_ISteamMatchmaking_SetLobbyMemberLimit(uintptr(s), lobbyID, int32(maxMembers))
+}
+
+func (s steamMatchmaking) GetLobbyMemberLimit(lobbyID CSteamID) int {
+	return int(ptrAPI_ISteamMatchmaking_GetLobbyMemberLimit(uintptr(s), lobbyID))
+}
+
+func (s steamMatchmaking) SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool {
+	return ptrAPI_ISteamMatchmaking_SetLobbyType(uintptr(s), lobbyID, lobbyType)
+}
+
+func (s steamMatchmaking) SetLobbyJoinable(lobbyID CSteamID, joinable bool) bool {
+	return ptrAPI_ISteamMatchmaking_SetLobbyJoinable(uintptr(s), lobbyID, joinable)
+}
+
+func (s steamMatchmaking) GetLobbyOwner(lobbyID CSteamID) CSteamID {
+	return ptrAPI_ISteamMatchmaking_GetLobbyOwner(uintptr(s), lobbyID)
+}
+
+func (s steamMatchmaking) SetLobbyOwner(lobbyID, owner CSteamID) bool {
+	return ptrAPI_ISteamMatchmaking_SetLobbyOwner(uintptr(s), lobbyID, owner)
+}
+
+func (s steamMatchmaking) SetLinkedLobby(lobbyID, lobbyDependent CSteamID) bool {
+	return ptrAPI_ISteamMatchmaking_SetLinkedLobby(uintptr(s), lobbyID, lobbyDependent)
+}
+
 func (s steamMatchmaking) GetNumLobbyMembers(lobbyID CSteamID) int {
 	return int(ptrAPI_ISteamMatchmaking_GetNumLobbyMembers(uintptr(s), lobbyID))
 }
@@ -1078,20 +1205,79 @@ func (s steamMatchmaking) LobbyMembers(lobbyID CSteamID) iter.Seq[CSteamID] {
 	}
 }
 
-func (s steamMatchmaking) GetLobbyData(lobbyID CSteamID, key string) string {
-	return ptrAPI_ISteamMatchmaking_GetLobbyData(uintptr(s), lobbyID, key)
-}
-
 func (s steamMatchmaking) SetLobbyData(lobbyID CSteamID, key, value string) bool {
 	return ptrAPI_ISteamMatchmaking_SetLobbyData(uintptr(s), lobbyID, key, value)
 }
 
-func (s steamMatchmaking) GetLobbyOwner(lobbyID CSteamID) CSteamID {
-	return ptrAPI_ISteamMatchmaking_GetLobbyOwner(uintptr(s), lobbyID)
+func (s steamMatchmaking) GetLobbyData(lobbyID CSteamID, key string) string {
+	return ptrAPI_ISteamMatchmaking_GetLobbyData(uintptr(s), lobbyID, key)
 }
 
-func (s steamMatchmaking) SetLobbyOwner(lobbyID, owner CSteamID) bool {
-	return ptrAPI_ISteamMatchmaking_SetLobbyOwner(uintptr(s), lobbyID, owner)
+func (s steamMatchmaking) DeleteLobbyData(lobbyID CSteamID, key string) bool {
+	return ptrAPI_ISteamMatchmaking_DeleteLobbyData(uintptr(s), lobbyID, key)
+}
+
+func (s steamMatchmaking) GetLobbyDataCount(lobbyID CSteamID) int {
+	return int(ptrAPI_ISteamMatchmaking_GetLobbyDataCount(uintptr(s), lobbyID))
+}
+
+func (s steamMatchmaking) GetLobbyDataByIndex(lobbyID CSteamID, lobbyDataIndex int) (key, value string, ok bool) {
+	var keyBuf [256]byte
+	var valueBuf [4096]byte
+	ok = ptrAPI_ISteamMatchmaking_GetLobbyDataByIndex(
+		uintptr(s),
+		lobbyID,
+		int32(lobbyDataIndex),
+		uintptr(unsafe.Pointer(&keyBuf[0])),
+		int32(len(keyBuf)),
+		uintptr(unsafe.Pointer(&valueBuf[0])),
+		int32(len(valueBuf)),
+	)
+	if !ok {
+		return "", "", false
+	}
+	key = cStringToGo(keyBuf[:])
+	value = cStringToGo(valueBuf[:])
+	return key, value, true
+}
+
+func (s steamMatchmaking) SetLobbyMemberData(lobbyID CSteamID, key, value string) {
+	ptrAPI_ISteamMatchmaking_SetLobbyMemberData(uintptr(s), lobbyID, key, value)
+}
+
+func (s steamMatchmaking) GetLobbyMemberData(lobbyID, user CSteamID, key string) string {
+	return ptrAPI_ISteamMatchmaking_GetLobbyMemberData(uintptr(s), lobbyID, user, key)
+}
+
+func (s steamMatchmaking) SendLobbyChatMsg(lobbyID CSteamID, msgBody []byte) bool {
+	var ptr uintptr
+	if len(msgBody) != 0 {
+		ptr = uintptr(unsafe.Pointer(&msgBody[0]))
+	}
+	return ptrAPI_ISteamMatchmaking_SendLobbyChatMsg(uintptr(s), lobbyID, ptr, int32(len(msgBody)))
+}
+
+func (s steamMatchmaking) GetLobbyChatEntry(lobbyID CSteamID, chatID int, data []byte) (user CSteamID, entryType EChatEntryType, bytesCopied int) {
+	var ptr uintptr
+	if len(data) != 0 {
+		ptr = uintptr(unsafe.Pointer(&data[0]))
+	}
+	var rawEntryType int32
+	bytesCopied = int(ptrAPI_ISteamMatchmaking_GetLobbyChatEntry(
+		uintptr(s),
+		lobbyID,
+		int32(chatID),
+		uintptr(unsafe.Pointer(&user)),
+		ptr,
+		int32(len(data)),
+		uintptr(unsafe.Pointer(&rawEntryType)),
+	))
+	entryType = EChatEntryType(rawEntryType)
+	return
+}
+
+func (s steamMatchmaking) RequestLobbyData(lobbyID CSteamID) bool {
+	return ptrAPI_ISteamMatchmaking_RequestLobbyData(uintptr(s), lobbyID)
 }
 
 func (s steamMatchmaking) SetLobbyGameServer(lobbyID CSteamID, ip uint32, port uint16, server CSteamID) {
@@ -1103,16 +1289,15 @@ func (s steamMatchmaking) GetLobbyGameServer(lobbyID CSteamID) (ip uint32, port 
 	return
 }
 
-func (s steamMatchmaking) SetLobbyJoinable(lobbyID CSteamID, joinable bool) bool {
-	return ptrAPI_ISteamMatchmaking_SetLobbyJoinable(uintptr(s), lobbyID, joinable)
-}
-
-func (s steamMatchmaking) SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool {
-	return ptrAPI_ISteamMatchmaking_SetLobbyMemberLimit(uintptr(s), lobbyID, int32(maxMembers))
-}
-
-func (s steamMatchmaking) SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool {
-	return ptrAPI_ISteamMatchmaking_SetLobbyType(uintptr(s), lobbyID, lobbyType)
+func (s steamMatchmaking) CheckForPSNGameBootInvite(lobbyID *CSteamID) bool {
+	if ptrAPI_ISteamMatchmaking_CheckForPSNGameBootInvite == nil {
+		return false
+	}
+	var ptr uintptr
+	if lobbyID != nil {
+		ptr = uintptr(unsafe.Pointer(lobbyID))
+	}
+	return ptrAPI_ISteamMatchmaking_CheckForPSNGameBootInvite(uintptr(s), ptr)
 }
 
 func SteamHTTP() ISteamHTTP {
