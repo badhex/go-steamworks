@@ -171,6 +171,30 @@ Go accessors. Interfaces are either:
 * fully/partially typed wrappers (method-by-method Go bindings), or
 * handle-backed wrappers exposing native Go structs with `Ptr() uintptr` and `Valid() bool`.
 
+
+### SDK return-structure mapping (Go representation)
+
+The following structures are mapped directly from Steamworks SDK return payloads
+into Go-native structures and aliases used by this package.
+
+| SDK concept | Go return type | Go fields / notes |
+|---|---|---|
+| SteamID / app / call handles | `CSteamID`, `AppId_t`, `SteamAPICall_t`, `HTTPRequestHandle`, etc. | Named Go aliases over SDK integer handle types (`uint32`/`uint64`-backed) for strong typing at call sites. |
+| Friend game session info (`FriendGameInfo_t`) | `FriendGameInfo` | `GameID CGameID`, `GameIP uint32`, `GamePort uint16`, `QueryPort uint16`, `LobbySteamID CSteamID`. |
+| Digital input action state (`InputDigitalActionData_t`) | `InputDigitalActionData` | `State bool`, `Active bool`. |
+| Analog input action state (`InputAnalogActionData_t`) | `InputAnalogActionData` | `Mode EInputSourceMode`, `X float32`, `Y float32`, `Active bool`. |
+| Motion input state (`InputMotionData_t`) | `InputMotionData` | `RotQuatX/Y/Z/W`, `PosAccelX/Y/Z`, `RotVelX/Y/Z` (all `float32`). |
+| Inventory item details (`SteamItemDetails_t`) | `SteamItemDetails` | `ItemID SteamItemInstanceID_t`, `Definition SteamItemDef_t`, `Quantity uint16`, `Flags uint16`. |
+| Networking IP addr (`SteamNetworkingIPAddr`) | `SteamNetworkingIPAddr` | Native Go struct mirror of SDK address bytes (`IP [16]byte`) and `Port uint16`. |
+| Networking identity (`SteamNetworkingIdentity`) | `SteamNetworkingIdentity` | Native Go struct carrying `IdentityType int32`, reserved bytes, and `Data [128]byte`. |
+| Networking message (`SteamNetworkingMessage_t`) | `*SteamNetworkingMessage` | Exposes payload pointer/size plus sender/connection metadata; includes `Release()` helper to invoke SDK release callback. |
+| Handle-backed interface families (e.g. `ISteamClient`) | `ISteamClient`, `ISteamAppTicket`, etc. | Returned as Go structs with `Ptr() uintptr` and `Valid() bool`. Pointer is resolved from `SteamAPI_*_v###` symbols (purego first, ffi fallback). |
+
+For pointer-backed interfaces, the expected structure is therefore the typed Go
+wrapper struct itself (for example `ISteamClient`) containing resolved SDK
+interface pointer state; callers should treat `Ptr()` as the canonical FFI entry
+address and gate usage with `Valid()`.
+
 **General**
 
 * `RestartAppIfNecessary(appID uint32) bool`
