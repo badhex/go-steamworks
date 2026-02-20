@@ -246,6 +246,7 @@ Go accessors. Interfaces are either:
 * `GetLargeFriendAvatar(friend CSteamID) int32`
 * `SetRichPresence(key, value string) bool`
 * `GetFriendGamePlayed(friend CSteamID) (FriendGameInfo, bool)`
+  * Returns `FriendGameInfo` mapped from SDK `FriendGameInfo_t` (see field breakdown below).
 * `InviteUserToGame(friend CSteamID, connectString string) bool`
 * `ActivateGameOverlay(dialog string)`
 * `ActivateGameOverlayToUser(dialog string, steamID CSteamID)`
@@ -310,12 +311,15 @@ Returned structure details:
 * `GetActiveActionSetLayers(inputHandle InputHandle_t, handles []InputActionSetHandle_t) int`
 * `GetDigitalActionHandle(actionName string) InputDigitalActionHandle_t`
 * `GetDigitalActionData(inputHandle InputHandle_t, actionHandle InputDigitalActionHandle_t) InputDigitalActionData`
+  * Returns `InputDigitalActionData` mapped from SDK `InputDigitalActionData_t`.
 * `GetDigitalActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputDigitalActionHandle_t, origins []EInputActionOrigin) int`
 * `GetAnalogActionHandle(actionName string) InputAnalogActionHandle_t`
 * `GetAnalogActionData(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t) InputAnalogActionData`
+  * Returns `InputAnalogActionData` mapped from SDK `InputAnalogActionData_t`.
 * `GetAnalogActionOrigins(inputHandle InputHandle_t, actionSetHandle InputActionSetHandle_t, actionHandle InputAnalogActionHandle_t, origins []EInputActionOrigin) int`
 * `StopAnalogActionMomentum(inputHandle InputHandle_t, actionHandle InputAnalogActionHandle_t)`
 * `GetMotionData(inputHandle InputHandle_t) InputMotionData`
+  * Returns `InputMotionData` mapped from SDK `InputMotionData_t`.
 * `TriggerVibration(inputHandle InputHandle_t, leftSpeed, rightSpeed uint16)`
 * `TriggerVibrationExtended(inputHandle InputHandle_t, leftSpeed, rightSpeed, leftTriggerSpeed, rightTriggerSpeed uint16)`
 * `TriggerSimpleHapticEvent(inputHandle InputHandle_t, pad ESteamControllerPad, durationMicroSec, offMicroSec, repeat uint16)`
@@ -346,6 +350,7 @@ Returned structure details:
 
 * `GetResultStatus(result SteamInventoryResult_t) EResult`
 * `GetResultItems(result SteamInventoryResult_t, outItems []SteamItemDetails) (int, bool)`
+  * Populates `outItems` with `SteamItemDetails` entries mapped from SDK `SteamItemDetails_t`.
 * `DestroyResult(result SteamInventoryResult_t)`
 
 Returned structure details:
@@ -388,6 +393,31 @@ Returned structure details:
 
 * Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
+**ISteamNetworkingMessages** (`SteamNetworkingMessages() ISteamNetworkingMessages`) — typed wrappers
+
+* `SendMessageToUser(identity *SteamNetworkingIdentity, data []byte, sendFlags SteamNetworkingSendFlags, remoteChannel int) EResult`
+* `ReceiveMessagesOnChannel(channel int, maxMessages int) []*SteamNetworkingMessage`
+  * Returns a slice of `*SteamNetworkingMessage` wrappers over SDK `SteamNetworkingMessage_t`.
+* `AcceptSessionWithUser(identity *SteamNetworkingIdentity) bool`
+* `CloseSessionWithUser(identity *SteamNetworkingIdentity) bool`
+* `CloseChannelWithUser(identity *SteamNetworkingIdentity, channel int) bool`
+
+Returned structure details:
+
+* `SteamNetworkingIdentity` fields:
+  * `IdentityType int32`
+  * `Reserved [3]int32`
+  * `Data [128]byte`
+* `SteamNetworkingMessage` (SDK `SteamNetworkingMessage_t`) pointer wrapper:
+  * `Data uintptr`
+  * `Size int32`
+  * `Conn HSteamNetConnection`
+  * `IdentityPeer SteamNetworkingIdentity`
+  * `ConnUserData int64`
+  * `TimeReceived int64`
+  * `MessageNumber int64`
+  * `ReleaseFunc uintptr` (invoked by `Release()`)
+
 **ISteamNetworkingSockets** (`SteamNetworkingSockets() ISteamNetworkingSockets`) — typed wrappers
 
 * `CreateListenSocketIP(localAddress *SteamNetworkingIPAddr, options []SteamNetworkingConfigValue) HSteamListenSocket`
@@ -399,10 +429,12 @@ Returned structure details:
 * `CloseListenSocket(socket HSteamListenSocket) bool`
 * `SendMessageToConnection(connection HSteamNetConnection, data []byte, sendFlags SteamNetworkingSendFlags) (EResult, int64)`
 * `ReceiveMessagesOnConnection(connection HSteamNetConnection, maxMessages int) []*SteamNetworkingMessage`
+  * Returns a slice of `*SteamNetworkingMessage` wrappers over SDK `SteamNetworkingMessage_t`.
 * `CreatePollGroup() HSteamNetPollGroup`
 * `DestroyPollGroup(group HSteamNetPollGroup) bool`
 * `SetConnectionPollGroup(connection HSteamNetConnection, group HSteamNetPollGroup) bool`
 * `ReceiveMessagesOnPollGroup(group HSteamNetPollGroup, maxMessages int) []*SteamNetworkingMessage`
+  * Returns a slice of `*SteamNetworkingMessage` wrappers over SDK `SteamNetworkingMessage_t`.
 
 Returned structure details:
 
@@ -426,6 +458,7 @@ Returned structure details:
 **ISteamNetworkingUtils** (`SteamNetworkingUtils() ISteamNetworkingUtils`) — typed wrappers
 
 * `AllocateMessage(size int) *SteamNetworkingMessage`
+  * Returns a `*SteamNetworkingMessage` wrapper over SDK `SteamNetworkingMessage_t`.
 * `InitRelayNetworkAccess()`
 * `GetLocalTimestamp() SteamNetworkingMicroseconds`
 
