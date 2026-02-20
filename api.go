@@ -8,10 +8,13 @@ import (
 	"fmt"
 	"iter"
 	"os"
+	"runtime"
+	"sync"
 	"unique"
 	"unsafe"
 
 	"github.com/ebitengine/purego"
+	"github.com/jupiterrider/ffi"
 )
 
 type lib struct {
@@ -241,6 +244,41 @@ var (
 	ptrAPI_ISteamNetworkingSockets_SetConnectionPollGroup      func(uintptr, HSteamNetConnection, HSteamNetPollGroup) bool
 	ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup  func(uintptr, HSteamNetPollGroup, uintptr, int32) int32
 )
+
+var ffiLibOnce = sync.OnceValues(func() (ffi.Lib, error) {
+	candidates := []string{}
+	if customPath := os.Getenv(steamworksLibEnv); customPath != "" {
+		candidates = append(candidates, customPath)
+	}
+	switch runtime.GOOS {
+	case "windows":
+		candidates = append(candidates, "steam_api64.dll")
+	case "darwin":
+		candidates = append(candidates, "libsteam_api.dylib")
+	default:
+		candidates = append(candidates, "libsteam_api.so")
+	}
+
+	for _, candidate := range candidates {
+		lib, err := ffi.Load(candidate)
+		if err == nil {
+			return lib, nil
+		}
+	}
+	return ffi.Lib{}, fmt.Errorf("steamworks: ffi loader could not open steam_api library")
+})
+
+func fallbackResolveInterfaceSymbol(symbol string) uintptr {
+	lib, err := ffiLibOnce()
+	if err != nil {
+		return 0
+	}
+	ptr, err := lib.Get(symbol)
+	if err != nil {
+		return 0
+	}
+	return ptr
+}
 
 func mustLookupSymbol(lib uintptr, name string) uintptr {
 	ptr, err := purego.Dlsym(lib, name)
@@ -539,6 +577,155 @@ func GetSteamInstallPath() string {
 func ReleaseCurrentThreadMemory() {
 	mustLoad()
 	ptrAPI_ReleaseCurrentThreadMemory()
+}
+
+func SteamAppTicket() ISteamAppTicket {
+	return SteamAppTicketRaw()
+}
+
+func SteamClient() ISteamClient {
+	return SteamClientRaw()
+}
+
+func SteamController() ISteamController {
+	return SteamControllerRaw()
+}
+
+func SteamGameCoordinator() ISteamGameCoordinator {
+	return SteamGameCoordinatorRaw()
+}
+
+func SteamGameServerStats() ISteamGameServerStats {
+	return SteamGameServerStatsRaw()
+}
+
+func SteamHTMLSurface() ISteamHTMLSurface {
+	return SteamHTMLSurfaceRaw()
+}
+
+func SteamMatchmakingServers() ISteamMatchmakingServers {
+	return SteamMatchmakingServersRaw()
+}
+
+func SteamMusic() ISteamMusic {
+	return SteamMusicRaw()
+}
+
+func SteamNetworking() ISteamNetworking {
+	return SteamNetworkingRaw()
+}
+
+func SteamRemotePlay() ISteamRemotePlay {
+	return SteamRemotePlayRaw()
+}
+
+func SteamScreenshots() ISteamScreenshots {
+	return SteamScreenshotsRaw()
+}
+
+func SteamTimeline() ISteamTimeline {
+	return SteamTimelineRaw()
+}
+
+func SteamVideo() ISteamVideo {
+	return SteamVideoRaw()
+}
+
+func SteamAPIClient() ISteamAPIClient {
+	return SteamAPIClientRaw()
+}
+
+func SteamAPIGameServer() ISteamAPIGameServer {
+	return SteamAPIGameServerRaw()
+}
+
+func resolveInterfaceSymbol(symbols ...string) uintptr {
+	mustLoad()
+	for _, sym := range symbols {
+		ptr, err := purego.Dlsym(theLib.lib, sym)
+		if err == nil && ptr != 0 {
+			return ptr
+		}
+		if ptr := fallbackResolveInterfaceSymbol(sym); ptr != 0 {
+			return ptr
+		}
+	}
+	return 0
+}
+
+// SteamAppTicketRaw returns the ISteamAppTicket interface pointer for purego/ffi calls.
+func SteamAppTicketRaw() ISteamAppTicket {
+	return ISteamAppTicket{ptr: resolveInterfaceSymbol("SteamAPI_SteamAppTicket_v001")}
+}
+
+// SteamClientRaw returns the ISteamClient interface pointer for purego/ffi calls.
+func SteamClientRaw() ISteamClient {
+	return ISteamClient{ptr: resolveInterfaceSymbol("SteamAPI_SteamClient_v022", "SteamAPI_SteamClient_v021", "SteamAPI_SteamClient_v020")}
+}
+
+// SteamControllerRaw returns the ISteamController interface pointer for purego/ffi calls.
+func SteamControllerRaw() ISteamController {
+	return ISteamController{ptr: resolveInterfaceSymbol("SteamAPI_SteamController_v008", "SteamAPI_SteamController_v007")}
+}
+
+// SteamGameCoordinatorRaw returns the ISteamGameCoordinator interface pointer for purego/ffi calls.
+func SteamGameCoordinatorRaw() ISteamGameCoordinator {
+	return ISteamGameCoordinator{ptr: resolveInterfaceSymbol("SteamAPI_SteamGameCoordinator_v001")}
+}
+
+// SteamGameServerStatsRaw returns the ISteamGameServerStats interface pointer for purego/ffi calls.
+func SteamGameServerStatsRaw() ISteamGameServerStats {
+	return ISteamGameServerStats{ptr: resolveInterfaceSymbol("SteamAPI_SteamGameServerStats_v001")}
+}
+
+// SteamHTMLSurfaceRaw returns the ISteamHTMLSurface interface pointer for purego/ffi calls.
+func SteamHTMLSurfaceRaw() ISteamHTMLSurface {
+	return ISteamHTMLSurface{ptr: resolveInterfaceSymbol("SteamAPI_SteamHTMLSurface_v005")}
+}
+
+// SteamMatchmakingServersRaw returns the ISteamMatchmakingServers interface pointer for purego/ffi calls.
+func SteamMatchmakingServersRaw() ISteamMatchmakingServers {
+	return ISteamMatchmakingServers{ptr: resolveInterfaceSymbol("SteamAPI_SteamMatchmakingServers_v002")}
+}
+
+// SteamMusicRaw returns the ISteamMusic interface pointer for purego/ffi calls.
+func SteamMusicRaw() ISteamMusic {
+	return ISteamMusic{ptr: resolveInterfaceSymbol("SteamAPI_SteamMusic_v001")}
+}
+
+// SteamNetworkingRaw returns the legacy ISteamNetworking interface pointer for purego/ffi calls.
+func SteamNetworkingRaw() ISteamNetworking {
+	return ISteamNetworking{ptr: resolveInterfaceSymbol("SteamAPI_SteamNetworking_v006", "SteamAPI_SteamNetworking_v005")}
+}
+
+// SteamRemotePlayRaw returns the ISteamRemotePlay interface pointer for purego/ffi calls.
+func SteamRemotePlayRaw() ISteamRemotePlay {
+	return ISteamRemotePlay{ptr: resolveInterfaceSymbol("SteamAPI_SteamRemotePlay_v001")}
+}
+
+// SteamScreenshotsRaw returns the ISteamScreenshots interface pointer for purego/ffi calls.
+func SteamScreenshotsRaw() ISteamScreenshots {
+	return ISteamScreenshots{ptr: resolveInterfaceSymbol("SteamAPI_SteamScreenshots_v003")}
+}
+
+// SteamTimelineRaw returns the ISteamTimeline interface pointer for purego/ffi calls.
+func SteamTimelineRaw() ISteamTimeline {
+	return ISteamTimeline{ptr: resolveInterfaceSymbol("SteamAPI_SteamTimeline_v001")}
+}
+
+// SteamVideoRaw returns the ISteamVideo interface pointer for purego/ffi calls.
+func SteamVideoRaw() ISteamVideo {
+	return ISteamVideo{ptr: resolveInterfaceSymbol("SteamAPI_SteamVideo_v002")}
+}
+
+// SteamAPIClientRaw returns the steam_api client foundation handle for purego/ffi calls.
+func SteamAPIClientRaw() ISteamAPIClient {
+	return ISteamAPIClient{ptr: resolveInterfaceSymbol("SteamAPI_SteamClient_v022", "SteamAPI_SteamClient_v021", "SteamAPI_SteamClient_v020")}
+}
+
+// SteamAPIGameServerRaw returns the steam_gameserver foundation handle for purego/ffi calls.
+func SteamAPIGameServerRaw() ISteamAPIGameServer {
+	return ISteamAPIGameServer{ptr: resolveInterfaceSymbol("SteamAPI_SteamGameServer_v015")}
 }
 
 func SteamApps() ISteamApps {
