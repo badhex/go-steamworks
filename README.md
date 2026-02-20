@@ -172,29 +172,6 @@ Go accessors. Interfaces are either:
 * handle-backed wrappers exposing native Go structs with `Ptr() uintptr` and `Valid() bool`.
 
 
-### SDK return-structure mapping (Go representation)
-
-The following structures are mapped directly from Steamworks SDK return payloads
-into Go-native structures and aliases used by this package.
-
-| SDK concept | Go return type | Go fields / notes |
-|---|---|---|
-| SteamID / app / call handles | `CSteamID`, `AppId_t`, `SteamAPICall_t`, `HTTPRequestHandle`, etc. | Named Go aliases over SDK integer handle types (`uint32`/`uint64`-backed) for strong typing at call sites. |
-| Friend game session info (`FriendGameInfo_t`) | `FriendGameInfo` | `GameID CGameID`, `GameIP uint32`, `GamePort uint16`, `QueryPort uint16`, `LobbySteamID CSteamID`. |
-| Digital input action state (`InputDigitalActionData_t`) | `InputDigitalActionData` | `State bool`, `Active bool`. |
-| Analog input action state (`InputAnalogActionData_t`) | `InputAnalogActionData` | `Mode EInputSourceMode`, `X float32`, `Y float32`, `Active bool`. |
-| Motion input state (`InputMotionData_t`) | `InputMotionData` | `RotQuatX/Y/Z/W`, `PosAccelX/Y/Z`, `RotVelX/Y/Z` (all `float32`). |
-| Inventory item details (`SteamItemDetails_t`) | `SteamItemDetails` | `ItemID SteamItemInstanceID_t`, `Definition SteamItemDef_t`, `Quantity uint16`, `Flags uint16`. |
-| Networking IP addr (`SteamNetworkingIPAddr`) | `SteamNetworkingIPAddr` | Native Go struct mirror of SDK address bytes (`IP [16]byte`) and `Port uint16`. |
-| Networking identity (`SteamNetworkingIdentity`) | `SteamNetworkingIdentity` | Native Go struct carrying `IdentityType int32`, reserved bytes, and `Data [128]byte`. |
-| Networking message (`SteamNetworkingMessage_t`) | `*SteamNetworkingMessage` | Exposes payload pointer/size plus sender/connection metadata; includes `Release()` helper to invoke SDK release callback. |
-| Handle-backed interface families (e.g. `ISteamClient`) | `ISteamClient`, `ISteamAppTicket`, etc. | Returned as Go structs with `Ptr() uintptr` and `Valid() bool`. Pointer is resolved from `SteamAPI_*_v###` symbols (purego first, ffi fallback). |
-
-For pointer-backed interfaces, the expected structure is therefore the typed Go
-wrapper struct itself (for example `ISteamClient`) containing resolved SDK
-interface pointer state; callers should treat `Ptr()` as the canonical FFI entry
-address and gate usage with `Valid()`.
-
 **General**
 
 * `RestartAppIfNecessary(appID uint32) bool`
@@ -243,15 +220,15 @@ address and gate usage with `Valid()`.
 
 **ISteamAppTicket** (`SteamAppTicket() ISteamAppTicket`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamClient** (`SteamClient() ISteamClient`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamController** (`SteamController() ISteamController`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamFriends** (`SteamFriends() ISteamFriends`) — typed wrappers
 
@@ -277,9 +254,18 @@ address and gate usage with `Valid()`.
 * `ActivateGameOverlayInviteDialog(lobbyID CSteamID)`
 * `ActivateGameOverlayInviteDialogConnectString(connectString string)`
 
+Returned structure details:
+
+* `FriendGameInfo` (SDK `FriendGameInfo_t`) fields:
+  * `GameID CGameID`
+  * `GameIP uint32`
+  * `GamePort uint16`
+  * `QueryPort uint16`
+  * `LobbySteamID CSteamID`
+
 **ISteamGameCoordinator** (`SteamGameCoordinator() ISteamGameCoordinator`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamGameServer** (`SteamGameServer() ISteamGameServer`) — typed wrappers
 
@@ -292,11 +278,11 @@ address and gate usage with `Valid()`.
 
 **ISteamGameServerStats** (`SteamGameServerStats() ISteamGameServerStats`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamHTMLSurface** (`SteamHTMLSurface() ISteamHTMLSurface`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamHTTP** (`SteamHTTP() ISteamHTTP`) — typed wrappers
 
@@ -341,11 +327,34 @@ address and gate usage with `Valid()`.
 * `GetGlyphForActionOrigin(origin EInputActionOrigin) string`
 * `GetRemotePlaySessionID(inputHandle InputHandle_t) uint32`
 
+Returned structure details:
+
+* `InputDigitalActionData` (SDK `InputDigitalActionData_t`) fields:
+  * `State bool`
+  * `Active bool`
+* `InputAnalogActionData` (SDK `InputAnalogActionData_t`) fields:
+  * `Mode EInputSourceMode`
+  * `X float32`
+  * `Y float32`
+  * `Active bool`
+* `InputMotionData` (SDK `InputMotionData_t`) fields:
+  * `RotQuatX float32`, `RotQuatY float32`, `RotQuatZ float32`, `RotQuatW float32`
+  * `PosAccelX float32`, `PosAccelY float32`, `PosAccelZ float32`
+  * `RotVelX float32`, `RotVelY float32`, `RotVelZ float32`
+
 **ISteamInventory** (`SteamInventory() ISteamInventory`) — typed wrappers
 
 * `GetResultStatus(result SteamInventoryResult_t) EResult`
 * `GetResultItems(result SteamInventoryResult_t, outItems []SteamItemDetails) (int, bool)`
 * `DestroyResult(result SteamInventoryResult_t)`
+
+Returned structure details:
+
+* `SteamItemDetails` (SDK `SteamItemDetails_t`) fields:
+  * `ItemID SteamItemInstanceID_t`
+  * `Definition SteamItemDef_t`
+  * `Quantity uint16`
+  * `Flags uint16`
 
 **ISteamMatchmaking** (`SteamMatchmaking() ISteamMatchmaking`) — typed wrappers
 
@@ -369,15 +378,15 @@ address and gate usage with `Valid()`.
 
 **ISteamMatchmakingServers** (`SteamMatchmakingServers() ISteamMatchmakingServers`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamMusic** (`SteamMusic() ISteamMusic`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamNetworking** (`SteamNetworking() ISteamNetworking`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamNetworkingSockets** (`SteamNetworkingSockets() ISteamNetworkingSockets`) — typed wrappers
 
@@ -395,6 +404,25 @@ address and gate usage with `Valid()`.
 * `SetConnectionPollGroup(connection HSteamNetConnection, group HSteamNetPollGroup) bool`
 * `ReceiveMessagesOnPollGroup(group HSteamNetPollGroup, maxMessages int) []*SteamNetworkingMessage`
 
+Returned structure details:
+
+* `SteamNetworkingIPAddr` fields:
+  * `IP [16]byte`
+  * `Port uint16`
+* `SteamNetworkingIdentity` fields:
+  * `IdentityType int32`
+  * `Reserved [3]int32`
+  * `Data [128]byte`
+* `SteamNetworkingMessage` (SDK `SteamNetworkingMessage_t`) pointer wrapper:
+  * `Data uintptr`
+  * `Size int32`
+  * `Conn HSteamNetConnection`
+  * `IdentityPeer SteamNetworkingIdentity`
+  * `ConnUserData int64`
+  * `TimeReceived int64`
+  * `MessageNumber int64`
+  * `ReleaseFunc uintptr` (invoked by `Release()`)
+
 **ISteamNetworkingUtils** (`SteamNetworkingUtils() ISteamNetworkingUtils`) — typed wrappers
 
 * `AllocateMessage(size int) *SteamNetworkingMessage`
@@ -403,7 +431,7 @@ address and gate usage with `Valid()`.
 
 **ISteamRemotePlay** (`SteamRemotePlay() ISteamRemotePlay`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamRemoteStorage** (`SteamRemoteStorage() ISteamRemoteStorage`) — typed wrappers
 
@@ -414,11 +442,11 @@ address and gate usage with `Valid()`.
 
 **ISteamScreenshots** (`SteamScreenshots() ISteamScreenshots`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamTimeline** (`SteamTimeline() ISteamTimeline`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **ISteamUGC** (`SteamUGC() ISteamUGC`) — typed wrappers
 
@@ -460,7 +488,7 @@ address and gate usage with `Valid()`.
 
 **ISteamVideo** (`SteamVideo() ISteamVideo`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **SteamEncryptedAppTicket** — typed utility wrappers
 
@@ -471,15 +499,15 @@ address and gate usage with `Valid()`.
 
 **steam_api** (`SteamAPIClient() ISteamAPIClient`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 **steam_gameserver** (`SteamAPIGameServer() ISteamAPIGameServer`) — handle-backed
 
-* `Ptr() uintptr` and `Valid() bool`
+* Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
 
 ### Additional raw symbol helpers (purego/ffi)
 
-Raw helpers return Go wrapper structs that expose `Ptr() uintptr` / `Valid() bool` for direct purego binding and advanced symbol usage.
+Raw helpers return concrete Go wrapper structs per interface family; use `Ptr()` for FFI call entry and `Valid()` before invocation.
 
 When symbol lookup via `purego.Dlsym` fails for an interface symbol, the package also attempts an ffi-based fallback lookup via `github.com/jupiterrider/ffi`.
 
