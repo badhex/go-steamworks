@@ -14,8 +14,6 @@ import (
 	"github.com/ebitengine/purego"
 )
 
-const steamworksLibEnv = "STEAMWORKS_LIB_PATH"
-
 func loadLib() (uintptr, error) {
 	libName := "libsteam_api.so"
 	if runtime.GOOS == "darwin" {

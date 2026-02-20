@@ -247,7 +247,7 @@ var (
 
 var ffiLibOnce = sync.OnceValues(func() (ffi.Lib, error) {
 	candidates := []string{}
-	if customPath := os.Getenv(steamworksLibEnv); customPath != "" {
+	if customPath := os.Getenv("STEAMWORKS_LIB_PATH"); customPath != "" {
 		candidates = append(candidates, customPath)
 	}
 	switch runtime.GOOS {
@@ -639,15 +639,21 @@ func SteamAPIGameServer() ISteamAPIGameServer {
 	return SteamAPIGameServerRaw()
 }
 
-func resolveInterfaceSymbol(symbols ...string) uintptr {
+func resolveInterfaceFactory(symbols ...string) uintptr {
 	mustLoad()
 	for _, sym := range symbols {
-		ptr, err := purego.Dlsym(theLib.lib, sym)
-		if err == nil && ptr != 0 {
-			return ptr
+		fn, err := purego.Dlsym(theLib.lib, sym)
+		if err == nil && fn != 0 {
+			ptr, _, _ := purego.SyscallN(fn)
+			if ptr != 0 {
+				return ptr
+			}
 		}
-		if ptr := fallbackResolveInterfaceSymbol(sym); ptr != 0 {
-			return ptr
+		if fn := fallbackResolveInterfaceSymbol(sym); fn != 0 {
+			ptr, _, _ := purego.SyscallN(fn)
+			if ptr != 0 {
+				return ptr
+			}
 		}
 	}
 	return 0
@@ -655,77 +661,77 @@ func resolveInterfaceSymbol(symbols ...string) uintptr {
 
 // SteamAppTicketRaw returns the ISteamAppTicket interface pointer for purego/ffi calls.
 func SteamAppTicketRaw() ISteamAppTicket {
-	return ISteamAppTicket{ptr: resolveInterfaceSymbol("SteamAPI_SteamAppTicket_v001")}
+	return ISteamAppTicket{ptr: resolveInterfaceFactory("SteamAPI_SteamAppTicket_v001")}
 }
 
 // SteamClientRaw returns the ISteamClient interface pointer for purego/ffi calls.
 func SteamClientRaw() ISteamClient {
-	return ISteamClient{ptr: resolveInterfaceSymbol("SteamAPI_SteamClient_v022", "SteamAPI_SteamClient_v021", "SteamAPI_SteamClient_v020")}
+	return ISteamClient{ptr: resolveInterfaceFactory("SteamAPI_SteamClient_v022", "SteamAPI_SteamClient_v021", "SteamAPI_SteamClient_v020")}
 }
 
 // SteamControllerRaw returns the ISteamController interface pointer for purego/ffi calls.
 func SteamControllerRaw() ISteamController {
-	return ISteamController{ptr: resolveInterfaceSymbol("SteamAPI_SteamController_v008", "SteamAPI_SteamController_v007")}
+	return ISteamController{ptr: resolveInterfaceFactory("SteamAPI_SteamController_v008", "SteamAPI_SteamController_v007")}
 }
 
 // SteamGameCoordinatorRaw returns the ISteamGameCoordinator interface pointer for purego/ffi calls.
 func SteamGameCoordinatorRaw() ISteamGameCoordinator {
-	return ISteamGameCoordinator{ptr: resolveInterfaceSymbol("SteamAPI_SteamGameCoordinator_v001")}
+	return ISteamGameCoordinator{ptr: resolveInterfaceFactory("SteamAPI_SteamGameCoordinator_v001")}
 }
 
 // SteamGameServerStatsRaw returns the ISteamGameServerStats interface pointer for purego/ffi calls.
 func SteamGameServerStatsRaw() ISteamGameServerStats {
-	return ISteamGameServerStats{ptr: resolveInterfaceSymbol("SteamAPI_SteamGameServerStats_v001")}
+	return ISteamGameServerStats{ptr: resolveInterfaceFactory("SteamAPI_SteamGameServerStats_v001")}
 }
 
 // SteamHTMLSurfaceRaw returns the ISteamHTMLSurface interface pointer for purego/ffi calls.
 func SteamHTMLSurfaceRaw() ISteamHTMLSurface {
-	return ISteamHTMLSurface{ptr: resolveInterfaceSymbol("SteamAPI_SteamHTMLSurface_v005")}
+	return ISteamHTMLSurface{ptr: resolveInterfaceFactory("SteamAPI_SteamHTMLSurface_v005")}
 }
 
 // SteamMatchmakingServersRaw returns the ISteamMatchmakingServers interface pointer for purego/ffi calls.
 func SteamMatchmakingServersRaw() ISteamMatchmakingServers {
-	return ISteamMatchmakingServers{ptr: resolveInterfaceSymbol("SteamAPI_SteamMatchmakingServers_v002")}
+	return ISteamMatchmakingServers{ptr: resolveInterfaceFactory("SteamAPI_SteamMatchmakingServers_v002")}
 }
 
 // SteamMusicRaw returns the ISteamMusic interface pointer for purego/ffi calls.
 func SteamMusicRaw() ISteamMusic {
-	return ISteamMusic{ptr: resolveInterfaceSymbol("SteamAPI_SteamMusic_v001")}
+	return ISteamMusic{ptr: resolveInterfaceFactory("SteamAPI_SteamMusic_v001")}
 }
 
 // SteamNetworkingRaw returns the legacy ISteamNetworking interface pointer for purego/ffi calls.
 func SteamNetworkingRaw() ISteamNetworking {
-	return ISteamNetworking{ptr: resolveInterfaceSymbol("SteamAPI_SteamNetworking_v006", "SteamAPI_SteamNetworking_v005")}
+	return ISteamNetworking{ptr: resolveInterfaceFactory("SteamAPI_SteamNetworking_v006", "SteamAPI_SteamNetworking_v005")}
 }
 
 // SteamRemotePlayRaw returns the ISteamRemotePlay interface pointer for purego/ffi calls.
 func SteamRemotePlayRaw() ISteamRemotePlay {
-	return ISteamRemotePlay{ptr: resolveInterfaceSymbol("SteamAPI_SteamRemotePlay_v001")}
+	return ISteamRemotePlay{ptr: resolveInterfaceFactory("SteamAPI_SteamRemotePlay_v001")}
 }
 
 // SteamScreenshotsRaw returns the ISteamScreenshots interface pointer for purego/ffi calls.
 func SteamScreenshotsRaw() ISteamScreenshots {
-	return ISteamScreenshots{ptr: resolveInterfaceSymbol("SteamAPI_SteamScreenshots_v003")}
+	return ISteamScreenshots{ptr: resolveInterfaceFactory("SteamAPI_SteamScreenshots_v003")}
 }
 
 // SteamTimelineRaw returns the ISteamTimeline interface pointer for purego/ffi calls.
 func SteamTimelineRaw() ISteamTimeline {
-	return ISteamTimeline{ptr: resolveInterfaceSymbol("SteamAPI_SteamTimeline_v001")}
+	return ISteamTimeline{ptr: resolveInterfaceFactory("SteamAPI_SteamTimeline_v001")}
 }
 
 // SteamVideoRaw returns the ISteamVideo interface pointer for purego/ffi calls.
 func SteamVideoRaw() ISteamVideo {
-	return ISteamVideo{ptr: resolveInterfaceSymbol("SteamAPI_SteamVideo_v002")}
+	return ISteamVideo{ptr: resolveInterfaceFactory("SteamAPI_SteamVideo_v002")}
 }
 
 // SteamAPIClientRaw returns the steam_api client foundation handle for purego/ffi calls.
 func SteamAPIClientRaw() ISteamAPIClient {
-	return ISteamAPIClient{ptr: resolveInterfaceSymbol("SteamAPI_SteamClient_v022", "SteamAPI_SteamClient_v021", "SteamAPI_SteamClient_v020")}
+	return ISteamAPIClient{ptr: resolveInterfaceFactory("SteamAPI_SteamClient_v022", "SteamAPI_SteamClient_v021", "SteamAPI_SteamClient_v020")}
 }
 
 // SteamAPIGameServerRaw returns the steam_gameserver foundation handle for purego/ffi calls.
 func SteamAPIGameServerRaw() ISteamAPIGameServer {
-	return ISteamAPIGameServer{ptr: resolveInterfaceSymbol("SteamAPI_SteamGameServer_v015")}
+	return ISteamAPIGameServer{ptr: resolveInterfaceFactory("SteamAPI_SteamGameServer_v015")}
 }
 
 func SteamApps() ISteamApps {

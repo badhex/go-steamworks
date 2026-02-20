@@ -542,7 +542,7 @@ Returned structure details:
 
 Raw helpers return concrete Go wrapper structs per interface family; use `Ptr()` for FFI call entry and `Valid()` before invocation.
 
-When symbol lookup via `purego.Dlsym` fails for an interface symbol, the package also attempts an ffi-based fallback lookup via `github.com/jupiterrider/ffi`.
+Interface raw helpers resolve the `SteamAPI_*` exported factory symbol and invoke it (zero-arg) to obtain the actual ISteam* instance pointer. If `purego.Dlsym` cannot resolve the factory symbol, the package attempts an ffi-based fallback lookup via `github.com/jupiterrider/ffi`.
 
 * `SteamAppTicketRaw() ISteamAppTicket` (ISteamAppTicket)
 * `SteamClientRaw() ISteamClient` (ISteamClient)
