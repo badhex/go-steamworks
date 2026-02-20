@@ -274,7 +274,18 @@ implemented methods include:
 
 **ISteamMatchmaking** (`steamworks.SteamMatchmaking()`)
 
+* `GetFavoriteGameCount() int`
+* `GetFavoriteGame(index int) (appID AppId_t, ip uint32, connPort uint16, queryPort uint16, flags uint32, lastPlayed uint32, ok bool)`
+* `AddFavoriteGame(appID AppId_t, ip uint32, connPort uint16, queryPort uint16, flags uint32, lastPlayed uint32) int`
+* `RemoveFavoriteGame(appID AppId_t, ip uint32, connPort uint16, queryPort uint16, flags uint32) bool`
 * `RequestLobbyList() SteamAPICall_t`
+* `AddRequestLobbyListStringFilter(key, value string, comparison ELobbyComparison)`
+* `AddRequestLobbyListNumericalFilter(key string, value int, comparison ELobbyComparison)`
+* `AddRequestLobbyListNearValueFilter(key string, value int)`
+* `AddRequestLobbyListFilterSlotsAvailable(slots int)`
+* `AddRequestLobbyListDistanceFilter(filter ELobbyDistanceFilter)`
+* `AddRequestLobbyListResultCountFilter(maxResults int)`
+* `AddRequestLobbyListCompatibleMembersFilter(lobbyID CSteamID)`
 * `GetLobbyByIndex(index int) CSteamID`
 * `CreateLobby(lobbyType ELobbyType, maxMembers int) SteamAPICall_t`
 * `JoinLobby(lobbyID CSteamID) SteamAPICall_t`
@@ -283,14 +294,24 @@ implemented methods include:
 * `GetNumLobbyMembers(lobbyID CSteamID) int`
 * `GetLobbyMemberByIndex(lobbyID CSteamID, memberIndex int) CSteamID`
 * `GetLobbyData(lobbyID CSteamID, key string) string`
+* `GetLobbyDataCount(lobbyID CSteamID) int`
+* `GetLobbyDataByIndex(lobbyID CSteamID, index int) (key string, value string, ok bool)`
 * `SetLobbyData(lobbyID CSteamID, key, value string) bool`
+* `DeleteLobbyData(lobbyID CSteamID, key string) bool`
+* `GetLobbyMemberData(lobbyID, user CSteamID, key string) string`
+* `SetLobbyMemberData(lobbyID CSteamID, key, value string)`
+* `SendLobbyChatMsg(lobbyID CSteamID, message []byte) bool`
+* `GetLobbyChatEntry(lobbyID CSteamID, chatID int, maxData int) (user CSteamID, data []byte, entryType EChatEntryType, dataLen int)`
+* `RequestLobbyData(lobbyID CSteamID) bool`
 * `GetLobbyOwner(lobbyID CSteamID) CSteamID`
 * `SetLobbyOwner(lobbyID, owner CSteamID) bool`
 * `SetLobbyGameServer(lobbyID CSteamID, ip uint32, port uint16, server CSteamID)`
 * `GetLobbyGameServer(lobbyID CSteamID) (ip uint32, port uint16, server CSteamID, ok bool)`
 * `SetLobbyJoinable(lobbyID CSteamID, joinable bool) bool`
 * `SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool`
+* `GetLobbyMemberLimit(lobbyID CSteamID) int`
 * `SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool`
+* `SetLinkedLobby(lobbyID, dependentLobbyID CSteamID) bool`
 
 **ISteamHTTP** (`steamworks.SteamHTTP()`)
 

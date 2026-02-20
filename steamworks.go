@@ -202,6 +202,45 @@ const (
 	ELobbyType_Invisible   ELobbyType = 3
 )
 
+type ELobbyComparison int32
+
+const (
+	ELobbyComparisonEqualToOrLessThan    ELobbyComparison = -2
+	ELobbyComparisonLessThan             ELobbyComparison = -1
+	ELobbyComparisonEqual                ELobbyComparison = 0
+	ELobbyComparisonGreaterThan          ELobbyComparison = 1
+	ELobbyComparisonEqualToOrGreaterThan ELobbyComparison = 2
+	ELobbyComparisonNotEqual             ELobbyComparison = 3
+)
+
+type ELobbyDistanceFilter int32
+
+const (
+	ELobbyDistanceFilterClose     ELobbyDistanceFilter = 0
+	ELobbyDistanceFilterDefault   ELobbyDistanceFilter = 1
+	ELobbyDistanceFilterFar       ELobbyDistanceFilter = 2
+	ELobbyDistanceFilterWorldwide ELobbyDistanceFilter = 3
+)
+
+type EChatEntryType int32
+
+const (
+	EChatEntryTypeInvalid          EChatEntryType = 0
+	EChatEntryTypeChatMsg          EChatEntryType = 1
+	EChatEntryTypeTyping           EChatEntryType = 2
+	EChatEntryTypeInviteGame       EChatEntryType = 3
+	EChatEntryTypeEmote            EChatEntryType = 4
+	EChatEntryTypeLeftConversation EChatEntryType = 6
+	EChatEntryTypeEntered          EChatEntryType = 7
+	EChatEntryTypeWasKicked        EChatEntryType = 8
+	EChatEntryTypeWasBanned        EChatEntryType = 9
+	EChatEntryTypeDisconnected     EChatEntryType = 10
+	EChatEntryTypeHistoricalChat   EChatEntryType = 11
+	EChatEntryTypeReserved1        EChatEntryType = 12
+	EChatEntryTypeReserved2        EChatEntryType = 13
+	EChatEntryTypeLinkBlocked      EChatEntryType = 14
+)
+
 type EResult int32
 
 const (
@@ -592,7 +631,18 @@ type ISteamFriends interface {
 }
 
 type ISteamMatchmaking interface {
+	GetFavoriteGameCount() int
+	GetFavoriteGame(index int) (appID AppId_t, ip uint32, connPort uint16, queryPort uint16, flags uint32, lastPlayed uint32, ok bool)
+	AddFavoriteGame(appID AppId_t, ip uint32, connPort uint16, queryPort uint16, flags uint32, lastPlayed uint32) int
+	RemoveFavoriteGame(appID AppId_t, ip uint32, connPort uint16, queryPort uint16, flags uint32) bool
 	RequestLobbyList() SteamAPICall_t
+	AddRequestLobbyListStringFilter(key, value string, comparison ELobbyComparison)
+	AddRequestLobbyListNumericalFilter(key string, value int, comparison ELobbyComparison)
+	AddRequestLobbyListNearValueFilter(key string, value int)
+	AddRequestLobbyListFilterSlotsAvailable(slots int)
+	AddRequestLobbyListDistanceFilter(filter ELobbyDistanceFilter)
+	AddRequestLobbyListResultCountFilter(maxResults int)
+	AddRequestLobbyListCompatibleMembersFilter(lobbyID CSteamID)
 	GetLobbyByIndex(index int) CSteamID
 	CreateLobby(lobbyType ELobbyType, maxMembers int) SteamAPICall_t
 	JoinLobby(lobbyID CSteamID) SteamAPICall_t
@@ -602,14 +652,24 @@ type ISteamMatchmaking interface {
 	GetLobbyMemberByIndex(lobbyID CSteamID, memberIndex int) CSteamID
 	LobbyMembers(lobbyID CSteamID) iter.Seq[CSteamID]
 	GetLobbyData(lobbyID CSteamID, key string) string
+	GetLobbyDataCount(lobbyID CSteamID) int
+	GetLobbyDataByIndex(lobbyID CSteamID, index int) (key string, value string, ok bool)
 	SetLobbyData(lobbyID CSteamID, key, value string) bool
+	DeleteLobbyData(lobbyID CSteamID, key string) bool
+	GetLobbyMemberData(lobbyID, user CSteamID, key string) string
+	SetLobbyMemberData(lobbyID CSteamID, key, value string)
+	SendLobbyChatMsg(lobbyID CSteamID, message []byte) bool
+	GetLobbyChatEntry(lobbyID CSteamID, chatID int, maxData int) (user CSteamID, data []byte, entryType EChatEntryType, dataLen int)
+	RequestLobbyData(lobbyID CSteamID) bool
 	GetLobbyOwner(lobbyID CSteamID) CSteamID
 	SetLobbyOwner(lobbyID, owner CSteamID) bool
 	SetLobbyGameServer(lobbyID CSteamID, ip uint32, port uint16, server CSteamID)
 	GetLobbyGameServer(lobbyID CSteamID) (ip uint32, port uint16, server CSteamID, ok bool)
 	SetLobbyJoinable(lobbyID CSteamID, joinable bool) bool
 	SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool
+	GetLobbyMemberLimit(lobbyID CSteamID) int
 	SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool
+	SetLinkedLobby(lobbyID, dependentLobbyID CSteamID) bool
 }
 
 type ISteamNetworkingMessages interface {
@@ -709,24 +769,45 @@ const (
 	flatAPI_ISteamFriends_ActivateGameOverlayInviteDialog              = "SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialog"
 	flatAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString = "SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString"
 
-	flatAPI_SteamMatchmaking                        = "SteamAPI_SteamMatchmaking_v009"
-	flatAPI_ISteamMatchmaking_RequestLobbyList      = "SteamAPI_ISteamMatchmaking_RequestLobbyList"
-	flatAPI_ISteamMatchmaking_GetLobbyByIndex       = "SteamAPI_ISteamMatchmaking_GetLobbyByIndex"
-	flatAPI_ISteamMatchmaking_CreateLobby           = "SteamAPI_ISteamMatchmaking_CreateLobby"
-	flatAPI_ISteamMatchmaking_JoinLobby             = "SteamAPI_ISteamMatchmaking_JoinLobby"
-	flatAPI_ISteamMatchmaking_LeaveLobby            = "SteamAPI_ISteamMatchmaking_LeaveLobby"
-	flatAPI_ISteamMatchmaking_InviteUserToLobby     = "SteamAPI_ISteamMatchmaking_InviteUserToLobby"
-	flatAPI_ISteamMatchmaking_GetNumLobbyMembers    = "SteamAPI_ISteamMatchmaking_GetNumLobbyMembers"
-	flatAPI_ISteamMatchmaking_GetLobbyMemberByIndex = "SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex"
-	flatAPI_ISteamMatchmaking_GetLobbyData          = "SteamAPI_ISteamMatchmaking_GetLobbyData"
-	flatAPI_ISteamMatchmaking_SetLobbyData          = "SteamAPI_ISteamMatchmaking_SetLobbyData"
-	flatAPI_ISteamMatchmaking_GetLobbyOwner         = "SteamAPI_ISteamMatchmaking_GetLobbyOwner"
-	flatAPI_ISteamMatchmaking_SetLobbyOwner         = "SteamAPI_ISteamMatchmaking_SetLobbyOwner"
-	flatAPI_ISteamMatchmaking_SetLobbyGameServer    = "SteamAPI_ISteamMatchmaking_SetLobbyGameServer"
-	flatAPI_ISteamMatchmaking_GetLobbyGameServer    = "SteamAPI_ISteamMatchmaking_GetLobbyGameServer"
-	flatAPI_ISteamMatchmaking_SetLobbyJoinable      = "SteamAPI_ISteamMatchmaking_SetLobbyJoinable"
-	flatAPI_ISteamMatchmaking_SetLobbyMemberLimit   = "SteamAPI_ISteamMatchmaking_SetLobbyMemberLimit"
-	flatAPI_ISteamMatchmaking_SetLobbyType          = "SteamAPI_ISteamMatchmaking_SetLobbyType"
+	flatAPI_SteamMatchmaking                                             = "SteamAPI_SteamMatchmaking_v009"
+	flatAPI_ISteamMatchmaking_GetFavoriteGameCount                       = "SteamAPI_ISteamMatchmaking_GetFavoriteGameCount"
+	flatAPI_ISteamMatchmaking_GetFavoriteGame                            = "SteamAPI_ISteamMatchmaking_GetFavoriteGame"
+	flatAPI_ISteamMatchmaking_AddFavoriteGame                            = "SteamAPI_ISteamMatchmaking_AddFavoriteGame"
+	flatAPI_ISteamMatchmaking_RemoveFavoriteGame                         = "SteamAPI_ISteamMatchmaking_RemoveFavoriteGame"
+	flatAPI_ISteamMatchmaking_RequestLobbyList                           = "SteamAPI_ISteamMatchmaking_RequestLobbyList"
+	flatAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter            = "SteamAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter"
+	flatAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter         = "SteamAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter"
+	flatAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter         = "SteamAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter"
+	flatAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable    = "SteamAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable"
+	flatAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter          = "SteamAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter"
+	flatAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter       = "SteamAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter"
+	flatAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter = "SteamAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter"
+	flatAPI_ISteamMatchmaking_GetLobbyByIndex                            = "SteamAPI_ISteamMatchmaking_GetLobbyByIndex"
+	flatAPI_ISteamMatchmaking_CreateLobby                                = "SteamAPI_ISteamMatchmaking_CreateLobby"
+	flatAPI_ISteamMatchmaking_JoinLobby                                  = "SteamAPI_ISteamMatchmaking_JoinLobby"
+	flatAPI_ISteamMatchmaking_LeaveLobby                                 = "SteamAPI_ISteamMatchmaking_LeaveLobby"
+	flatAPI_ISteamMatchmaking_InviteUserToLobby                          = "SteamAPI_ISteamMatchmaking_InviteUserToLobby"
+	flatAPI_ISteamMatchmaking_GetNumLobbyMembers                         = "SteamAPI_ISteamMatchmaking_GetNumLobbyMembers"
+	flatAPI_ISteamMatchmaking_GetLobbyMemberByIndex                      = "SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex"
+	flatAPI_ISteamMatchmaking_GetLobbyData                               = "SteamAPI_ISteamMatchmaking_GetLobbyData"
+	flatAPI_ISteamMatchmaking_GetLobbyDataCount                          = "SteamAPI_ISteamMatchmaking_GetLobbyDataCount"
+	flatAPI_ISteamMatchmaking_GetLobbyDataByIndex                        = "SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex"
+	flatAPI_ISteamMatchmaking_SetLobbyData                               = "SteamAPI_ISteamMatchmaking_SetLobbyData"
+	flatAPI_ISteamMatchmaking_DeleteLobbyData                            = "SteamAPI_ISteamMatchmaking_DeleteLobbyData"
+	flatAPI_ISteamMatchmaking_GetLobbyMemberData                         = "SteamAPI_ISteamMatchmaking_GetLobbyMemberData"
+	flatAPI_ISteamMatchmaking_SetLobbyMemberData                         = "SteamAPI_ISteamMatchmaking_SetLobbyMemberData"
+	flatAPI_ISteamMatchmaking_SendLobbyChatMsg                           = "SteamAPI_ISteamMatchmaking_SendLobbyChatMsg"
+	flatAPI_ISteamMatchmaking_GetLobbyChatEntry                          = "SteamAPI_ISteamMatchmaking_GetLobbyChatEntry"
+	flatAPI_ISteamMatchmaking_RequestLobbyData                           = "SteamAPI_ISteamMatchmaking_RequestLobbyData"
+	flatAPI_ISteamMatchmaking_GetLobbyOwner                              = "SteamAPI_ISteamMatchmaking_GetLobbyOwner"
+	flatAPI_ISteamMatchmaking_SetLobbyOwner                              = "SteamAPI_ISteamMatchmaking_SetLobbyOwner"
+	flatAPI_ISteamMatchmaking_SetLobbyGameServer                         = "SteamAPI_ISteamMatchmaking_SetLobbyGameServer"
+	flatAPI_ISteamMatchmaking_GetLobbyGameServer                         = "SteamAPI_ISteamMatchmaking_GetLobbyGameServer"
+	flatAPI_ISteamMatchmaking_SetLobbyJoinable                           = "SteamAPI_ISteamMatchmaking_SetLobbyJoinable"
+	flatAPI_ISteamMatchmaking_SetLobbyMemberLimit                        = "SteamAPI_ISteamMatchmaking_SetLobbyMemberLimit"
+	flatAPI_ISteamMatchmaking_GetLobbyMemberLimit                        = "SteamAPI_ISteamMatchmaking_GetLobbyMemberLimit"
+	flatAPI_ISteamMatchmaking_SetLobbyType                               = "SteamAPI_ISteamMatchmaking_SetLobbyType"
+	flatAPI_ISteamMatchmaking_SetLinkedLobby                             = "SteamAPI_ISteamMatchmaking_SetLinkedLobby"
 
 	flatAPI_SteamHTTP                            = "SteamAPI_SteamHTTP_v003"
 	flatAPI_ISteamHTTP_CreateHTTPRequest         = "SteamAPI_ISteamHTTP_CreateHTTPRequest"

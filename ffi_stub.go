@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2025 The go-steamworks Authors
 
+//go:build !amd64
+
 package steamworks
 
 type ffi_InputDigitalActionData struct {
