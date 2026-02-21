@@ -230,7 +230,9 @@ func TestSDKSymbolResolution(t *testing.T) {
 	})
 
 	expectedMissing := map[string]struct{}{
-		flatAPI_ISteamInput_GetGlyphForActionOrigin:         {},
+		flatAPI_ISteamInput_GetGlyphForActionOrigin: {},
+	}
+	optionalSymbols := map[string]struct{}{
 		flatAPI_ISteamMatchmaking_CheckForPSNGameBootInvite: {},
 	}
 	for _, symbol := range allFlatAPISymbols() {
@@ -239,6 +241,10 @@ func TestSDKSymbolResolution(t *testing.T) {
 			if err != nil {
 				if _, ok := expectedMissing[symbol]; ok {
 					t.Logf("expected missing symbol: %s", symbol)
+					return
+				}
+				if _, ok := optionalSymbols[symbol]; ok {
+					t.Logf("optional symbol not exported by this SDK: %s", symbol)
 					return
 				}
 				t.Fatalf("Dlsym(%s): %v", symbol, err)
