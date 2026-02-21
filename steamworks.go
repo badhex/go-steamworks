@@ -24,6 +24,10 @@ type PublishedFileId_t uint64
 type SteamItemInstanceID_t uint64
 type SteamItemDef_t int32
 type SteamInventoryResult_t int32
+type HSteamUser int32
+type HAuthTicket uint32
+type HServerListRequest uintptr
+type HServerQuery int32
 
 type HSteamNetConnection uint32
 type HSteamListenSocket uint32
@@ -31,6 +35,18 @@ type HSteamNetPollGroup uint32
 type SteamNetworkingMicroseconds int64
 
 type ESteamAPIInitResult int32
+
+type EVoiceResult int32
+
+type EBeginAuthSessionResult int32
+
+type EUserHasLicenseForAppResult int32
+
+type EDurationControlProgress int32
+
+type EDurationControlNotification int32
+
+type EDurationControlOnlineState int32
 
 const (
 	ESteamAPIInitResult_OK              ESteamAPIInitResult = 0
@@ -278,6 +294,14 @@ type FavoriteGame struct {
 	QueryPort              uint16
 	Flags                  uint32
 	LastPlayedOnServerTime uint32
+}
+
+type DurationControl struct {
+	Progress         EDurationControlProgress
+	Notification     EDurationControlNotification
+	OnlineState      EDurationControlOnlineState
+	SecondsRemaining uint32
+	SecondsPlayed    uint32
 }
 
 type EHTTPMethod int32
@@ -530,12 +554,50 @@ type ISteamNetworkingUtils interface {
 }
 
 type ISteamGameServer interface {
-	SetProduct(product string)
-	SetGameDescription(description string)
-	LogOnAnonymous()
-	LogOff()
+	AssociateWithClan(clanID CSteamID) SteamAPICall_t
+	BeginAuthSession(authTicket []byte, steamID CSteamID) EBeginAuthSessionResult
 	BLoggedOn() bool
+	BSecure() bool
+	BUpdateUserData(steamIDUser CSteamID, playerName string, score uint32) bool
+	CancelAuthTicket(authTicket HAuthTicket)
+	ClearAllKeyValues()
+	ComputeNewPlayerCompatibility(steamIDNewPlayer CSteamID, steamIDPlayers []CSteamID, steamIDPlayersInGame []CSteamID, steamIDTeamPlayers []CSteamID) SteamAPICall_t
+	CreateUnauthenticatedUserConnection() CSteamID
+	EnableHeartbeats(active bool)
+	EndAuthSession(steamID CSteamID)
+	ForceHeartbeat()
+	GetAuthSessionTicket(authTicket []byte) (ticket HAuthTicket, size uint32)
+	GetGameplayStats()
+	GetNextOutgoingPacket(dest []byte) (size int32, ip uint32, port uint16)
+	GetPublicIP() uint32
+	GetServerReputation() SteamAPICall_t
 	GetSteamID() CSteamID
+	HandleIncomingPacket(data []byte, ip uint32, port uint16) bool
+	InitGameServer(ip uint32, steamPort uint16, gamePort uint16, queryPort uint16, serverMode uint32, versionString string) bool
+	LogOff()
+	LogOn(token string)
+	LogOnAnonymous()
+	RequestUserGroupStatus(steamIDUser CSteamID, steamIDGroup CSteamID) bool
+	SendUserConnectAndAuthenticate(ipClient uint32, authBlob []byte) (steamIDUser CSteamID, ok bool)
+	SendUserDisconnect(steamIDUser CSteamID)
+	SetBotPlayerCount(botPlayers int32)
+	SetDedicatedServer(dedicated bool)
+	SetGameData(gameData string)
+	SetGameDescription(description string)
+	SetGameTags(gameTags string)
+	SetHeartbeatInterval(interval int)
+	SetKeyValue(key string, value string)
+	SetMapName(mapName string)
+	SetMaxPlayerCount(playersMax int32)
+	SetModDir(modDir string)
+	SetPasswordProtected(passwordProtected bool)
+	SetProduct(product string)
+	SetRegion(region string)
+	SetServerName(serverName string)
+	SetSpectatorPort(spectatorPort uint16)
+	SetSpectatorServerName(spectatorServerName string)
+	UserHasLicenseForApp(steamID CSteamID, appID AppId_t) EUserHasLicenseForAppResult
+	WasRestartRequested() bool
 }
 
 type ISteamInput interface {
@@ -581,7 +643,38 @@ type ISteamRemoteStorage interface {
 }
 
 type ISteamUser interface {
+	AdvertiseGame(gameServerSteamID CSteamID, ip uint32, port uint16)
+	BeginAuthSession(authTicket []byte, steamID CSteamID) EBeginAuthSessionResult
+	BIsBehindNAT() bool
+	BIsPhoneIdentifying() bool
+	BIsPhoneRequiringVerification() bool
+	BIsPhoneVerified() bool
+	BIsTwoFactorEnabled() bool
+	BLoggedOn() bool
+	BSetDurationControlOnlineState(newState EDurationControlOnlineState) bool
+	CancelAuthTicket(authTicket HAuthTicket)
+	DecompressVoice(compressedData []byte, destBuffer []byte, desiredSampleRate uint32) (bytesWritten uint32, result EVoiceResult)
+	EndAuthSession(steamID CSteamID)
+	GetAuthSessionTicket(authTicket []byte, identityRemote *SteamNetworkingIdentity) (ticket HAuthTicket, size uint32)
+	GetAuthTicketForWebApi(identity string) HAuthTicket
+	GetAvailableVoice() (compressedBytes uint32, uncompressedBytes uint32, result EVoiceResult)
+	GetDurationControl() (control DurationControl, ok bool)
+	GetEncryptedAppTicket(ticket []byte) (ticketSize uint32, ok bool)
+	GetGameBadgeLevel(series int32, foil bool) int32
+	GetHSteamUser() HSteamUser
+	GetPlayerSteamLevel() int32
 	GetSteamID() CSteamID
+	GetUserDataFolder() (path string, ok bool)
+	GetVoice(wantCompressed bool, compressedData []byte, wantUncompressed bool, uncompressedData []byte, desiredSampleRate uint32) (compressedBytes uint32, uncompressedBytes uint32, result EVoiceResult)
+	GetVoiceOptimalSampleRate() uint32
+	InitiateGameConnection(authBlob []byte, steamIDGameServer CSteamID, ipServer uint32, portServer uint16, secure bool) int32
+	RequestEncryptedAppTicket(dataToInclude []byte) SteamAPICall_t
+	RequestStoreAuthURL(redirectURL string) SteamAPICall_t
+	StartVoiceRecording()
+	StopVoiceRecording()
+	TerminateGameConnection(ipServer uint32, portServer uint16)
+	TrackAppUsageEvent(gameID CGameID, eventCode int32, extraInfo string)
+	UserHasLicenseForApp(steamID CSteamID, appID AppId_t) EUserHasLicenseForAppResult
 }
 
 type ISteamUserStats interface {
@@ -898,6 +991,24 @@ const (
 	flatAPI_ISteamMatchmaking_GetLobbyGameServer                         = "SteamAPI_ISteamMatchmaking_GetLobbyGameServer"
 	flatAPI_ISteamMatchmaking_CheckForPSNGameBootInvite                  = "SteamAPI_ISteamMatchmaking_CheckForPSNGameBootInvite"
 
+	flatAPI_SteamMatchmakingServers_RequestInternetServerList  = "SteamAPI_ISteamMatchmakingServers_RequestInternetServerList"
+	flatAPI_SteamMatchmakingServers_RequestLANServerList       = "SteamAPI_ISteamMatchmakingServers_RequestLANServerList"
+	flatAPI_SteamMatchmakingServers_RequestFriendsServerList   = "SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList"
+	flatAPI_SteamMatchmakingServers_RequestFavoritesServerList = "SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList"
+	flatAPI_SteamMatchmakingServers_RequestHistoryServerList   = "SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList"
+	flatAPI_SteamMatchmakingServers_RequestSpectatorServerList = "SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList"
+	flatAPI_SteamMatchmakingServers_ReleaseRequest             = "SteamAPI_ISteamMatchmakingServers_ReleaseRequest"
+	flatAPI_SteamMatchmakingServers_GetServerDetails           = "SteamAPI_ISteamMatchmakingServers_GetServerDetails"
+	flatAPI_SteamMatchmakingServers_CancelQuery                = "SteamAPI_ISteamMatchmakingServers_CancelQuery"
+	flatAPI_SteamMatchmakingServers_RefreshQuery               = "SteamAPI_ISteamMatchmakingServers_RefreshQuery"
+	flatAPI_SteamMatchmakingServers_IsRefreshing               = "SteamAPI_ISteamMatchmakingServers_IsRefreshing"
+	flatAPI_SteamMatchmakingServers_GetServerCount             = "SteamAPI_ISteamMatchmakingServers_GetServerCount"
+	flatAPI_SteamMatchmakingServers_RefreshServer              = "SteamAPI_ISteamMatchmakingServers_RefreshServer"
+	flatAPI_SteamMatchmakingServers_PingServer                 = "SteamAPI_ISteamMatchmakingServers_PingServer"
+	flatAPI_SteamMatchmakingServers_PlayerDetails              = "SteamAPI_ISteamMatchmakingServers_PlayerDetails"
+	flatAPI_SteamMatchmakingServers_ServerRules                = "SteamAPI_ISteamMatchmakingServers_ServerRules"
+	flatAPI_SteamMatchmakingServers_CancelServerQuery          = "SteamAPI_ISteamMatchmakingServers_CancelServerQuery"
+
 	flatAPI_SteamHTTP                            = "SteamAPI_SteamHTTP_v003"
 	flatAPI_ISteamHTTP_CreateHTTPRequest         = "SteamAPI_ISteamHTTP_CreateHTTPRequest"
 	flatAPI_ISteamHTTP_SetHTTPRequestHeaderValue = "SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue"
@@ -954,8 +1065,39 @@ const (
 	flatAPI_ISteamRemoteStorage_FileDelete  = "SteamAPI_ISteamRemoteStorage_FileDelete"
 	flatAPI_ISteamRemoteStorage_GetFileSize = "SteamAPI_ISteamRemoteStorage_GetFileSize"
 
-	flatAPI_SteamUser             = "SteamAPI_SteamUser_v023"
-	flatAPI_ISteamUser_GetSteamID = "SteamAPI_ISteamUser_GetSteamID"
+	flatAPI_SteamUser                                 = "SteamAPI_SteamUser_v023"
+	flatAPI_ISteamUser_AdvertiseGame                  = "SteamAPI_ISteamUser_AdvertiseGame"
+	flatAPI_ISteamUser_BeginAuthSession               = "SteamAPI_ISteamUser_BeginAuthSession"
+	flatAPI_ISteamUser_BIsBehindNAT                   = "SteamAPI_ISteamUser_BIsBehindNAT"
+	flatAPI_ISteamUser_BIsPhoneIdentifying            = "SteamAPI_ISteamUser_BIsPhoneIdentifying"
+	flatAPI_ISteamUser_BIsPhoneRequiringVerification  = "SteamAPI_ISteamUser_BIsPhoneRequiringVerification"
+	flatAPI_ISteamUser_BIsPhoneVerified               = "SteamAPI_ISteamUser_BIsPhoneVerified"
+	flatAPI_ISteamUser_BIsTwoFactorEnabled            = "SteamAPI_ISteamUser_BIsTwoFactorEnabled"
+	flatAPI_ISteamUser_BLoggedOn                      = "SteamAPI_ISteamUser_BLoggedOn"
+	flatAPI_ISteamUser_BSetDurationControlOnlineState = "SteamAPI_ISteamUser_BSetDurationControlOnlineState"
+	flatAPI_ISteamUser_CancelAuthTicket               = "SteamAPI_ISteamUser_CancelAuthTicket"
+	flatAPI_ISteamUser_DecompressVoice                = "SteamAPI_ISteamUser_DecompressVoice"
+	flatAPI_ISteamUser_EndAuthSession                 = "SteamAPI_ISteamUser_EndAuthSession"
+	flatAPI_ISteamUser_GetAuthSessionTicket           = "SteamAPI_ISteamUser_GetAuthSessionTicket"
+	flatAPI_ISteamUser_GetAuthTicketForWebApi         = "SteamAPI_ISteamUser_GetAuthTicketForWebApi"
+	flatAPI_ISteamUser_GetAvailableVoice              = "SteamAPI_ISteamUser_GetAvailableVoice"
+	flatAPI_ISteamUser_GetDurationControl             = "SteamAPI_ISteamUser_GetDurationControl"
+	flatAPI_ISteamUser_GetEncryptedAppTicket          = "SteamAPI_ISteamUser_GetEncryptedAppTicket"
+	flatAPI_ISteamUser_GetGameBadgeLevel              = "SteamAPI_ISteamUser_GetGameBadgeLevel"
+	flatAPI_ISteamUser_GetHSteamUser                  = "SteamAPI_ISteamUser_GetHSteamUser"
+	flatAPI_ISteamUser_GetPlayerSteamLevel            = "SteamAPI_ISteamUser_GetPlayerSteamLevel"
+	flatAPI_ISteamUser_GetSteamID                     = "SteamAPI_ISteamUser_GetSteamID"
+	flatAPI_ISteamUser_GetUserDataFolder              = "SteamAPI_ISteamUser_GetUserDataFolder"
+	flatAPI_ISteamUser_GetVoice                       = "SteamAPI_ISteamUser_GetVoice"
+	flatAPI_ISteamUser_GetVoiceOptimalSampleRate      = "SteamAPI_ISteamUser_GetVoiceOptimalSampleRate"
+	flatAPI_ISteamUser_InitiateGameConnection         = "SteamAPI_ISteamUser_InitiateGameConnection_DEPRECATED"
+	flatAPI_ISteamUser_RequestEncryptedAppTicket      = "SteamAPI_ISteamUser_RequestEncryptedAppTicket"
+	flatAPI_ISteamUser_RequestStoreAuthURL            = "SteamAPI_ISteamUser_RequestStoreAuthURL"
+	flatAPI_ISteamUser_StartVoiceRecording            = "SteamAPI_ISteamUser_StartVoiceRecording"
+	flatAPI_ISteamUser_StopVoiceRecording             = "SteamAPI_ISteamUser_StopVoiceRecording"
+	flatAPI_ISteamUser_TerminateGameConnection        = "SteamAPI_ISteamUser_TerminateGameConnection_DEPRECATED"
+	flatAPI_ISteamUser_TrackAppUsageEvent             = "SteamAPI_ISteamUser_TrackAppUsageEvent"
+	flatAPI_ISteamUser_UserHasLicenseForApp           = "SteamAPI_ISteamUser_UserHasLicenseForApp"
 
 	flatAPI_SteamUserStats                   = "SteamAPI_SteamUserStats_v013"
 	flatAPI_ISteamUserStats_GetAchievement   = "SteamAPI_ISteamUserStats_GetAchievement"
@@ -1011,13 +1153,51 @@ const (
 	flatAPI_ISteamNetworkingSockets_SetConnectionPollGroup      = "SteamAPI_ISteamNetworkingSockets_SetConnectionPollGroup"
 	flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup  = "SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup"
 
-	flatAPI_SteamGameServer                     = "SteamAPI_SteamGameServer_v015"
-	flatAPI_ISteamGameServer_SetProduct         = "SteamAPI_ISteamGameServer_SetProduct"
-	flatAPI_ISteamGameServer_SetGameDescription = "SteamAPI_ISteamGameServer_SetGameDescription"
-	flatAPI_ISteamGameServer_LogOnAnonymous     = "SteamAPI_ISteamGameServer_LogOnAnonymous"
-	flatAPI_ISteamGameServer_LogOff             = "SteamAPI_ISteamGameServer_LogOff"
-	flatAPI_ISteamGameServer_BLoggedOn          = "SteamAPI_ISteamGameServer_BLoggedOn"
-	flatAPI_ISteamGameServer_GetSteamID         = "SteamAPI_ISteamGameServer_GetSteamID"
+	flatAPI_SteamGameServer                                      = "SteamAPI_SteamGameServer_v015"
+	flatAPI_ISteamGameServer_AssociateWithClan                   = "SteamAPI_ISteamGameServer_AssociateWithClan"
+	flatAPI_ISteamGameServer_BeginAuthSession                    = "SteamAPI_ISteamGameServer_BeginAuthSession"
+	flatAPI_ISteamGameServer_BLoggedOn                           = "SteamAPI_ISteamGameServer_BLoggedOn"
+	flatAPI_ISteamGameServer_BSecure                             = "SteamAPI_ISteamGameServer_BSecure"
+	flatAPI_ISteamGameServer_BUpdateUserData                     = "SteamAPI_ISteamGameServer_BUpdateUserData"
+	flatAPI_ISteamGameServer_CancelAuthTicket                    = "SteamAPI_ISteamGameServer_CancelAuthTicket"
+	flatAPI_ISteamGameServer_ClearAllKeyValues                   = "SteamAPI_ISteamGameServer_ClearAllKeyValues"
+	flatAPI_ISteamGameServer_ComputeNewPlayerCompatibility       = "SteamAPI_ISteamGameServer_ComputeNewPlayerCompatibility"
+	flatAPI_ISteamGameServer_CreateUnauthenticatedUserConnection = "SteamAPI_ISteamGameServer_CreateUnauthenticatedUserConnection"
+	flatAPI_ISteamGameServer_EnableHeartbeats                    = "SteamAPI_ISteamGameServer_EnableHeartbeats"
+	flatAPI_ISteamGameServer_EndAuthSession                      = "SteamAPI_ISteamGameServer_EndAuthSession"
+	flatAPI_ISteamGameServer_ForceHeartbeat                      = "SteamAPI_ISteamGameServer_ForceHeartbeat"
+	flatAPI_ISteamGameServer_GetAuthSessionTicket                = "SteamAPI_ISteamGameServer_GetAuthSessionTicket"
+	flatAPI_ISteamGameServer_GetGameplayStats                    = "SteamAPI_ISteamGameServer_GetGameplayStats"
+	flatAPI_ISteamGameServer_GetNextOutgoingPacket               = "SteamAPI_ISteamGameServer_GetNextOutgoingPacket"
+	flatAPI_ISteamGameServer_GetPublicIP                         = "SteamAPI_ISteamGameServer_GetPublicIP"
+	flatAPI_ISteamGameServer_GetServerReputation                 = "SteamAPI_ISteamGameServer_GetServerReputation"
+	flatAPI_ISteamGameServer_GetSteamID                          = "SteamAPI_ISteamGameServer_GetSteamID"
+	flatAPI_ISteamGameServer_HandleIncomingPacket                = "SteamAPI_ISteamGameServer_HandleIncomingPacket"
+	flatAPI_ISteamGameServer_InitGameServer                      = "SteamAPI_ISteamGameServer_InitGameServer"
+	flatAPI_ISteamGameServer_LogOff                              = "SteamAPI_ISteamGameServer_LogOff"
+	flatAPI_ISteamGameServer_LogOn                               = "SteamAPI_ISteamGameServer_LogOn"
+	flatAPI_ISteamGameServer_LogOnAnonymous                      = "SteamAPI_ISteamGameServer_LogOnAnonymous"
+	flatAPI_ISteamGameServer_RequestUserGroupStatus              = "SteamAPI_ISteamGameServer_RequestUserGroupStatus"
+	flatAPI_ISteamGameServer_SendUserConnectAndAuthenticate      = "SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate_DEPRECATED"
+	flatAPI_ISteamGameServer_SendUserDisconnect                  = "SteamAPI_ISteamGameServer_SendUserDisconnect_DEPRECATED"
+	flatAPI_ISteamGameServer_SetBotPlayerCount                   = "SteamAPI_ISteamGameServer_SetBotPlayerCount"
+	flatAPI_ISteamGameServer_SetDedicatedServer                  = "SteamAPI_ISteamGameServer_SetDedicatedServer"
+	flatAPI_ISteamGameServer_SetGameData                         = "SteamAPI_ISteamGameServer_SetGameData"
+	flatAPI_ISteamGameServer_SetGameDescription                  = "SteamAPI_ISteamGameServer_SetGameDescription"
+	flatAPI_ISteamGameServer_SetGameTags                         = "SteamAPI_ISteamGameServer_SetGameTags"
+	flatAPI_ISteamGameServer_SetHeartbeatInterval                = "SteamAPI_ISteamGameServer_SetHeartbeatInterval"
+	flatAPI_ISteamGameServer_SetKeyValue                         = "SteamAPI_ISteamGameServer_SetKeyValue"
+	flatAPI_ISteamGameServer_SetMapName                          = "SteamAPI_ISteamGameServer_SetMapName"
+	flatAPI_ISteamGameServer_SetMaxPlayerCount                   = "SteamAPI_ISteamGameServer_SetMaxPlayerCount"
+	flatAPI_ISteamGameServer_SetModDir                           = "SteamAPI_ISteamGameServer_SetModDir"
+	flatAPI_ISteamGameServer_SetPasswordProtected                = "SteamAPI_ISteamGameServer_SetPasswordProtected"
+	flatAPI_ISteamGameServer_SetProduct                          = "SteamAPI_ISteamGameServer_SetProduct"
+	flatAPI_ISteamGameServer_SetRegion                           = "SteamAPI_ISteamGameServer_SetRegion"
+	flatAPI_ISteamGameServer_SetServerName                       = "SteamAPI_ISteamGameServer_SetServerName"
+	flatAPI_ISteamGameServer_SetSpectatorPort                    = "SteamAPI_ISteamGameServer_SetSpectatorPort"
+	flatAPI_ISteamGameServer_SetSpectatorServerName              = "SteamAPI_ISteamGameServer_SetSpectatorServerName"
+	flatAPI_ISteamGameServer_UserHasLicenseForApp                = "SteamAPI_ISteamGameServer_UserHasLicenseForApp"
+	flatAPI_ISteamGameServer_WasRestartRequested                 = "SteamAPI_ISteamGameServer_WasRestartRequested"
 )
 
 type steamErrMsg [1024]byte

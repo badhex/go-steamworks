@@ -270,12 +270,50 @@ Returned structure details:
 
 **ISteamGameServer** (`SteamGameServer() ISteamGameServer`) — typed wrappers
 
-* `SetProduct(product string)`
-* `SetGameDescription(description string)`
-* `LogOnAnonymous()`
-* `LogOff()`
+* `AssociateWithClan(clanID CSteamID) SteamAPICall_t`
+* `BeginAuthSession(authTicket []byte, steamID CSteamID) EBeginAuthSessionResult`
 * `BLoggedOn() bool`
+* `BSecure() bool`
+* `BUpdateUserData(steamIDUser CSteamID, playerName string, score uint32) bool`
+* `CancelAuthTicket(authTicket HAuthTicket)`
+* `ClearAllKeyValues()`
+* `ComputeNewPlayerCompatibility(steamIDNewPlayer CSteamID, steamIDPlayers []CSteamID, steamIDPlayersInGame []CSteamID, steamIDTeamPlayers []CSteamID) SteamAPICall_t`
+* `CreateUnauthenticatedUserConnection() CSteamID`
+* `EnableHeartbeats(active bool)`
+* `EndAuthSession(steamID CSteamID)`
+* `ForceHeartbeat()`
+* `GetAuthSessionTicket(authTicket []byte) (ticket HAuthTicket, size uint32)`
+* `GetGameplayStats()`
+* `GetNextOutgoingPacket(dest []byte) (size int32, ip uint32, port uint16)`
+* `GetPublicIP() uint32`
+* `GetServerReputation() SteamAPICall_t`
 * `GetSteamID() CSteamID`
+* `HandleIncomingPacket(data []byte, ip uint32, port uint16) bool`
+* `InitGameServer(ip uint32, steamPort uint16, gamePort uint16, queryPort uint16, serverMode uint32, versionString string) bool`
+* `LogOff()`
+* `LogOn(token string)`
+* `LogOnAnonymous()`
+* `RequestUserGroupStatus(steamIDUser CSteamID, steamIDGroup CSteamID) bool`
+* `SendUserConnectAndAuthenticate(ipClient uint32, authBlob []byte) (steamIDUser CSteamID, ok bool)`
+* `SendUserDisconnect(steamIDUser CSteamID)`
+* `SetBotPlayerCount(botPlayers int32)`
+* `SetDedicatedServer(dedicated bool)`
+* `SetGameData(gameData string)`
+* `SetGameDescription(description string)`
+* `SetGameTags(gameTags string)`
+* `SetHeartbeatInterval(interval int)`
+* `SetKeyValue(key string, value string)`
+* `SetMapName(mapName string)`
+* `SetMaxPlayerCount(playersMax int32)`
+* `SetModDir(modDir string)`
+* `SetPasswordProtected(passwordProtected bool)`
+* `SetProduct(product string)`
+* `SetRegion(region string)`
+* `SetServerName(serverName string)`
+* `SetSpectatorPort(spectatorPort uint16)`
+* `SetSpectatorServerName(spectatorServerName string)`
+* `UserHasLicenseForApp(steamID CSteamID, appID AppId_t) EUserHasLicenseForAppResult`
+* `WasRestartRequested() bool`
 
 **ISteamGameServerStats** (`SteamGameServerStats() ISteamGameServerStats`) — handle-backed
 
@@ -363,27 +401,66 @@ Returned structure details:
 
 **ISteamMatchmaking** (`SteamMatchmaking() ISteamMatchmaking`) — typed wrappers
 
+* `GetFavoriteGameCount() int`
+* `GetFavoriteGame(index int) (FavoriteGame, bool)`
+* `AddFavoriteGame(appID AppId_t, ip uint32, connectionPort, queryPort uint16, flags, lastPlayedOnServerTime uint32) int`
+* `RemoveFavoriteGame(appID AppId_t, ip uint32, connectionPort, queryPort uint16, flags uint32) bool`
 * `RequestLobbyList() SteamAPICall_t`
+* `AddRequestLobbyListStringFilter(key, value string, comparisonType ELobbyComparison)`
+* `AddRequestLobbyListNumericalFilter(key string, value int, comparisonType ELobbyComparison)`
+* `AddRequestLobbyListNearValueFilter(key string, value int)`
+* `AddRequestLobbyListFilterSlotsAvailable(slotsAvailable int)`
+* `AddRequestLobbyListDistanceFilter(distanceFilter ELobbyDistanceFilter)`
+* `AddRequestLobbyListResultCountFilter(maxResults int)`
+* `AddRequestLobbyListCompatibleMembersFilter(lobbyID CSteamID)`
 * `GetLobbyByIndex(index int) CSteamID`
 * `CreateLobby(lobbyType ELobbyType, maxMembers int) SteamAPICall_t`
 * `JoinLobby(lobbyID CSteamID) SteamAPICall_t`
 * `LeaveLobby(lobbyID CSteamID)`
 * `InviteUserToLobby(lobbyID, invitee CSteamID) bool`
-* `GetNumLobbyMembers(lobbyID CSteamID) int`
-* `GetLobbyMemberByIndex(lobbyID CSteamID, memberIndex int) CSteamID`
-* `GetLobbyData(lobbyID CSteamID, key string) string`
-* `SetLobbyData(lobbyID CSteamID, key, value string) bool`
+* `SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool`
+* `GetLobbyMemberLimit(lobbyID CSteamID) int`
+* `SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool`
+* `SetLobbyJoinable(lobbyID CSteamID, joinable bool) bool`
 * `GetLobbyOwner(lobbyID CSteamID) CSteamID`
 * `SetLobbyOwner(lobbyID, owner CSteamID) bool`
+* `SetLinkedLobby(lobbyID, lobbyDependent CSteamID) bool`
+* `GetNumLobbyMembers(lobbyID CSteamID) int`
+* `GetLobbyMemberByIndex(lobbyID CSteamID, memberIndex int) CSteamID`
+* `SetLobbyData(lobbyID CSteamID, key, value string) bool`
+* `GetLobbyData(lobbyID CSteamID, key string) string`
+* `DeleteLobbyData(lobbyID CSteamID, key string) bool`
+* `GetLobbyDataCount(lobbyID CSteamID) int`
+* `GetLobbyDataByIndex(lobbyID CSteamID, lobbyDataIndex int) (key, value string, ok bool)`
+* `SetLobbyMemberData(lobbyID CSteamID, key, value string)`
+* `GetLobbyMemberData(lobbyID, user CSteamID, key string) string`
+* `SendLobbyChatMsg(lobbyID CSteamID, msgBody []byte) bool`
+* `GetLobbyChatEntry(lobbyID CSteamID, chatID int, data []byte) (user CSteamID, entryType EChatEntryType, bytesCopied int)`
+* `RequestLobbyData(lobbyID CSteamID) bool`
 * `SetLobbyGameServer(lobbyID CSteamID, ip uint32, port uint16, server CSteamID)`
 * `GetLobbyGameServer(lobbyID CSteamID) (ip uint32, port uint16, server CSteamID, ok bool)`
-* `SetLobbyJoinable(lobbyID CSteamID, joinable bool) bool`
-* `SetLobbyMemberLimit(lobbyID CSteamID, maxMembers int) bool`
-* `SetLobbyType(lobbyID CSteamID, lobbyType ELobbyType) bool`
+* `CheckForPSNGameBootInvite(lobbyID *CSteamID) bool`
 
 **ISteamMatchmakingServers** (`SteamMatchmakingServers() ISteamMatchmakingServers`) — handle-backed
 
 * Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+* `RequestFavoritesServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest`
+* `RequestFriendsServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest`
+* `RequestHistoryServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest`
+* `RequestInternetServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest`
+* `RequestLANServerList(appID AppId_t, response uintptr) HServerListRequest`
+* `RequestSpectatorServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest`
+* `ReleaseRequest(request HServerListRequest)`
+* `GetServerDetails(request HServerListRequest, server int) uintptr`
+* `CancelQuery(request HServerListRequest)`
+* `RefreshQuery(request HServerListRequest)`
+* `IsRefreshing(request HServerListRequest) bool`
+* `GetServerCount(request HServerListRequest) int`
+* `RefreshServer(request HServerListRequest, server int)`
+* `PingServer(ip uint32, port uint16, response uintptr) HServerQuery`
+* `PlayerDetails(ip uint32, port uint16, response uintptr) HServerQuery`
+* `ServerRules(ip uint32, port uint16, response uintptr) HServerQuery`
+* `CancelServerQuery(query HServerQuery)`
 
 **ISteamMusic** (`SteamMusic() ISteamMusic`) — handle-backed
 
@@ -488,7 +565,38 @@ Returned structure details:
 
 **ISteamUser** (`SteamUser() ISteamUser`) — typed wrappers
 
+* `AdvertiseGame(gameServerSteamID CSteamID, ip uint32, port uint16)`
+* `BeginAuthSession(authTicket []byte, steamID CSteamID) EBeginAuthSessionResult`
+* `BIsBehindNAT() bool`
+* `BIsPhoneIdentifying() bool`
+* `BIsPhoneRequiringVerification() bool`
+* `BIsPhoneVerified() bool`
+* `BIsTwoFactorEnabled() bool`
+* `BLoggedOn() bool`
+* `BSetDurationControlOnlineState(newState EDurationControlOnlineState) bool`
+* `CancelAuthTicket(authTicket HAuthTicket)`
+* `DecompressVoice(compressedData []byte, destBuffer []byte, desiredSampleRate uint32) (bytesWritten uint32, result EVoiceResult)`
+* `EndAuthSession(steamID CSteamID)`
+* `GetAuthSessionTicket(authTicket []byte, identityRemote *SteamNetworkingIdentity) (ticket HAuthTicket, size uint32)`
+* `GetAuthTicketForWebApi(identity string) HAuthTicket`
+* `GetAvailableVoice() (compressedBytes uint32, uncompressedBytes uint32, result EVoiceResult)`
+* `GetDurationControl() (control DurationControl, ok bool)`
+* `GetEncryptedAppTicket(ticket []byte) (ticketSize uint32, ok bool)`
+* `GetGameBadgeLevel(series int32, foil bool) int32`
+* `GetHSteamUser() HSteamUser`
+* `GetPlayerSteamLevel() int32`
 * `GetSteamID() CSteamID`
+* `GetUserDataFolder() (path string, ok bool)`
+* `GetVoice(wantCompressed bool, compressedData []byte, wantUncompressed bool, uncompressedData []byte, desiredSampleRate uint32) (compressedBytes uint32, uncompressedBytes uint32, result EVoiceResult)`
+* `GetVoiceOptimalSampleRate() uint32`
+* `InitiateGameConnection(authBlob []byte, steamIDGameServer CSteamID, ipServer uint32, portServer uint16, secure bool) int32`
+* `RequestEncryptedAppTicket(dataToInclude []byte) SteamAPICall_t`
+* `RequestStoreAuthURL(redirectURL string) SteamAPICall_t`
+* `StartVoiceRecording()`
+* `StopVoiceRecording()`
+* `TerminateGameConnection(ipServer uint32, portServer uint16)`
+* `TrackAppUsageEvent(gameID CGameID, eventCode int32, extraInfo string)`
+* `UserHasLicenseForApp(steamID CSteamID, appID AppId_t) EUserHasLicenseForAppResult`
 
 **ISteamUserStats** (`SteamUserStats() ISteamUserStats`) — typed wrappers
 

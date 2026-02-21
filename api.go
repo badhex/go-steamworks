@@ -133,6 +133,25 @@ var (
 	ptrAPI_ISteamMatchmaking_GetLobbyGameServer                         func(uintptr, CSteamID, uintptr, uintptr, uintptr) bool
 	ptrAPI_ISteamMatchmaking_CheckForPSNGameBootInvite                  func(uintptr, uintptr) bool
 
+	// ISteamMatchmakingServers
+	ptrAPI_ISteamMatchmakingServers_RequestInternetServerList  func(uintptr, AppId_t, uintptr, uint32, uintptr) HServerListRequest
+	ptrAPI_ISteamMatchmakingServers_RequestLANServerList       func(uintptr, AppId_t, uintptr) HServerListRequest
+	ptrAPI_ISteamMatchmakingServers_RequestFriendsServerList   func(uintptr, AppId_t, uintptr, uint32, uintptr) HServerListRequest
+	ptrAPI_ISteamMatchmakingServers_RequestFavoritesServerList func(uintptr, AppId_t, uintptr, uint32, uintptr) HServerListRequest
+	ptrAPI_ISteamMatchmakingServers_RequestHistoryServerList   func(uintptr, AppId_t, uintptr, uint32, uintptr) HServerListRequest
+	ptrAPI_ISteamMatchmakingServers_RequestSpectatorServerList func(uintptr, AppId_t, uintptr, uint32, uintptr) HServerListRequest
+	ptrAPI_ISteamMatchmakingServers_ReleaseRequest             func(uintptr, HServerListRequest)
+	ptrAPI_ISteamMatchmakingServers_GetServerDetails           func(uintptr, HServerListRequest, int32) uintptr
+	ptrAPI_ISteamMatchmakingServers_CancelQuery                func(uintptr, HServerListRequest)
+	ptrAPI_ISteamMatchmakingServers_RefreshQuery               func(uintptr, HServerListRequest)
+	ptrAPI_ISteamMatchmakingServers_IsRefreshing               func(uintptr, HServerListRequest) bool
+	ptrAPI_ISteamMatchmakingServers_GetServerCount             func(uintptr, HServerListRequest) int32
+	ptrAPI_ISteamMatchmakingServers_RefreshServer              func(uintptr, HServerListRequest, int32)
+	ptrAPI_ISteamMatchmakingServers_PingServer                 func(uintptr, uint32, uint16, uintptr) HServerQuery
+	ptrAPI_ISteamMatchmakingServers_PlayerDetails              func(uintptr, uint32, uint16, uintptr) HServerQuery
+	ptrAPI_ISteamMatchmakingServers_ServerRules                func(uintptr, uint32, uint16, uintptr) HServerQuery
+	ptrAPI_ISteamMatchmakingServers_CancelServerQuery          func(uintptr, HServerQuery)
+
 	// ISteamHTTP
 	ptrAPI_SteamHTTP                            func() uintptr
 	ptrAPI_ISteamHTTP_CreateHTTPRequest         func(uintptr, int32, string) HTTPRequestHandle
@@ -195,8 +214,39 @@ var (
 	ptrAPI_ISteamRemoteStorage_GetFileSize func(uintptr, string) int32
 
 	// ISteamUser
-	ptrAPI_SteamUser             func() uintptr
-	ptrAPI_ISteamUser_GetSteamID func(uintptr) CSteamID
+	ptrAPI_SteamUser                                 func() uintptr
+	ptrAPI_ISteamUser_AdvertiseGame                  func(uintptr, CSteamID, uint32, uint16)
+	ptrAPI_ISteamUser_BeginAuthSession               func(uintptr, uintptr, int32, CSteamID) int32
+	ptrAPI_ISteamUser_BIsBehindNAT                   func(uintptr) bool
+	ptrAPI_ISteamUser_BIsPhoneIdentifying            func(uintptr) bool
+	ptrAPI_ISteamUser_BIsPhoneRequiringVerification  func(uintptr) bool
+	ptrAPI_ISteamUser_BIsPhoneVerified               func(uintptr) bool
+	ptrAPI_ISteamUser_BIsTwoFactorEnabled            func(uintptr) bool
+	ptrAPI_ISteamUser_BLoggedOn                      func(uintptr) bool
+	ptrAPI_ISteamUser_BSetDurationControlOnlineState func(uintptr, EDurationControlOnlineState) bool
+	ptrAPI_ISteamUser_CancelAuthTicket               func(uintptr, HAuthTicket)
+	ptrAPI_ISteamUser_DecompressVoice                func(uintptr, uintptr, uint32, uintptr, uint32, uintptr, uint32) int32
+	ptrAPI_ISteamUser_EndAuthSession                 func(uintptr, CSteamID)
+	ptrAPI_ISteamUser_GetAuthSessionTicket           func(uintptr, uintptr, int32, uintptr, uintptr) HAuthTicket
+	ptrAPI_ISteamUser_GetAuthTicketForWebApi         func(uintptr, string, uintptr) HAuthTicket
+	ptrAPI_ISteamUser_GetAvailableVoice              func(uintptr, uintptr, uintptr, uint32) int32
+	ptrAPI_ISteamUser_GetDurationControl             func(uintptr, uintptr) bool
+	ptrAPI_ISteamUser_GetEncryptedAppTicket          func(uintptr, uintptr, int32, uintptr) bool
+	ptrAPI_ISteamUser_GetGameBadgeLevel              func(uintptr, int32, bool) int32
+	ptrAPI_ISteamUser_GetHSteamUser                  func(uintptr) HSteamUser
+	ptrAPI_ISteamUser_GetPlayerSteamLevel            func(uintptr) int32
+	ptrAPI_ISteamUser_GetSteamID                     func(uintptr) CSteamID
+	ptrAPI_ISteamUser_GetUserDataFolder              func(uintptr, uintptr, int32) bool
+	ptrAPI_ISteamUser_GetVoice                       func(uintptr, bool, uintptr, uint32, uintptr, bool, uintptr, uint32, uintptr, uint32) int32
+	ptrAPI_ISteamUser_GetVoiceOptimalSampleRate      func(uintptr) uint32
+	ptrAPI_ISteamUser_InitiateGameConnection         func(uintptr, uintptr, int32, CSteamID, uint32, uint16, bool) int32
+	ptrAPI_ISteamUser_RequestEncryptedAppTicket      func(uintptr, uintptr, int32) SteamAPICall_t
+	ptrAPI_ISteamUser_RequestStoreAuthURL            func(uintptr, string) SteamAPICall_t
+	ptrAPI_ISteamUser_StartVoiceRecording            func(uintptr)
+	ptrAPI_ISteamUser_StopVoiceRecording             func(uintptr)
+	ptrAPI_ISteamUser_TerminateGameConnection        func(uintptr, uint32, uint16)
+	ptrAPI_ISteamUser_TrackAppUsageEvent             func(uintptr, CGameID, int32, string)
+	ptrAPI_ISteamUser_UserHasLicenseForApp           func(uintptr, CSteamID, AppId_t) int32
 
 	// ISteamUserStats
 	ptrAPI_SteamUserStats                   func() uintptr
@@ -234,13 +284,51 @@ var (
 	ptrAPI_ISteamNetworkingUtils_GetLocalTimestamp      func(uintptr) SteamNetworkingMicroseconds
 
 	// ISteamGameServer
-	ptrAPI_SteamGameServer                     func() uintptr
-	ptrAPI_ISteamGameServer_SetProduct         func(uintptr, string)
-	ptrAPI_ISteamGameServer_SetGameDescription func(uintptr, string)
-	ptrAPI_ISteamGameServer_LogOnAnonymous     func(uintptr)
-	ptrAPI_ISteamGameServer_LogOff             func(uintptr)
-	ptrAPI_ISteamGameServer_BLoggedOn          func(uintptr) bool
-	ptrAPI_ISteamGameServer_GetSteamID         func(uintptr) CSteamID
+	ptrAPI_SteamGameServer                                      func() uintptr
+	ptrAPI_ISteamGameServer_AssociateWithClan                   func(uintptr, CSteamID) SteamAPICall_t
+	ptrAPI_ISteamGameServer_BeginAuthSession                    func(uintptr, uintptr, int32, CSteamID) int32
+	ptrAPI_ISteamGameServer_BLoggedOn                           func(uintptr) bool
+	ptrAPI_ISteamGameServer_BSecure                             func(uintptr) bool
+	ptrAPI_ISteamGameServer_BUpdateUserData                     func(uintptr, CSteamID, string, uint32) bool
+	ptrAPI_ISteamGameServer_CancelAuthTicket                    func(uintptr, HAuthTicket)
+	ptrAPI_ISteamGameServer_ClearAllKeyValues                   func(uintptr)
+	ptrAPI_ISteamGameServer_ComputeNewPlayerCompatibility       func(uintptr, CSteamID, uintptr, uint32, uintptr, uint32, uintptr, uint32) SteamAPICall_t
+	ptrAPI_ISteamGameServer_CreateUnauthenticatedUserConnection func(uintptr) CSteamID
+	ptrAPI_ISteamGameServer_EnableHeartbeats                    func(uintptr, bool)
+	ptrAPI_ISteamGameServer_EndAuthSession                      func(uintptr, CSteamID)
+	ptrAPI_ISteamGameServer_ForceHeartbeat                      func(uintptr)
+	ptrAPI_ISteamGameServer_GetAuthSessionTicket                func(uintptr, uintptr, int32, uintptr) HAuthTicket
+	ptrAPI_ISteamGameServer_GetGameplayStats                    func(uintptr)
+	ptrAPI_ISteamGameServer_GetNextOutgoingPacket               func(uintptr, uintptr, int32, uintptr, uintptr) int32
+	ptrAPI_ISteamGameServer_GetPublicIP                         func(uintptr) uint32
+	ptrAPI_ISteamGameServer_GetServerReputation                 func(uintptr) SteamAPICall_t
+	ptrAPI_ISteamGameServer_GetSteamID                          func(uintptr) CSteamID
+	ptrAPI_ISteamGameServer_HandleIncomingPacket                func(uintptr, uintptr, int32, uint32, uint16) bool
+	ptrAPI_ISteamGameServer_InitGameServer                      func(uintptr, uint32, uint16, uint16, uint16, uint32, string) bool
+	ptrAPI_ISteamGameServer_LogOff                              func(uintptr)
+	ptrAPI_ISteamGameServer_LogOn                               func(uintptr, string)
+	ptrAPI_ISteamGameServer_LogOnAnonymous                      func(uintptr)
+	ptrAPI_ISteamGameServer_RequestUserGroupStatus              func(uintptr, CSteamID, CSteamID) bool
+	ptrAPI_ISteamGameServer_SendUserConnectAndAuthenticate      func(uintptr, uint32, uintptr, uint32, uintptr) bool
+	ptrAPI_ISteamGameServer_SendUserDisconnect                  func(uintptr, CSteamID)
+	ptrAPI_ISteamGameServer_SetBotPlayerCount                   func(uintptr, int32)
+	ptrAPI_ISteamGameServer_SetDedicatedServer                  func(uintptr, bool)
+	ptrAPI_ISteamGameServer_SetGameData                         func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetGameDescription                  func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetGameTags                         func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetHeartbeatInterval                func(uintptr, int32)
+	ptrAPI_ISteamGameServer_SetKeyValue                         func(uintptr, string, string)
+	ptrAPI_ISteamGameServer_SetMapName                          func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetMaxPlayerCount                   func(uintptr, int32)
+	ptrAPI_ISteamGameServer_SetModDir                           func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetPasswordProtected                func(uintptr, bool)
+	ptrAPI_ISteamGameServer_SetProduct                          func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetRegion                           func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetServerName                       func(uintptr, string)
+	ptrAPI_ISteamGameServer_SetSpectatorPort                    func(uintptr, uint16)
+	ptrAPI_ISteamGameServer_SetSpectatorServerName              func(uintptr, string)
+	ptrAPI_ISteamGameServer_UserHasLicenseForApp                func(uintptr, CSteamID, AppId_t) int32
+	ptrAPI_ISteamGameServer_WasRestartRequested                 func(uintptr) bool
 
 	// ISteamNetworkingMessages
 	ptrAPI_SteamNetworkingMessages                           func() uintptr
@@ -436,6 +524,25 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmaking_GetLobbyGameServer, lib, flatAPI_ISteamMatchmaking_GetLobbyGameServer)
 	registerOptionalFunc(&ptrAPI_ISteamMatchmaking_CheckForPSNGameBootInvite, lib, flatAPI_ISteamMatchmaking_CheckForPSNGameBootInvite)
 
+	// ISteamMatchmakingServers
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RequestInternetServerList, lib, flatAPI_SteamMatchmakingServers_RequestInternetServerList)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RequestLANServerList, lib, flatAPI_SteamMatchmakingServers_RequestLANServerList)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RequestFriendsServerList, lib, flatAPI_SteamMatchmakingServers_RequestFriendsServerList)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RequestFavoritesServerList, lib, flatAPI_SteamMatchmakingServers_RequestFavoritesServerList)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RequestHistoryServerList, lib, flatAPI_SteamMatchmakingServers_RequestHistoryServerList)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RequestSpectatorServerList, lib, flatAPI_SteamMatchmakingServers_RequestSpectatorServerList)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_ReleaseRequest, lib, flatAPI_SteamMatchmakingServers_ReleaseRequest)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_GetServerDetails, lib, flatAPI_SteamMatchmakingServers_GetServerDetails)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_CancelQuery, lib, flatAPI_SteamMatchmakingServers_CancelQuery)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RefreshQuery, lib, flatAPI_SteamMatchmakingServers_RefreshQuery)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_IsRefreshing, lib, flatAPI_SteamMatchmakingServers_IsRefreshing)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_GetServerCount, lib, flatAPI_SteamMatchmakingServers_GetServerCount)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_RefreshServer, lib, flatAPI_SteamMatchmakingServers_RefreshServer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_PingServer, lib, flatAPI_SteamMatchmakingServers_PingServer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_PlayerDetails, lib, flatAPI_SteamMatchmakingServers_PlayerDetails)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_ServerRules, lib, flatAPI_SteamMatchmakingServers_ServerRules)
+	purego.RegisterLibFunc(&ptrAPI_ISteamMatchmakingServers_CancelServerQuery, lib, flatAPI_SteamMatchmakingServers_CancelServerQuery)
+
 	// ISteamHTTP
 	purego.RegisterLibFunc(&ptrAPI_SteamHTTP, lib, flatAPI_SteamHTTP)
 	purego.RegisterLibFunc(&ptrAPI_ISteamHTTP_CreateHTTPRequest, lib, flatAPI_ISteamHTTP_CreateHTTPRequest)
@@ -496,7 +603,38 @@ func registerFunctions(lib uintptr) {
 
 	// ISteamUser
 	purego.RegisterLibFunc(&ptrAPI_SteamUser, lib, flatAPI_SteamUser)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_AdvertiseGame, lib, flatAPI_ISteamUser_AdvertiseGame)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BeginAuthSession, lib, flatAPI_ISteamUser_BeginAuthSession)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BIsBehindNAT, lib, flatAPI_ISteamUser_BIsBehindNAT)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BIsPhoneIdentifying, lib, flatAPI_ISteamUser_BIsPhoneIdentifying)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BIsPhoneRequiringVerification, lib, flatAPI_ISteamUser_BIsPhoneRequiringVerification)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BIsPhoneVerified, lib, flatAPI_ISteamUser_BIsPhoneVerified)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BIsTwoFactorEnabled, lib, flatAPI_ISteamUser_BIsTwoFactorEnabled)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BLoggedOn, lib, flatAPI_ISteamUser_BLoggedOn)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_BSetDurationControlOnlineState, lib, flatAPI_ISteamUser_BSetDurationControlOnlineState)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_CancelAuthTicket, lib, flatAPI_ISteamUser_CancelAuthTicket)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_DecompressVoice, lib, flatAPI_ISteamUser_DecompressVoice)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_EndAuthSession, lib, flatAPI_ISteamUser_EndAuthSession)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetAuthSessionTicket, lib, flatAPI_ISteamUser_GetAuthSessionTicket)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetAuthTicketForWebApi, lib, flatAPI_ISteamUser_GetAuthTicketForWebApi)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetAvailableVoice, lib, flatAPI_ISteamUser_GetAvailableVoice)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetDurationControl, lib, flatAPI_ISteamUser_GetDurationControl)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetEncryptedAppTicket, lib, flatAPI_ISteamUser_GetEncryptedAppTicket)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetGameBadgeLevel, lib, flatAPI_ISteamUser_GetGameBadgeLevel)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetHSteamUser, lib, flatAPI_ISteamUser_GetHSteamUser)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetPlayerSteamLevel, lib, flatAPI_ISteamUser_GetPlayerSteamLevel)
 	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetSteamID, lib, flatAPI_ISteamUser_GetSteamID)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetUserDataFolder, lib, flatAPI_ISteamUser_GetUserDataFolder)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetVoice, lib, flatAPI_ISteamUser_GetVoice)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_GetVoiceOptimalSampleRate, lib, flatAPI_ISteamUser_GetVoiceOptimalSampleRate)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_InitiateGameConnection, lib, flatAPI_ISteamUser_InitiateGameConnection)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_RequestEncryptedAppTicket, lib, flatAPI_ISteamUser_RequestEncryptedAppTicket)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_RequestStoreAuthURL, lib, flatAPI_ISteamUser_RequestStoreAuthURL)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_StartVoiceRecording, lib, flatAPI_ISteamUser_StartVoiceRecording)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_StopVoiceRecording, lib, flatAPI_ISteamUser_StopVoiceRecording)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_TerminateGameConnection, lib, flatAPI_ISteamUser_TerminateGameConnection)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_TrackAppUsageEvent, lib, flatAPI_ISteamUser_TrackAppUsageEvent)
+	purego.RegisterLibFunc(&ptrAPI_ISteamUser_UserHasLicenseForApp, lib, flatAPI_ISteamUser_UserHasLicenseForApp)
 
 	// ISteamUserStats
 	purego.RegisterLibFunc(&ptrAPI_SteamUserStats, lib, flatAPI_SteamUserStats)
@@ -535,12 +673,50 @@ func registerFunctions(lib uintptr) {
 
 	// ISteamGameServer
 	purego.RegisterLibFunc(&ptrAPI_SteamGameServer, lib, flatAPI_SteamGameServer)
-	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetProduct, lib, flatAPI_ISteamGameServer_SetProduct)
-	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetGameDescription, lib, flatAPI_ISteamGameServer_SetGameDescription)
-	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_LogOnAnonymous, lib, flatAPI_ISteamGameServer_LogOnAnonymous)
-	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_LogOff, lib, flatAPI_ISteamGameServer_LogOff)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_AssociateWithClan, lib, flatAPI_ISteamGameServer_AssociateWithClan)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_BeginAuthSession, lib, flatAPI_ISteamGameServer_BeginAuthSession)
 	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_BLoggedOn, lib, flatAPI_ISteamGameServer_BLoggedOn)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_BSecure, lib, flatAPI_ISteamGameServer_BSecure)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_BUpdateUserData, lib, flatAPI_ISteamGameServer_BUpdateUserData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_CancelAuthTicket, lib, flatAPI_ISteamGameServer_CancelAuthTicket)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_ClearAllKeyValues, lib, flatAPI_ISteamGameServer_ClearAllKeyValues)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_ComputeNewPlayerCompatibility, lib, flatAPI_ISteamGameServer_ComputeNewPlayerCompatibility)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_CreateUnauthenticatedUserConnection, lib, flatAPI_ISteamGameServer_CreateUnauthenticatedUserConnection)
+	registerOptionalFunc(&ptrAPI_ISteamGameServer_EnableHeartbeats, lib, flatAPI_ISteamGameServer_EnableHeartbeats)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_EndAuthSession, lib, flatAPI_ISteamGameServer_EndAuthSession)
+	registerOptionalFunc(&ptrAPI_ISteamGameServer_ForceHeartbeat, lib, flatAPI_ISteamGameServer_ForceHeartbeat)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_GetAuthSessionTicket, lib, flatAPI_ISteamGameServer_GetAuthSessionTicket)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_GetGameplayStats, lib, flatAPI_ISteamGameServer_GetGameplayStats)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_GetNextOutgoingPacket, lib, flatAPI_ISteamGameServer_GetNextOutgoingPacket)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_GetPublicIP, lib, flatAPI_ISteamGameServer_GetPublicIP)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_GetServerReputation, lib, flatAPI_ISteamGameServer_GetServerReputation)
 	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_GetSteamID, lib, flatAPI_ISteamGameServer_GetSteamID)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_HandleIncomingPacket, lib, flatAPI_ISteamGameServer_HandleIncomingPacket)
+	registerOptionalFunc(&ptrAPI_ISteamGameServer_InitGameServer, lib, flatAPI_ISteamGameServer_InitGameServer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_LogOff, lib, flatAPI_ISteamGameServer_LogOff)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_LogOn, lib, flatAPI_ISteamGameServer_LogOn)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_LogOnAnonymous, lib, flatAPI_ISteamGameServer_LogOnAnonymous)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_RequestUserGroupStatus, lib, flatAPI_ISteamGameServer_RequestUserGroupStatus)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SendUserConnectAndAuthenticate, lib, flatAPI_ISteamGameServer_SendUserConnectAndAuthenticate)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SendUserDisconnect, lib, flatAPI_ISteamGameServer_SendUserDisconnect)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetBotPlayerCount, lib, flatAPI_ISteamGameServer_SetBotPlayerCount)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetDedicatedServer, lib, flatAPI_ISteamGameServer_SetDedicatedServer)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetGameData, lib, flatAPI_ISteamGameServer_SetGameData)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetGameDescription, lib, flatAPI_ISteamGameServer_SetGameDescription)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetGameTags, lib, flatAPI_ISteamGameServer_SetGameTags)
+	registerOptionalFunc(&ptrAPI_ISteamGameServer_SetHeartbeatInterval, lib, flatAPI_ISteamGameServer_SetHeartbeatInterval)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetKeyValue, lib, flatAPI_ISteamGameServer_SetKeyValue)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetMapName, lib, flatAPI_ISteamGameServer_SetMapName)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetMaxPlayerCount, lib, flatAPI_ISteamGameServer_SetMaxPlayerCount)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetModDir, lib, flatAPI_ISteamGameServer_SetModDir)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetPasswordProtected, lib, flatAPI_ISteamGameServer_SetPasswordProtected)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetProduct, lib, flatAPI_ISteamGameServer_SetProduct)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetRegion, lib, flatAPI_ISteamGameServer_SetRegion)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetServerName, lib, flatAPI_ISteamGameServer_SetServerName)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetSpectatorPort, lib, flatAPI_ISteamGameServer_SetSpectatorPort)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_SetSpectatorServerName, lib, flatAPI_ISteamGameServer_SetSpectatorServerName)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_UserHasLicenseForApp, lib, flatAPI_ISteamGameServer_UserHasLicenseForApp)
+	purego.RegisterLibFunc(&ptrAPI_ISteamGameServer_WasRestartRequested, lib, flatAPI_ISteamGameServer_WasRestartRequested)
 
 	// ISteamNetworkingMessages
 	purego.RegisterLibFunc(&ptrAPI_SteamNetworkingMessages, lib, flatAPI_SteamNetworkingMessages)
@@ -736,6 +912,88 @@ func SteamHTMLSurfaceRaw() ISteamHTMLSurface {
 // SteamMatchmakingServersRaw returns the ISteamMatchmakingServers interface pointer for purego/ffi calls.
 func SteamMatchmakingServersRaw() ISteamMatchmakingServers {
 	return ISteamMatchmakingServers{ptr: resolveInterfaceFactory("SteamAPI_SteamMatchmakingServers_v002")}
+}
+
+func ptrSlice(items []uintptr) uintptr {
+	if len(items) == 0 {
+		return 0
+	}
+	return uintptr(unsafe.Pointer(&items[0]))
+}
+
+func steamIDSlicePtr(items []CSteamID) uintptr {
+	if len(items) == 0 {
+		return 0
+	}
+	return uintptr(unsafe.Pointer(&items[0]))
+}
+
+func (s ISteamMatchmakingServers) RequestFavoritesServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest {
+	return ptrAPI_ISteamMatchmakingServers_RequestFavoritesServerList(s.ptr, appID, ptrSlice(filters), uint32(len(filters)), response)
+}
+
+func (s ISteamMatchmakingServers) RequestFriendsServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest {
+	return ptrAPI_ISteamMatchmakingServers_RequestFriendsServerList(s.ptr, appID, ptrSlice(filters), uint32(len(filters)), response)
+}
+
+func (s ISteamMatchmakingServers) RequestHistoryServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest {
+	return ptrAPI_ISteamMatchmakingServers_RequestHistoryServerList(s.ptr, appID, ptrSlice(filters), uint32(len(filters)), response)
+}
+
+func (s ISteamMatchmakingServers) RequestInternetServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest {
+	return ptrAPI_ISteamMatchmakingServers_RequestInternetServerList(s.ptr, appID, ptrSlice(filters), uint32(len(filters)), response)
+}
+
+func (s ISteamMatchmakingServers) RequestLANServerList(appID AppId_t, response uintptr) HServerListRequest {
+	return ptrAPI_ISteamMatchmakingServers_RequestLANServerList(s.ptr, appID, response)
+}
+
+func (s ISteamMatchmakingServers) RequestSpectatorServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest {
+	return ptrAPI_ISteamMatchmakingServers_RequestSpectatorServerList(s.ptr, appID, ptrSlice(filters), uint32(len(filters)), response)
+}
+
+func (s ISteamMatchmakingServers) ReleaseRequest(request HServerListRequest) {
+	ptrAPI_ISteamMatchmakingServers_ReleaseRequest(s.ptr, request)
+}
+
+func (s ISteamMatchmakingServers) GetServerDetails(request HServerListRequest, server int) uintptr {
+	return ptrAPI_ISteamMatchmakingServers_GetServerDetails(s.ptr, request, int32(server))
+}
+
+func (s ISteamMatchmakingServers) CancelQuery(request HServerListRequest) {
+	ptrAPI_ISteamMatchmakingServers_CancelQuery(s.ptr, request)
+}
+
+func (s ISteamMatchmakingServers) RefreshQuery(request HServerListRequest) {
+	ptrAPI_ISteamMatchmakingServers_RefreshQuery(s.ptr, request)
+}
+
+func (s ISteamMatchmakingServers) IsRefreshing(request HServerListRequest) bool {
+	return ptrAPI_ISteamMatchmakingServers_IsRefreshing(s.ptr, request)
+}
+
+func (s ISteamMatchmakingServers) GetServerCount(request HServerListRequest) int {
+	return int(ptrAPI_ISteamMatchmakingServers_GetServerCount(s.ptr, request))
+}
+
+func (s ISteamMatchmakingServers) RefreshServer(request HServerListRequest, server int) {
+	ptrAPI_ISteamMatchmakingServers_RefreshServer(s.ptr, request, int32(server))
+}
+
+func (s ISteamMatchmakingServers) PingServer(ip uint32, port uint16, response uintptr) HServerQuery {
+	return ptrAPI_ISteamMatchmakingServers_PingServer(s.ptr, ip, port, response)
+}
+
+func (s ISteamMatchmakingServers) PlayerDetails(ip uint32, port uint16, response uintptr) HServerQuery {
+	return ptrAPI_ISteamMatchmakingServers_PlayerDetails(s.ptr, ip, port, response)
+}
+
+func (s ISteamMatchmakingServers) ServerRules(ip uint32, port uint16, response uintptr) HServerQuery {
+	return ptrAPI_ISteamMatchmakingServers_ServerRules(s.ptr, ip, port, response)
+}
+
+func (s ISteamMatchmakingServers) CancelServerQuery(query HServerQuery) {
+	ptrAPI_ISteamMatchmakingServers_CancelServerQuery(s.ptr, query)
 }
 
 // SteamMusicRaw returns the ISteamMusic interface pointer for purego/ffi calls.
@@ -1632,8 +1890,158 @@ func SteamUserV023() ISteamUser {
 
 type steamUser uintptr
 
+func (s steamUser) AdvertiseGame(gameServerSteamID CSteamID, ip uint32, port uint16) {
+	ptrAPI_ISteamUser_AdvertiseGame(uintptr(s), gameServerSteamID, ip, port)
+}
+
+func (s steamUser) BeginAuthSession(authTicket []byte, steamID CSteamID) EBeginAuthSessionResult {
+	return EBeginAuthSessionResult(ptrAPI_ISteamUser_BeginAuthSession(uintptr(s), uintptr(unsafe.Pointer(&authTicket[0])), int32(len(authTicket)), steamID))
+}
+
+func (s steamUser) BIsBehindNAT() bool {
+	return ptrAPI_ISteamUser_BIsBehindNAT(uintptr(s))
+}
+
+func (s steamUser) BIsPhoneIdentifying() bool {
+	return ptrAPI_ISteamUser_BIsPhoneIdentifying(uintptr(s))
+}
+
+func (s steamUser) BIsPhoneRequiringVerification() bool {
+	return ptrAPI_ISteamUser_BIsPhoneRequiringVerification(uintptr(s))
+}
+
+func (s steamUser) BIsPhoneVerified() bool {
+	return ptrAPI_ISteamUser_BIsPhoneVerified(uintptr(s))
+}
+
+func (s steamUser) BIsTwoFactorEnabled() bool {
+	return ptrAPI_ISteamUser_BIsTwoFactorEnabled(uintptr(s))
+}
+
+func (s steamUser) BLoggedOn() bool {
+	return ptrAPI_ISteamUser_BLoggedOn(uintptr(s))
+}
+
+func (s steamUser) BSetDurationControlOnlineState(newState EDurationControlOnlineState) bool {
+	return ptrAPI_ISteamUser_BSetDurationControlOnlineState(uintptr(s), newState)
+}
+
+func (s steamUser) CancelAuthTicket(authTicket HAuthTicket) {
+	ptrAPI_ISteamUser_CancelAuthTicket(uintptr(s), authTicket)
+}
+
+func (s steamUser) DecompressVoice(compressedData []byte, destBuffer []byte, desiredSampleRate uint32) (bytesWritten uint32, result EVoiceResult) {
+	result = EVoiceResult(ptrAPI_ISteamUser_DecompressVoice(uintptr(s), uintptr(unsafe.Pointer(&compressedData[0])), uint32(len(compressedData)), uintptr(unsafe.Pointer(&destBuffer[0])), uint32(len(destBuffer)), uintptr(unsafe.Pointer(&bytesWritten)), desiredSampleRate))
+	return
+}
+
+func (s steamUser) EndAuthSession(steamID CSteamID) {
+	ptrAPI_ISteamUser_EndAuthSession(uintptr(s), steamID)
+}
+
+func (s steamUser) GetAuthSessionTicket(authTicket []byte, identityRemote *SteamNetworkingIdentity) (ticket HAuthTicket, size uint32) {
+	var remotePtr uintptr
+	if identityRemote != nil {
+		remotePtr = uintptr(unsafe.Pointer(identityRemote))
+	}
+	ticket = ptrAPI_ISteamUser_GetAuthSessionTicket(uintptr(s), uintptr(unsafe.Pointer(&authTicket[0])), int32(len(authTicket)), uintptr(unsafe.Pointer(&size)), remotePtr)
+	return
+}
+
+func (s steamUser) GetAuthTicketForWebApi(identity string) HAuthTicket {
+	var handle HAuthTicket
+	return ptrAPI_ISteamUser_GetAuthTicketForWebApi(uintptr(s), identity, uintptr(unsafe.Pointer(&handle)))
+}
+
+func (s steamUser) GetAvailableVoice() (compressedBytes uint32, uncompressedBytes uint32, result EVoiceResult) {
+	result = EVoiceResult(ptrAPI_ISteamUser_GetAvailableVoice(uintptr(s), uintptr(unsafe.Pointer(&compressedBytes)), uintptr(unsafe.Pointer(&uncompressedBytes)), 0))
+	return
+}
+
+func (s steamUser) GetDurationControl() (control DurationControl, ok bool) {
+	ok = ptrAPI_ISteamUser_GetDurationControl(uintptr(s), uintptr(unsafe.Pointer(&control)))
+	return
+}
+
+func (s steamUser) GetEncryptedAppTicket(ticket []byte) (ticketSize uint32, ok bool) {
+	ok = ptrAPI_ISteamUser_GetEncryptedAppTicket(uintptr(s), uintptr(unsafe.Pointer(&ticket[0])), int32(len(ticket)), uintptr(unsafe.Pointer(&ticketSize)))
+	return
+}
+
+func (s steamUser) GetGameBadgeLevel(series int32, foil bool) int32 {
+	return ptrAPI_ISteamUser_GetGameBadgeLevel(uintptr(s), series, foil)
+}
+
+func (s steamUser) GetHSteamUser() HSteamUser {
+	return ptrAPI_ISteamUser_GetHSteamUser(uintptr(s))
+}
+
+func (s steamUser) GetPlayerSteamLevel() int32 {
+	return ptrAPI_ISteamUser_GetPlayerSteamLevel(uintptr(s))
+}
+
 func (s steamUser) GetSteamID() CSteamID {
 	return CSteamID(ptrAPI_ISteamUser_GetSteamID(uintptr(s)))
+}
+
+func (s steamUser) GetUserDataFolder() (path string, ok bool) {
+	buf := make([]byte, 4096)
+	ok = ptrAPI_ISteamUser_GetUserDataFolder(uintptr(s), uintptr(unsafe.Pointer(&buf[0])), int32(len(buf)))
+	if i := bytes.IndexByte(buf, 0); i >= 0 {
+		path = string(buf[:i])
+	} else {
+		path = string(buf)
+	}
+	return
+}
+
+func (s steamUser) GetVoice(wantCompressed bool, compressedData []byte, wantUncompressed bool, uncompressedData []byte, desiredSampleRate uint32) (compressedBytes uint32, uncompressedBytes uint32, result EVoiceResult) {
+	var compressedPtr uintptr
+	if len(compressedData) > 0 {
+		compressedPtr = uintptr(unsafe.Pointer(&compressedData[0]))
+	}
+	var uncompressedPtr uintptr
+	if len(uncompressedData) > 0 {
+		uncompressedPtr = uintptr(unsafe.Pointer(&uncompressedData[0]))
+	}
+	result = EVoiceResult(ptrAPI_ISteamUser_GetVoice(uintptr(s), wantCompressed, compressedPtr, uint32(len(compressedData)), uintptr(unsafe.Pointer(&compressedBytes)), wantUncompressed, uncompressedPtr, uint32(len(uncompressedData)), uintptr(unsafe.Pointer(&uncompressedBytes)), desiredSampleRate))
+	return
+}
+
+func (s steamUser) GetVoiceOptimalSampleRate() uint32 {
+	return ptrAPI_ISteamUser_GetVoiceOptimalSampleRate(uintptr(s))
+}
+
+func (s steamUser) InitiateGameConnection(authBlob []byte, steamIDGameServer CSteamID, ipServer uint32, portServer uint16, secure bool) int32 {
+	return ptrAPI_ISteamUser_InitiateGameConnection(uintptr(s), uintptr(unsafe.Pointer(&authBlob[0])), int32(len(authBlob)), steamIDGameServer, ipServer, portServer, secure)
+}
+
+func (s steamUser) RequestEncryptedAppTicket(dataToInclude []byte) SteamAPICall_t {
+	return ptrAPI_ISteamUser_RequestEncryptedAppTicket(uintptr(s), uintptr(unsafe.Pointer(&dataToInclude[0])), int32(len(dataToInclude)))
+}
+
+func (s steamUser) RequestStoreAuthURL(redirectURL string) SteamAPICall_t {
+	return ptrAPI_ISteamUser_RequestStoreAuthURL(uintptr(s), redirectURL)
+}
+
+func (s steamUser) StartVoiceRecording() {
+	ptrAPI_ISteamUser_StartVoiceRecording(uintptr(s))
+}
+
+func (s steamUser) StopVoiceRecording() {
+	ptrAPI_ISteamUser_StopVoiceRecording(uintptr(s))
+}
+
+func (s steamUser) TerminateGameConnection(ipServer uint32, portServer uint16) {
+	ptrAPI_ISteamUser_TerminateGameConnection(uintptr(s), ipServer, portServer)
+}
+
+func (s steamUser) TrackAppUsageEvent(gameID CGameID, eventCode int32, extraInfo string) {
+	ptrAPI_ISteamUser_TrackAppUsageEvent(uintptr(s), gameID, eventCode, extraInfo)
+}
+
+func (s steamUser) UserHasLicenseForApp(steamID CSteamID, appID AppId_t) EUserHasLicenseForAppResult {
+	return EUserHasLicenseForAppResult(ptrAPI_ISteamUser_UserHasLicenseForApp(uintptr(s), steamID, appID))
 }
 
 func SteamUserStats() ISteamUserStats {
@@ -1802,28 +2210,201 @@ func SteamGameServerV015() ISteamGameServer {
 
 type steamGameServer uintptr
 
-func (s steamGameServer) SetProduct(product string) {
-	ptrAPI_ISteamGameServer_SetProduct(uintptr(s), product)
+func (s steamGameServer) AssociateWithClan(clanID CSteamID) SteamAPICall_t {
+	return ptrAPI_ISteamGameServer_AssociateWithClan(uintptr(s), clanID)
 }
 
-func (s steamGameServer) SetGameDescription(description string) {
-	ptrAPI_ISteamGameServer_SetGameDescription(uintptr(s), description)
-}
-
-func (s steamGameServer) LogOnAnonymous() {
-	ptrAPI_ISteamGameServer_LogOnAnonymous(uintptr(s))
-}
-
-func (s steamGameServer) LogOff() {
-	ptrAPI_ISteamGameServer_LogOff(uintptr(s))
+func (s steamGameServer) BeginAuthSession(authTicket []byte, steamID CSteamID) EBeginAuthSessionResult {
+	return EBeginAuthSessionResult(ptrAPI_ISteamGameServer_BeginAuthSession(uintptr(s), uintptr(unsafe.Pointer(&authTicket[0])), int32(len(authTicket)), steamID))
 }
 
 func (s steamGameServer) BLoggedOn() bool {
 	return ptrAPI_ISteamGameServer_BLoggedOn(uintptr(s))
 }
 
+func (s steamGameServer) BSecure() bool {
+	return ptrAPI_ISteamGameServer_BSecure(uintptr(s))
+}
+
+func (s steamGameServer) BUpdateUserData(steamIDUser CSteamID, playerName string, score uint32) bool {
+	return ptrAPI_ISteamGameServer_BUpdateUserData(uintptr(s), steamIDUser, playerName, score)
+}
+
+func (s steamGameServer) CancelAuthTicket(authTicket HAuthTicket) {
+	ptrAPI_ISteamGameServer_CancelAuthTicket(uintptr(s), authTicket)
+}
+
+func (s steamGameServer) ClearAllKeyValues() {
+	ptrAPI_ISteamGameServer_ClearAllKeyValues(uintptr(s))
+}
+
+func (s steamGameServer) ComputeNewPlayerCompatibility(steamIDNewPlayer CSteamID, steamIDPlayers []CSteamID, steamIDPlayersInGame []CSteamID, steamIDTeamPlayers []CSteamID) SteamAPICall_t {
+	return ptrAPI_ISteamGameServer_ComputeNewPlayerCompatibility(
+		uintptr(s),
+		steamIDNewPlayer,
+		steamIDSlicePtr(steamIDPlayers),
+		uint32(len(steamIDPlayers)),
+		steamIDSlicePtr(steamIDPlayersInGame),
+		uint32(len(steamIDPlayersInGame)),
+		steamIDSlicePtr(steamIDTeamPlayers),
+		uint32(len(steamIDTeamPlayers)),
+	)
+}
+
+func (s steamGameServer) CreateUnauthenticatedUserConnection() CSteamID {
+	return ptrAPI_ISteamGameServer_CreateUnauthenticatedUserConnection(uintptr(s))
+}
+
+func (s steamGameServer) EnableHeartbeats(active bool) {
+	if ptrAPI_ISteamGameServer_EnableHeartbeats != nil {
+		ptrAPI_ISteamGameServer_EnableHeartbeats(uintptr(s), active)
+	}
+}
+
+func (s steamGameServer) EndAuthSession(steamID CSteamID) {
+	ptrAPI_ISteamGameServer_EndAuthSession(uintptr(s), steamID)
+}
+
+func (s steamGameServer) ForceHeartbeat() {
+	if ptrAPI_ISteamGameServer_ForceHeartbeat != nil {
+		ptrAPI_ISteamGameServer_ForceHeartbeat(uintptr(s))
+	}
+}
+
+func (s steamGameServer) GetAuthSessionTicket(authTicket []byte) (ticket HAuthTicket, size uint32) {
+	ticket = ptrAPI_ISteamGameServer_GetAuthSessionTicket(uintptr(s), uintptr(unsafe.Pointer(&authTicket[0])), int32(len(authTicket)), uintptr(unsafe.Pointer(&size)))
+	return
+}
+
+func (s steamGameServer) GetGameplayStats() {
+	ptrAPI_ISteamGameServer_GetGameplayStats(uintptr(s))
+}
+
+func (s steamGameServer) GetNextOutgoingPacket(dest []byte) (size int32, ip uint32, port uint16) {
+	size = ptrAPI_ISteamGameServer_GetNextOutgoingPacket(uintptr(s), uintptr(unsafe.Pointer(&dest[0])), int32(len(dest)), uintptr(unsafe.Pointer(&ip)), uintptr(unsafe.Pointer(&port)))
+	return
+}
+
+func (s steamGameServer) GetPublicIP() uint32 {
+	return ptrAPI_ISteamGameServer_GetPublicIP(uintptr(s))
+}
+
+func (s steamGameServer) GetServerReputation() SteamAPICall_t {
+	return ptrAPI_ISteamGameServer_GetServerReputation(uintptr(s))
+}
+
 func (s steamGameServer) GetSteamID() CSteamID {
 	return ptrAPI_ISteamGameServer_GetSteamID(uintptr(s))
+}
+
+func (s steamGameServer) HandleIncomingPacket(data []byte, ip uint32, port uint16) bool {
+	return ptrAPI_ISteamGameServer_HandleIncomingPacket(uintptr(s), uintptr(unsafe.Pointer(&data[0])), int32(len(data)), ip, port)
+}
+
+func (s steamGameServer) InitGameServer(ip uint32, steamPort uint16, gamePort uint16, queryPort uint16, serverMode uint32, versionString string) bool {
+	if ptrAPI_ISteamGameServer_InitGameServer == nil {
+		return false
+	}
+	return ptrAPI_ISteamGameServer_InitGameServer(uintptr(s), ip, steamPort, gamePort, queryPort, serverMode, versionString)
+}
+
+func (s steamGameServer) LogOff() {
+	ptrAPI_ISteamGameServer_LogOff(uintptr(s))
+}
+
+func (s steamGameServer) LogOn(token string) {
+	ptrAPI_ISteamGameServer_LogOn(uintptr(s), token)
+}
+
+func (s steamGameServer) LogOnAnonymous() {
+	ptrAPI_ISteamGameServer_LogOnAnonymous(uintptr(s))
+}
+
+func (s steamGameServer) RequestUserGroupStatus(steamIDUser CSteamID, steamIDGroup CSteamID) bool {
+	return ptrAPI_ISteamGameServer_RequestUserGroupStatus(uintptr(s), steamIDUser, steamIDGroup)
+}
+
+func (s steamGameServer) SendUserConnectAndAuthenticate(ipClient uint32, authBlob []byte) (steamIDUser CSteamID, ok bool) {
+	ok = ptrAPI_ISteamGameServer_SendUserConnectAndAuthenticate(uintptr(s), ipClient, uintptr(unsafe.Pointer(&authBlob[0])), uint32(len(authBlob)), uintptr(unsafe.Pointer(&steamIDUser)))
+	return
+}
+
+func (s steamGameServer) SendUserDisconnect(steamIDUser CSteamID) {
+	ptrAPI_ISteamGameServer_SendUserDisconnect(uintptr(s), steamIDUser)
+}
+
+func (s steamGameServer) SetBotPlayerCount(botPlayers int32) {
+	ptrAPI_ISteamGameServer_SetBotPlayerCount(uintptr(s), botPlayers)
+}
+
+func (s steamGameServer) SetDedicatedServer(dedicated bool) {
+	ptrAPI_ISteamGameServer_SetDedicatedServer(uintptr(s), dedicated)
+}
+
+func (s steamGameServer) SetGameData(gameData string) {
+	ptrAPI_ISteamGameServer_SetGameData(uintptr(s), gameData)
+}
+
+func (s steamGameServer) SetGameDescription(description string) {
+	ptrAPI_ISteamGameServer_SetGameDescription(uintptr(s), description)
+}
+
+func (s steamGameServer) SetGameTags(gameTags string) {
+	ptrAPI_ISteamGameServer_SetGameTags(uintptr(s), gameTags)
+}
+
+func (s steamGameServer) SetHeartbeatInterval(interval int) {
+	if ptrAPI_ISteamGameServer_SetHeartbeatInterval != nil {
+		ptrAPI_ISteamGameServer_SetHeartbeatInterval(uintptr(s), int32(interval))
+	}
+}
+
+func (s steamGameServer) SetKeyValue(key string, value string) {
+	ptrAPI_ISteamGameServer_SetKeyValue(uintptr(s), key, value)
+}
+
+func (s steamGameServer) SetMapName(mapName string) {
+	ptrAPI_ISteamGameServer_SetMapName(uintptr(s), mapName)
+}
+
+func (s steamGameServer) SetMaxPlayerCount(playersMax int32) {
+	ptrAPI_ISteamGameServer_SetMaxPlayerCount(uintptr(s), playersMax)
+}
+
+func (s steamGameServer) SetModDir(modDir string) {
+	ptrAPI_ISteamGameServer_SetModDir(uintptr(s), modDir)
+}
+
+func (s steamGameServer) SetPasswordProtected(passwordProtected bool) {
+	ptrAPI_ISteamGameServer_SetPasswordProtected(uintptr(s), passwordProtected)
+}
+
+func (s steamGameServer) SetProduct(product string) {
+	ptrAPI_ISteamGameServer_SetProduct(uintptr(s), product)
+}
+
+func (s steamGameServer) SetRegion(region string) {
+	ptrAPI_ISteamGameServer_SetRegion(uintptr(s), region)
+}
+
+func (s steamGameServer) SetServerName(serverName string) {
+	ptrAPI_ISteamGameServer_SetServerName(uintptr(s), serverName)
+}
+
+func (s steamGameServer) SetSpectatorPort(spectatorPort uint16) {
+	ptrAPI_ISteamGameServer_SetSpectatorPort(uintptr(s), spectatorPort)
+}
+
+func (s steamGameServer) SetSpectatorServerName(spectatorServerName string) {
+	ptrAPI_ISteamGameServer_SetSpectatorServerName(uintptr(s), spectatorServerName)
+}
+
+func (s steamGameServer) UserHasLicenseForApp(steamID CSteamID, appID AppId_t) EUserHasLicenseForAppResult {
+	return EUserHasLicenseForAppResult(ptrAPI_ISteamGameServer_UserHasLicenseForApp(uintptr(s), steamID, appID))
+}
+
+func (s steamGameServer) WasRestartRequested() bool {
+	return ptrAPI_ISteamGameServer_WasRestartRequested(uintptr(s))
 }
 
 func SteamNetworkingMessages() ISteamNetworkingMessages {
