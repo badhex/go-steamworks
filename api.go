@@ -921,6 +921,13 @@ func ptrSlice(items []uintptr) uintptr {
 	return uintptr(unsafe.Pointer(&items[0]))
 }
 
+func steamIDSlicePtr(items []CSteamID) uintptr {
+	if len(items) == 0 {
+		return 0
+	}
+	return uintptr(unsafe.Pointer(&items[0]))
+}
+
 func (s ISteamMatchmakingServers) RequestFavoritesServerList(appID AppId_t, filters []uintptr, response uintptr) HServerListRequest {
 	return ptrAPI_ISteamMatchmakingServers_RequestFavoritesServerList(s.ptr, appID, ptrSlice(filters), uint32(len(filters)), response)
 }
@@ -1989,7 +1996,15 @@ func (s steamUser) GetUserDataFolder() (path string, ok bool) {
 }
 
 func (s steamUser) GetVoice(wantCompressed bool, compressedData []byte, wantUncompressed bool, uncompressedData []byte, desiredSampleRate uint32) (compressedBytes uint32, uncompressedBytes uint32, result EVoiceResult) {
-	result = EVoiceResult(ptrAPI_ISteamUser_GetVoice(uintptr(s), wantCompressed, uintptr(unsafe.Pointer(&compressedData[0])), uint32(len(compressedData)), uintptr(unsafe.Pointer(&compressedBytes)), wantUncompressed, uintptr(unsafe.Pointer(&uncompressedData[0])), uint32(len(uncompressedData)), uintptr(unsafe.Pointer(&uncompressedBytes)), desiredSampleRate))
+	var compressedPtr uintptr
+	if len(compressedData) > 0 {
+		compressedPtr = uintptr(unsafe.Pointer(&compressedData[0]))
+	}
+	var uncompressedPtr uintptr
+	if len(uncompressedData) > 0 {
+		uncompressedPtr = uintptr(unsafe.Pointer(&uncompressedData[0]))
+	}
+	result = EVoiceResult(ptrAPI_ISteamUser_GetVoice(uintptr(s), wantCompressed, compressedPtr, uint32(len(compressedData)), uintptr(unsafe.Pointer(&compressedBytes)), wantUncompressed, uncompressedPtr, uint32(len(uncompressedData)), uintptr(unsafe.Pointer(&uncompressedBytes)), desiredSampleRate))
 	return
 }
 
@@ -2227,11 +2242,11 @@ func (s steamGameServer) ComputeNewPlayerCompatibility(steamIDNewPlayer CSteamID
 	return ptrAPI_ISteamGameServer_ComputeNewPlayerCompatibility(
 		uintptr(s),
 		steamIDNewPlayer,
-		uintptr(unsafe.Pointer(&steamIDPlayers[0])),
+		steamIDSlicePtr(steamIDPlayers),
 		uint32(len(steamIDPlayers)),
-		uintptr(unsafe.Pointer(&steamIDPlayersInGame[0])),
+		steamIDSlicePtr(steamIDPlayersInGame),
 		uint32(len(steamIDPlayersInGame)),
-		uintptr(unsafe.Pointer(&steamIDTeamPlayers[0])),
+		steamIDSlicePtr(steamIDTeamPlayers),
 		uint32(len(steamIDTeamPlayers)),
 	)
 }
