@@ -21,8 +21,6 @@ import (
 	"time"
 	"unicode/utf8"
 	"unsafe"
-
-	"github.com/ebitengine/purego"
 )
 
 var (
@@ -241,7 +239,7 @@ func TestSDKSymbolResolution(t *testing.T) {
 	}
 	for _, symbol := range allFlatAPISymbols() {
 		t.Run(symbol, func(t *testing.T) {
-			ptr, err := purego.Dlsym(libHandle, symbol)
+			ptr, err := lookupSymbolAddr(libHandle, symbol)
 			if err != nil {
 				if _, ok := expectedMissing[symbol]; ok {
 					t.Logf("expected missing symbol: %s", symbol)
@@ -251,13 +249,13 @@ func TestSDKSymbolResolution(t *testing.T) {
 					t.Logf("optional symbol not exported by this SDK: %s", symbol)
 					return
 				}
-				t.Fatalf("Dlsym(%s): %v", symbol, err)
+				t.Fatalf("lookupSymbolAddr(%s): %v", symbol, err)
 			}
 			if _, ok := expectedMissing[symbol]; ok {
 				t.Fatalf("expected missing symbol %s, but it was present", symbol)
 			}
 			if ptr == 0 {
-				t.Fatalf("Dlsym(%s) returned 0", symbol)
+				t.Fatalf("lookupSymbolAddr(%s) returned 0", symbol)
 			}
 			t.Logf("resolved symbol %s: 0x%x", symbol, ptr)
 		})
@@ -271,9 +269,9 @@ func TestSDKCallSymbol(t *testing.T) {
 		registerInputStructReturns(libHandle)
 		initResult = initSteamAPI(t)
 	})
-	ptr, err := purego.Dlsym(libHandle, flatAPI_IsSteamRunning)
+	ptr, err := lookupSymbolAddr(libHandle, flatAPI_IsSteamRunning)
 	if err != nil {
-		t.Fatalf("Dlsym(%s): %v", flatAPI_IsSteamRunning, err)
+		t.Fatalf("lookupSymbolAddr(%s): %v", flatAPI_IsSteamRunning, err)
 	}
 	result := CallSymbolPtr(ptr)
 	if result == 0 {

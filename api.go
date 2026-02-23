@@ -391,9 +391,9 @@ func fallbackResolveInterfaceSymbol(symbol string) uintptr {
 }
 
 func mustLookupSymbol(lib uintptr, name string) uintptr {
-	ptr, err := purego.Dlsym(lib, name)
+	ptr, err := lookupSymbolAddr(lib, name)
 	if err != nil {
-		panic(fmt.Errorf("steamworks: dlsym failed for %s: %w", name, err))
+		panic(fmt.Errorf("steamworks: symbol lookup failed for %s: %w", name, err))
 	}
 	return ptr
 }
@@ -405,7 +405,7 @@ func registerInputStructReturns(lib uintptr) {
 }
 
 func registerOptionalFunc(fptr any, lib uintptr, name string) {
-	ptr, err := purego.Dlsym(lib, name)
+	ptr, err := lookupSymbolAddr(lib, name)
 	if err != nil {
 		return
 	}
@@ -862,7 +862,7 @@ func SteamAPIGameServer() ISteamAPIGameServer {
 func resolveInterfaceFactory(symbols ...string) uintptr {
 	mustLoad()
 	for _, sym := range symbols {
-		fn, err := purego.Dlsym(theLib.lib, sym)
+		fn, err := lookupSymbolAddr(theLib.lib, sym)
 		if err == nil && fn != 0 {
 			ptr, _, _ := purego.SyscallN(fn)
 			if ptr != 0 {

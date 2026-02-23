@@ -17,7 +17,7 @@ func LookupSymbol(name string) (uintptr, error) {
 		return 0, err
 	}
 	theLib = l
-	return purego.Dlsym(theLib.lib, name)
+	return lookupSymbolAddr(theLib.lib, name)
 }
 
 // CallSymbol looks up a Steamworks SDK symbol and invokes it with the provided arguments.
