@@ -256,6 +256,42 @@ const (
 	EChatEntryTypeLinkBlocked      EChatEntryType = 14
 )
 
+// Steam matchmaking callback IDs for lobby events.
+const (
+	CallbackIDLobbyDataUpdate CallbackID = 505
+	CallbackIDLobbyChatUpdate CallbackID = 506
+	CallbackIDLobbyChatMsg    CallbackID = 507
+)
+
+// LobbyDataUpdate mirrors Steam's LobbyDataUpdate_t callback payload.
+type LobbyDataUpdate struct {
+	LobbySteamID  CSteamID
+	MemberSteamID CSteamID
+	Success       uint8
+}
+
+// LobbyChatUpdate mirrors Steam's LobbyChatUpdate_t callback payload.
+type LobbyChatUpdate struct {
+	LobbySteamID          CSteamID
+	UserChangedSteamID    CSteamID
+	MakingChangeSteamID   CSteamID
+	ChatMemberStateChange uint32
+}
+
+// LobbyChatMsg mirrors Steam's LobbyChatMsg_t callback payload.
+type LobbyChatMsg struct {
+	LobbySteamID  CSteamID
+	UserSteamID   CSteamID
+	ChatEntryType uint8
+	_             [3]byte
+	ChatID        int32
+}
+
+// EntryType returns the callback's chat entry type as EChatEntryType.
+func (m LobbyChatMsg) EntryType() EChatEntryType {
+	return EChatEntryType(m.ChatEntryType)
+}
+
 type EResult int32
 
 const (

@@ -6,6 +6,7 @@ package steamworks
 import (
 	"bytes"
 	"testing"
+	"unsafe"
 )
 
 func TestCStringToGo(t *testing.T) {
@@ -122,4 +123,38 @@ func TestLobbyMembersIterator(t *testing.T) {
 	var s steamMatchmaking
 	var lobbyID CSteamID
 	_ = s.LobbyMembers(lobbyID)
+}
+
+func TestLobbyCallbackPayloadSizes(t *testing.T) {
+	var (
+		dataUpdate LobbyDataUpdate
+		chatUpdate LobbyChatUpdate
+		chatMsg    LobbyChatMsg
+	)
+
+	if got, want := unsafe.Sizeof(dataUpdate), uintptr(24); got != want {
+		t.Fatalf("LobbyDataUpdate size=%d, want %d", got, want)
+	}
+	if got, want := unsafe.Sizeof(chatUpdate), uintptr(32); got != want {
+		t.Fatalf("LobbyChatUpdate size=%d, want %d", got, want)
+	}
+	if got, want := unsafe.Sizeof(chatMsg), uintptr(24); got != want {
+		t.Fatalf("LobbyChatMsg size=%d, want %d", got, want)
+	}
+}
+
+func TestLobbyChatMsgLayout(t *testing.T) {
+	var msg LobbyChatMsg
+
+	if got, want := unsafe.Offsetof(msg.ChatEntryType), uintptr(16); got != want {
+		t.Fatalf("LobbyChatMsg.ChatEntryType offset=%d, want %d", got, want)
+	}
+	if got, want := unsafe.Offsetof(msg.ChatID), uintptr(20); got != want {
+		t.Fatalf("LobbyChatMsg.ChatID offset=%d, want %d", got, want)
+	}
+
+	msg.ChatEntryType = uint8(EChatEntryTypeWasKicked)
+	if got, want := msg.EntryType(), EChatEntryTypeWasKicked; got != want {
+		t.Fatalf("LobbyChatMsg.EntryType()=%v, want %v", got, want)
+	}
 }
