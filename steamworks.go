@@ -270,6 +270,8 @@ const (
 type SteamRemotePlaySessionAvatarLoaded struct {
 	SessionID uint32
 	Image     int32
+	Wide      int32
+	Height    int32
 }
 
 // LobbyDataUpdate mirrors Steam's LobbyDataUpdate_t callback payload.
