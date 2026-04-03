@@ -221,6 +221,11 @@ Go accessors. Interfaces are either:
 **ISteamAppTicket** (`SteamAppTicket() ISteamAppTicket`) — handle-backed
 
 * Returned wrapper struct shape: `{ ptr uintptr }` with methods `Ptr() uintptr` and `Valid() bool`.
+* `BSessionRemotePlayTogether(sessionID uint32) bool`
+* `GetSessionGuestID(sessionID uint32) CSteamID`
+* `GetSmallSessionAvatar(sessionID uint32) int32`
+* `GetMediumSessionAvatar(sessionID uint32) int32`
+* `GetLargeSessionAvatar(sessionID uint32) int32`
 
 **ISteamClient** (`SteamClient() ISteamClient`) — handle-backed
 
