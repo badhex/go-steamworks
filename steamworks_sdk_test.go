@@ -229,6 +229,7 @@ func TestSDKSymbolResolution(t *testing.T) {
 
 	expectedMissing := map[string]struct{}{
 		flatAPI_ISteamInput_GetGlyphForActionOrigin: {},
+		flatAPI_SteamApps: {},
 	}
 	optionalSymbols := map[string]struct{}{
 		flatAPI_ISteamMatchmaking_CheckForPSNGameBootInvite: {},
@@ -430,9 +431,18 @@ func initSteamAPI(t *testing.T) initStatus {
 	return initStatus{ok: true}
 }
 
+func steamAppsInterfacePtr() uintptr {
+	if ptrAPI_SteamApps != nil {
+		if ptr := ptrAPI_SteamApps(); ptr != 0 {
+			return ptr
+		}
+	}
+	return resolveInterfaceFactory("SteamAPI_SteamApps_v009", "SteamAPI_SteamApps_v008", "SteamAPI_SteamApps")
+}
+
 func interfacePointers() map[string]uintptr {
 	return map[string]uintptr{
-		"ISteamApps":               ptrAPI_SteamApps(),
+		"ISteamApps":               steamAppsInterfacePtr(),
 		"ISteamFriends":            ptrAPI_SteamFriends(),
 		"ISteamMatchmaking":        ptrAPI_SteamMatchmaking(),
 		"ISteamMatchmakingServers": SteamMatchmakingServersRaw().Ptr(),
@@ -1255,7 +1265,7 @@ func signatureExpectations() []signatureExpectation {
 
 		{name: "ptrAPI_SteamRemotePlay", expected: (func() uintptr)(nil)},
 		{name: "ptrAPI_ISteamRemotePlay_BSessionRemotePlayTogether", expected: (func(uintptr, uint32) bool)(nil)},
-		{name: "ptrAPI_ISteamRemotePlay_GetSessionGuestID", expected: (func(uintptr, uint32) CSteamID)(nil)},
+		{name: "ptrAPI_ISteamRemotePlay_GetSessionGuestID", expected: (func(uintptr, uint32) uint32)(nil)},
 		{name: "ptrAPI_ISteamRemotePlay_GetSmallSessionAvatar", expected: (func(uintptr, uint32) int32)(nil)},
 		{name: "ptrAPI_ISteamRemotePlay_GetMediumSessionAvatar", expected: (func(uintptr, uint32) int32)(nil)},
 		{name: "ptrAPI_ISteamRemotePlay_GetLargeSessionAvatar", expected: (func(uintptr, uint32) int32)(nil)},

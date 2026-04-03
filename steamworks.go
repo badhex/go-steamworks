@@ -270,6 +270,8 @@ const (
 type SteamRemotePlaySessionAvatarLoaded struct {
 	SessionID uint32
 	Image     int32
+	Wide      int32
+	Height    int32
 }
 
 // LobbyDataUpdate mirrors Steam's LobbyDataUpdate_t callback payload.
@@ -941,6 +943,8 @@ const (
 	flatAPI_ReleaseCurrentThreadMemory = "SteamAPI_ReleaseCurrentThreadMemory"
 
 	flatAPI_SteamApps                                 = "SteamAPI_SteamApps_v008"
+	flatAPI_SteamAppsV009                             = "SteamAPI_SteamApps_v009"
+	flatAPI_SteamAppsUnversioned                      = "SteamAPI_SteamApps"
 	flatAPI_ISteamApps_BIsSubscribed                  = "SteamAPI_ISteamApps_BIsSubscribed"
 	flatAPI_ISteamApps_BIsLowViolence                 = "SteamAPI_ISteamApps_BIsLowViolence"
 	flatAPI_ISteamApps_BIsCybercafe                   = "SteamAPI_ISteamApps_BIsCybercafe"

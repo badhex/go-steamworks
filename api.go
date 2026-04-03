@@ -212,7 +212,7 @@ var (
 	// ISteamRemotePlay
 	ptrAPI_SteamRemotePlay                             func() uintptr
 	ptrAPI_ISteamRemotePlay_BSessionRemotePlayTogether func(uintptr, uint32) bool
-	ptrAPI_ISteamRemotePlay_GetSessionGuestID          func(uintptr, uint32) CSteamID
+	ptrAPI_ISteamRemotePlay_GetSessionGuestID          func(uintptr, uint32) uint32
 	ptrAPI_ISteamRemotePlay_GetSmallSessionAvatar      func(uintptr, uint32) int32
 	ptrAPI_ISteamRemotePlay_GetMediumSessionAvatar     func(uintptr, uint32) int32
 	ptrAPI_ISteamRemotePlay_GetLargeSessionAvatar      func(uintptr, uint32) int32
@@ -434,7 +434,13 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ReleaseCurrentThreadMemory, lib, flatAPI_ReleaseCurrentThreadMemory)
 
 	// ISteamApps
-	purego.RegisterLibFunc(&ptrAPI_SteamApps, lib, flatAPI_SteamApps)
+	registerOptionalFunc(&ptrAPI_SteamApps, lib, flatAPI_SteamAppsV009)
+	if ptrAPI_SteamApps == nil {
+		registerOptionalFunc(&ptrAPI_SteamApps, lib, flatAPI_SteamApps)
+	}
+	if ptrAPI_SteamApps == nil {
+		registerOptionalFunc(&ptrAPI_SteamApps, lib, flatAPI_SteamAppsUnversioned)
+	}
 	purego.RegisterLibFunc(&ptrAPI_ISteamApps_BIsSubscribed, lib, flatAPI_ISteamApps_BIsSubscribed)
 	purego.RegisterLibFunc(&ptrAPI_ISteamApps_BIsLowViolence, lib, flatAPI_ISteamApps_BIsLowViolence)
 	purego.RegisterLibFunc(&ptrAPI_ISteamApps_BIsCybercafe, lib, flatAPI_ISteamApps_BIsCybercafe)
@@ -1046,7 +1052,7 @@ func (s ISteamRemotePlay) BSessionRemotePlayTogether(sessionID uint32) bool {
 	return ptrAPI_ISteamRemotePlay_BSessionRemotePlayTogether(s.ptr, sessionID)
 }
 
-func (s ISteamRemotePlay) GetSessionGuestID(sessionID uint32) CSteamID {
+func (s ISteamRemotePlay) GetSessionGuestID(sessionID uint32) uint32 {
 	if ptrAPI_ISteamRemotePlay_GetSessionGuestID == nil {
 		return 0
 	}
@@ -1101,7 +1107,12 @@ func SteamAPIGameServerRaw() ISteamAPIGameServer {
 
 func SteamApps() ISteamApps {
 	mustLoad()
-	return steamApps(ptrAPI_SteamApps())
+	if ptrAPI_SteamApps != nil {
+		if ptr := ptrAPI_SteamApps(); ptr != 0 {
+			return steamApps(ptr)
+		}
+	}
+	return steamApps(resolveInterfaceFactory("SteamAPI_SteamApps_v009", "SteamAPI_SteamApps_v008", "SteamAPI_SteamApps"))
 }
 
 // SteamAppsV008 returns the v008 apps interface.
