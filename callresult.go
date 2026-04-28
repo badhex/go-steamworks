@@ -30,6 +30,11 @@ func NewCallResult[T any](call SteamAPICall_t, expectedCallback int32) *CallResu
 	}
 }
 
+// GetAPICallResultTyped fetches a typed API call result without requiring a raw callback pointer.
+func GetAPICallResultTyped[T any](call SteamAPICall_t, expectedCallback int32) (result T, failed bool, err error) {
+	return NewCallResult[T](call, expectedCallback).Result()
+}
+
 // IsComplete reports whether the call has completed and whether it failed.
 func (c *CallResult[T]) IsComplete() (failed bool, ok bool) {
 	return SteamUtils().IsAPICallCompleted(c.call)

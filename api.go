@@ -364,6 +364,8 @@ var (
 	ptrAPI_ISteamNetworkingSockets_DestroyPollGroup            func(uintptr, HSteamNetPollGroup) bool
 	ptrAPI_ISteamNetworkingSockets_SetConnectionPollGroup      func(uintptr, HSteamNetConnection, HSteamNetPollGroup) bool
 	ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup  func(uintptr, HSteamNetPollGroup, uintptr, int32) int32
+	ptrAPI_ISteamNetworkingSockets_GetConnectionInfo           func(uintptr, HSteamNetConnection, uintptr) bool
+	ptrAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus func(uintptr, HSteamNetConnection, uintptr, int32, uintptr) EResult
 )
 
 var ffiLibOnce = sync.OnceValues(func() (ffi.Lib, error) {
@@ -769,6 +771,8 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_DestroyPollGroup, lib, flatAPI_ISteamNetworkingSockets_DestroyPollGroup)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_SetConnectionPollGroup, lib, flatAPI_ISteamNetworkingSockets_SetConnectionPollGroup)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup, lib, flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_GetConnectionInfo, lib, flatAPI_ISteamNetworkingSockets_GetConnectionInfo)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus, lib, flatAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus)
 
 	registerInputStructReturns(lib)
 }
@@ -990,8 +994,8 @@ func (s ISteamMatchmakingServers) ReleaseRequest(request HServerListRequest) {
 	ptrAPI_ISteamMatchmakingServers_ReleaseRequest(s.ptr, request)
 }
 
-func (s ISteamMatchmakingServers) GetServerDetails(request HServerListRequest, server int) uintptr {
-	return ptrAPI_ISteamMatchmakingServers_GetServerDetails(s.ptr, request, int32(server))
+func (s ISteamMatchmakingServers) GetServerDetails(request HServerListRequest, server int) MatchmakingServerItem {
+	return MatchmakingServerItem{ptr: ptrAPI_ISteamMatchmakingServers_GetServerDetails(s.ptr, request, int32(server))}
 }
 
 func (s ISteamMatchmakingServers) CancelQuery(request HServerListRequest) {
@@ -2638,11 +2642,36 @@ func (s steamNetworkingSockets) ReceiveMessagesOnPollGroup(group HSteamNetPollGr
 	return messages[:count]
 }
 
+func (s steamNetworkingSockets) GetConnectionInfo(connection HSteamNetConnection) (SteamNetConnectionInfo, bool) {
+	var info SteamNetConnectionInfo
+	ok := ptrAPI_ISteamNetworkingSockets_GetConnectionInfo(uintptr(s), connection, uintptr(unsafe.Pointer(&info)))
+	return info, ok
+}
+
+func (s steamNetworkingSockets) GetConnectionRealTimeStatus(connection HSteamNetConnection, lanes []SteamNetConnectionRealTimeLaneStatus) (EResult, SteamNetConnectionRealTimeStatus) {
+	var status SteamNetConnectionRealTimeStatus
+	var lanePtr uintptr
+	if len(lanes) > 0 {
+		lanePtr = uintptr(unsafe.Pointer(&lanes[0]))
+	}
+	result := ptrAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus(uintptr(s), connection, uintptr(unsafe.Pointer(&status)), int32(len(lanes)), lanePtr)
+	return result, status
+}
+
 func (m *SteamNetworkingMessage) Release() {
 	if m == nil || m.ReleaseFunc == 0 {
 		return
 	}
 	purego.SyscallN(m.ReleaseFunc, uintptr(unsafe.Pointer(m)))
+}
+
+// Payload returns a byte view over the message payload owned by Steamworks.
+// The returned slice is only valid until Release is called.
+func (m *SteamNetworkingMessage) Payload() []byte {
+	if m == nil || m.Data == 0 || m.Size <= 0 {
+		return nil
+	}
+	return unsafe.Slice((*byte)(unsafe.Pointer(m.Data)), int(m.Size))
 }
 
 func optionsPtr(options []SteamNetworkingConfigValue) uintptr {
