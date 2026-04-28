@@ -364,6 +364,8 @@ var (
 	ptrAPI_ISteamNetworkingSockets_DestroyPollGroup            func(uintptr, HSteamNetPollGroup) bool
 	ptrAPI_ISteamNetworkingSockets_SetConnectionPollGroup      func(uintptr, HSteamNetConnection, HSteamNetPollGroup) bool
 	ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup  func(uintptr, HSteamNetPollGroup, uintptr, int32) int32
+	ptrAPI_ISteamNetworkingSockets_GetConnectionInfo           func(uintptr, HSteamNetConnection, uintptr) bool
+	ptrAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus func(uintptr, HSteamNetConnection, uintptr, int32, uintptr) EResult
 )
 
 var ffiLibOnce = sync.OnceValues(func() (ffi.Lib, error) {
@@ -769,6 +771,8 @@ func registerFunctions(lib uintptr) {
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_DestroyPollGroup, lib, flatAPI_ISteamNetworkingSockets_DestroyPollGroup)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_SetConnectionPollGroup, lib, flatAPI_ISteamNetworkingSockets_SetConnectionPollGroup)
 	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup, lib, flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_GetConnectionInfo, lib, flatAPI_ISteamNetworkingSockets_GetConnectionInfo)
+	purego.RegisterLibFunc(&ptrAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus, lib, flatAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus)
 
 	registerInputStructReturns(lib)
 }
@@ -2636,6 +2640,22 @@ func (s steamNetworkingSockets) ReceiveMessagesOnPollGroup(group HSteamNetPollGr
 		return nil
 	}
 	return messages[:count]
+}
+
+func (s steamNetworkingSockets) GetConnectionInfo(connection HSteamNetConnection) (SteamNetConnectionInfo, bool) {
+	var info SteamNetConnectionInfo
+	ok := ptrAPI_ISteamNetworkingSockets_GetConnectionInfo(uintptr(s), connection, uintptr(unsafe.Pointer(&info)))
+	return info, ok
+}
+
+func (s steamNetworkingSockets) GetConnectionRealTimeStatus(connection HSteamNetConnection, lanes []SteamNetConnectionRealTimeLaneStatus) (EResult, SteamNetConnectionRealTimeStatus) {
+	var status SteamNetConnectionRealTimeStatus
+	var lanePtr uintptr
+	if len(lanes) > 0 {
+		lanePtr = uintptr(unsafe.Pointer(&lanes[0]))
+	}
+	result := ptrAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus(uintptr(s), connection, uintptr(unsafe.Pointer(&status)), int32(len(lanes)), lanePtr)
+	return result, status
 }
 
 func (m *SteamNetworkingMessage) Release() {

@@ -34,6 +34,20 @@ type HSteamListenSocket uint32
 type HSteamNetPollGroup uint32
 type SteamNetworkingMicroseconds int64
 
+type ESteamNetworkingConnectionState int32
+
+const (
+	SteamNetworkingConnectionState_None                   ESteamNetworkingConnectionState = 0
+	SteamNetworkingConnectionState_Connecting             ESteamNetworkingConnectionState = 1
+	SteamNetworkingConnectionState_FindingRoute           ESteamNetworkingConnectionState = 2
+	SteamNetworkingConnectionState_Connected              ESteamNetworkingConnectionState = 3
+	SteamNetworkingConnectionState_ClosedByPeer           ESteamNetworkingConnectionState = 4
+	SteamNetworkingConnectionState_ProblemDetectedLocally ESteamNetworkingConnectionState = 5
+	SteamNetworkingConnectionState_FinWait                ESteamNetworkingConnectionState = -1
+	SteamNetworkingConnectionState_Linger                 ESteamNetworkingConnectionState = -2
+	SteamNetworkingConnectionState_Dead                   ESteamNetworkingConnectionState = -3
+)
+
 type ESteamAPIInitResult int32
 
 type EVoiceResult int32
@@ -538,6 +552,57 @@ type SteamNetworkingMessage struct {
 	_pad1         uint16
 }
 
+type SteamNetConnectionInfo struct {
+	IdentityRemote        SteamNetworkingIdentity
+	UserData              int64
+	ListenSocket          HSteamListenSocket
+	AddrRemote            SteamNetworkingIPAddr
+	_pad1                 uint16
+	POPRemote             uint32
+	POPRelay              uint32
+	State                 ESteamNetworkingConnectionState
+	EndReason             int32
+	EndDebug              [128]byte
+	ConnectionDescription [128]byte
+	Flags                 int32
+	Reserved              [63]uint32
+}
+
+func (i SteamNetConnectionInfo) EndDebugString() string {
+	return cStringToGo(i.EndDebug[:])
+}
+
+func (i SteamNetConnectionInfo) ConnectionDescriptionString() string {
+	return cStringToGo(i.ConnectionDescription[:])
+}
+
+type SteamNetConnectionRealTimeStatus struct {
+	State                   ESteamNetworkingConnectionState
+	Ping                    int32
+	ConnectionQualityLocal  float32
+	ConnectionQualityRemote float32
+	OutPacketsPerSec        float32
+	OutBytesPerSec          float32
+	InPacketsPerSec         float32
+	InBytesPerSec           float32
+	SendRateBytesPerSecond  int32
+	PendingUnreliableBytes  int32
+	PendingReliableBytes    int32
+	SentUnackedReliable     int32
+	QueueTime               SteamNetworkingMicroseconds
+	MaxJitterMicroseconds   int32
+	Reserved                [15]uint32
+}
+
+type SteamNetConnectionRealTimeLaneStatus struct {
+	PendingUnreliableBytes int32
+	PendingReliableBytes   int32
+	SentUnackedReliable    int32
+	_reservePad1           int32
+	QueueTime              SteamNetworkingMicroseconds
+	Reserved               [10]uint32
+}
+
 type ISteamApps interface {
 	BGetDLCDataByIndex(iDLC int) (appID AppId_t, available bool, pchName string, success bool)
 	BIsSubscribed() bool
@@ -850,6 +915,8 @@ type ISteamNetworkingSockets interface {
 	DestroyPollGroup(group HSteamNetPollGroup) bool
 	SetConnectionPollGroup(connection HSteamNetConnection, group HSteamNetPollGroup) bool
 	ReceiveMessagesOnPollGroup(group HSteamNetPollGroup, maxMessages int) []*SteamNetworkingMessage
+	GetConnectionInfo(connection HSteamNetConnection) (SteamNetConnectionInfo, bool)
+	GetConnectionRealTimeStatus(connection HSteamNetConnection, lanes []SteamNetConnectionRealTimeLaneStatus) (EResult, SteamNetConnectionRealTimeStatus)
 }
 
 type SteamNetworkingConfigValue struct {
@@ -1214,6 +1281,8 @@ const (
 	flatAPI_ISteamNetworkingSockets_DestroyPollGroup            = "SteamAPI_ISteamNetworkingSockets_DestroyPollGroup"
 	flatAPI_ISteamNetworkingSockets_SetConnectionPollGroup      = "SteamAPI_ISteamNetworkingSockets_SetConnectionPollGroup"
 	flatAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup  = "SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup"
+	flatAPI_ISteamNetworkingSockets_GetConnectionInfo           = "SteamAPI_ISteamNetworkingSockets_GetConnectionInfo"
+	flatAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus = "SteamAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus"
 
 	flatAPI_SteamGameServer                                      = "SteamAPI_SteamGameServer_v015"
 	flatAPI_ISteamGameServer_AssociateWithClan                   = "SteamAPI_ISteamGameServer_AssociateWithClan"
