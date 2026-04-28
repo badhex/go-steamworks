@@ -2665,6 +2665,15 @@ func (m *SteamNetworkingMessage) Release() {
 	purego.SyscallN(m.ReleaseFunc, uintptr(unsafe.Pointer(m)))
 }
 
+// Payload returns a byte view over the message payload owned by Steamworks.
+// The returned slice is only valid until Release is called.
+func (m *SteamNetworkingMessage) Payload() []byte {
+	if m == nil || m.Data == 0 || m.Size <= 0 {
+		return nil
+	}
+	return unsafe.Slice((*byte)(unsafe.Pointer(m.Data)), int(m.Size))
+}
+
 func optionsPtr(options []SteamNetworkingConfigValue) uintptr {
 	if len(options) == 0 {
 		return 0
