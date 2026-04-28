@@ -590,8 +590,7 @@ type SteamNetConnectionRealTimeStatus struct {
 	PendingReliableBytes    int32
 	SentUnackedReliable     int32
 	QueueTime               SteamNetworkingMicroseconds
-	MaxJitterMicroseconds   int32
-	Reserved                [15]uint32
+	Reserved                [16]uint32
 }
 
 type SteamNetConnectionRealTimeLaneStatus struct {
