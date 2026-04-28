@@ -994,8 +994,8 @@ func (s ISteamMatchmakingServers) ReleaseRequest(request HServerListRequest) {
 	ptrAPI_ISteamMatchmakingServers_ReleaseRequest(s.ptr, request)
 }
 
-func (s ISteamMatchmakingServers) GetServerDetails(request HServerListRequest, server int) uintptr {
-	return ptrAPI_ISteamMatchmakingServers_GetServerDetails(s.ptr, request, int32(server))
+func (s ISteamMatchmakingServers) GetServerDetails(request HServerListRequest, server int) MatchmakingServerItem {
+	return MatchmakingServerItem{ptr: ptrAPI_ISteamMatchmakingServers_GetServerDetails(s.ptr, request, int32(server))}
 }
 
 func (s ISteamMatchmakingServers) CancelQuery(request HServerListRequest) {

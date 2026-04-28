@@ -959,6 +959,11 @@ type ISteamMatchmakingServers struct{ ptr uintptr }
 func (i ISteamMatchmakingServers) Ptr() uintptr { return i.ptr }
 func (i ISteamMatchmakingServers) Valid() bool  { return i.ptr != 0 }
 
+type MatchmakingServerItem struct{ ptr uintptr }
+
+func (i MatchmakingServerItem) Ptr() uintptr { return i.ptr }
+func (i MatchmakingServerItem) Valid() bool  { return i.ptr != 0 }
+
 type ISteamMusic struct{ ptr uintptr }
 
 func (i ISteamMusic) Ptr() uintptr { return i.ptr }
